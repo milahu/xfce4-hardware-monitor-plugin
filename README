@@ -61,12 +61,11 @@ and intltool need to be installed for this script to work.
 Debian archives
 ---------------
 
-See http://git.xfce.org/panel-plugins/xfce4-hardware-monitor-plugin/tree/?h=pkg
+See https://github.com/OmegaPhil/hardware-monitor-applet/tree/pkg
 
 
-Bugs
-----
+Bugs and feature requests
+-------------------------
 
-Report bugs and suggestions to OmegaPhil:
+Please report at https://bugzilla.xfce.org/describecomponents.cgi?product=Xfce4-hardware-monitor-plugin
 
-  $ cat MAINTAINERS

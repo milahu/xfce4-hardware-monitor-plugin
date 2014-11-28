@@ -1,2 +1,2 @@
 version=3
-http://githubredir.debian.net/github/omegaphil/hardware-monitor-applet/ (.*).tar.gz
+http://git.xfce.org/panel-plugins/xfce4-hardware-monitor-plugin/refs/tags/ (.*).tar.bz2
