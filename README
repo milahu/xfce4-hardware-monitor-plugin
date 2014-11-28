@@ -39,6 +39,18 @@ compile time, the configure script will detect it and add support for
 monitoring temperatures and fan speeds (if the library is not found,
 the relevant UI is hidden).
 
+libgnomecanvas (which libgnomecanvasmm binds) has a stupid memory leak
+in its paint routine, which I have reported:
+
+My bug: https://github.com/OmegaPhil/hardware-monitor-applet/issues/5
+Debian bug: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=753621
+GNOME bug: https://bugzilla.gnome.org/show_bug.cgi?id=729717
+
+In both cases the bug has been ignored. Running the plugin for days will
+gradually cause the RSS to increase without limit - for Debian users I
+have produced fixed i386 and amd64 Debian archives -
+https://github.com/OmegaPhil/libgnomecanvas/tree/pkg
+
 
 Compiling from source
 ---------------------
