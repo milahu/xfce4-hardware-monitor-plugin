@@ -1,9 +1,9 @@
 XFCE4 Hardware Monitor Downloads
 ================================
 
-This branch contains basic Debian archives made by [checkinstall](http://asic-linux.com.mx/~izto/checkinstall/).
+This branch contains Debian archives (<v1.4.6, made by [checkinstall](http://asic-linux.com.mx/~izto/checkinstall/)).
 
-Please report any problems on the [issue tracker](https://github.com/OmegaPhil/hardware-monitor-applet/issues).
+Please report any problems on the [issue tracker](https://bugzilla.xfce.org/buglist.cgi?component=General&list_id=19900&product=Xfce4-hardware-monitor-plugin).
 
 To download a file, click on the filename, then click View Raw. **DO NOT**
 right click on a link, as this will save the web page, not the file.
