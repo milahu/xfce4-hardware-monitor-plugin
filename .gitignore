@@ -25,6 +25,12 @@ missing
 # Ignore custom build directory
 build/
 
+# Ignore Qt Creator files
+xfce4-hardware-monitor-plugin.config
+xfce4-hardware-monitor-plugin.creator
+xfce4-hardware-monitor-plugin.files
+xfce4-hardware-monitor-plugin.includes
+
 # Ignoring binaries
 *.o
 *.so
