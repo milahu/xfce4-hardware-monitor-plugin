@@ -67,7 +67,8 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
     // They do - looping for all monitors
     for (int i = 0; settings_monitors[i] != NULL; ++i)
     {
-      // Skipping default group
+      /* Skipping default group - this is the name of the NULL group here and
+       * must not be confused with the normal way of addressing it, NULL */
       if (g_strcmp0(settings_monitors[i], "[NULL]") == 0)
         continue;
 
@@ -908,7 +909,7 @@ void NetworkLoadMonitor::configure_interface_names(XfcePanelPlugin *panel_applet
     g_free(file);
 
     // Ensuring default group is in focus
-    xfce_rc_set_group(settings_ro, "[NULL]");
+    xfce_rc_set_group(settings_ro, NULL);
 
     Glib::ustring setting_name = String::ucompose(
           "network_type_%1_interface_name",
@@ -1258,7 +1259,7 @@ bool NetworkLoadMonitor::interface_exists(const Glib::ustring &interface_name)
 void NetworkLoadMonitor::save_interfaces(XfceRc *settings_w)
 {
   // Ensuring default group is in focus
-  xfce_rc_set_group(settings_w, "[NULL]");
+  xfce_rc_set_group(settings_w, NULL);
 
   // Saving interface names
   Glib::ustring setting_name = String::ucompose("network_type_%1_interface_name",

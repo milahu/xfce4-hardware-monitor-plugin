@@ -396,9 +396,12 @@ void PreferencesWindow::sync_conf_with_colorbutton(Glib::ustring settings_dir,
     XfceRc* settings_w = xfce_rc_simple_open(file, false);
     g_free(file);
 
-    // Focussing settings group if requested
+    /* Focussing settings group (since NULL is a valid value, this is always
+     * requested) */
     if (!settings_dir.empty())
       xfce_rc_set_group(settings_w, settings_dir.c_str());
+    else
+      xfce_rc_set_group(settings_w, NULL);
     
     // Updating configuration
     xfce_rc_write_int_entry(settings_w, setting_name.c_str(),
@@ -420,7 +423,7 @@ void PreferencesWindow::sync_conf_with_colorbutton(Glib::ustring settings_dir,
 void PreferencesWindow::on_background_colorbutton_set()
 {
   // Settings dir here is the default XFCE4 settings group
-  sync_conf_with_colorbutton("[NULL]", "background_color",
+  sync_conf_with_colorbutton(NULL, "background_color",
            background_colorbutton);
 
   // Actually apply the color change
@@ -445,7 +448,7 @@ void PreferencesWindow::on_background_color_radiobutton_toggled()
     g_free(file);
 
     // Ensuring default group is in focus
-    xfce_rc_set_group(settings_w, "[NULL]");
+    xfce_rc_set_group(settings_w, NULL);
 
     // Updating configuration
     xfce_rc_write_bool_entry(settings_w, "use_background_color", on);
@@ -478,7 +481,7 @@ void PreferencesWindow::on_curve_radiobutton_toggled()
       g_free(file);
 
       // Ensuring default group is in focus
-      xfce_rc_set_group(settings_w, "[NULL]");
+      xfce_rc_set_group(settings_w, NULL);
 
       // Updating configuration
       xfce_rc_write_entry(settings_w, "viewer_type", "curve");
@@ -518,7 +521,7 @@ void PreferencesWindow::on_bar_radiobutton_toggled()
       g_free(file);
 
       // Ensuring default group is in focus
-      xfce_rc_set_group(settings_w, "[NULL]");
+      xfce_rc_set_group(settings_w, NULL);
 
       // Updating configuration
       xfce_rc_write_entry(settings_w, "viewer_type", "bar");
@@ -558,7 +561,7 @@ void PreferencesWindow::on_vbar_radiobutton_toggled()
       g_free(file);
 
       // Ensuring default group is in focus
-      xfce_rc_set_group(settings_w, "[NULL]");
+      xfce_rc_set_group(settings_w, NULL);
 
       // Updating configuration
       xfce_rc_write_entry(settings_w, "viewer_type", "vbar");
@@ -598,7 +601,7 @@ void PreferencesWindow::on_column_radiobutton_toggled()
       g_free(file);
 
       // Ensuring default group is in focus
-      xfce_rc_set_group(settings_w, "[NULL]");
+      xfce_rc_set_group(settings_w, NULL);
 
       // Updating configuration
       xfce_rc_write_entry(settings_w, "viewer_type", "column");
@@ -638,7 +641,7 @@ void PreferencesWindow::on_text_radiobutton_toggled()
       g_free(file);
 
       // Ensuring default group is in focus
-      xfce_rc_set_group(settings_w, "[NULL]");
+      xfce_rc_set_group(settings_w, NULL);
 
       // Updating configuration
       xfce_rc_write_entry(settings_w, "viewer_type", "text");
@@ -677,7 +680,7 @@ void PreferencesWindow::on_flame_radiobutton_toggled()
       g_free(file);
 
       // Ensuring default group is in focus
-      xfce_rc_set_group(settings_w, "[NULL]");
+      xfce_rc_set_group(settings_w, NULL);
 
       // Updating configuration
       xfce_rc_write_entry(settings_w, "viewer_type", "flame");
@@ -721,7 +724,7 @@ void PreferencesWindow::on_size_scale_changed()
     g_free(file);
 
     // Ensuring default group is in focus
-    xfce_rc_set_group(settings_w, "[NULL]");
+    xfce_rc_set_group(settings_w, NULL);
 
     // Updating configuration
     xfce_rc_write_int_entry(settings_w, "viewer_size",
@@ -946,7 +949,7 @@ void PreferencesWindow::save_font_details(Glib::ustring font_details)
     g_free(file);
 
     // Ensuring default group is in focus
-    xfce_rc_set_group(settings_w, "[NULL]");
+    xfce_rc_set_group(settings_w, NULL);
 
     // Updating configuration
     xfce_rc_write_entry(settings_w, "viewer_font", font_details.c_str());
