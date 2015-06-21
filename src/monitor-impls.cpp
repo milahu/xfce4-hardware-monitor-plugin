@@ -112,16 +112,10 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
       {
         NetworkLoadMonitor::InterfaceType inter_type(NetworkLoadMonitor::ethernet_first);
 
-        // Debug code
-        std::cout << "HARDWARE MONITOR PLUGIN: Before interface_no detection\n";
-
         /* Deprecated config check (<=v1.4.6) - is the interface defined by a
          * count? */
         if (xfce_rc_has_entry(settings_ro, "interface_no"))
         {
-          // Debug code
-          std::cout << "HARDWARE MONITOR PLUGIN: interface_no detected!\n";
-
           // It is - fetching interface number
           int inter_no = xfce_rc_read_int_entry(settings_ro, "interface_no", 0);
 
