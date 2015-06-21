@@ -1,7 +1,7 @@
 /* Implementation of the PreferencesWindow class.
  *
  * Copyright (c) 2003, 04 Ole Laursen.
- * Copyright (c) 2013-2014 OmegaPhil (OmegaPhil@startmail.com)
+ * Copyright (c) 2013-2015 OmegaPhil (OmegaPhil@startmail.com)
  *
  * This program is free software; you can redistribute it and/or 
  * modify it under the terms of the GNU General Public License as 
@@ -393,19 +393,19 @@ void PreferencesWindow::sync_conf_with_colorbutton(Glib::ustring settings_dir,
   if (file)
   {
     // Opening setting file
-    XfceRc* settings = xfce_rc_simple_open(file, false);
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
     g_free(file);
 
     // Focussing settings group if requested
     if (!settings_dir.empty())
-      xfce_rc_set_group(settings, settings_dir.c_str());
+      xfce_rc_set_group(settings_w, settings_dir.c_str());
     
     // Updating configuration
-    xfce_rc_write_int_entry(settings, setting_name.c_str(),
+    xfce_rc_write_int_entry(settings_w, setting_name.c_str(),
       get_colorbutton_int(button));
 
     // Close settings file
-    xfce_rc_close(settings);
+    xfce_rc_close(settings_w);
   }
   else
   {
@@ -441,17 +441,17 @@ void PreferencesWindow::on_background_color_radiobutton_toggled()
   if (file)
   {
     // Opening setting file
-    XfceRc* settings = xfce_rc_simple_open(file, false);
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
     g_free(file);
 
     // Ensuring default group is in focus
-    xfce_rc_set_group(settings, "[NULL]");
+    xfce_rc_set_group(settings_w, "[NULL]");
 
     // Updating configuration
-    xfce_rc_write_bool_entry(settings, "use_background_color", on);
+    xfce_rc_write_bool_entry(settings_w, "use_background_color", on);
 
     // Close settings file
-    xfce_rc_close(settings);
+    xfce_rc_close(settings_w);
   }
   else
   {
@@ -474,17 +474,17 @@ void PreferencesWindow::on_curve_radiobutton_toggled()
     if (file)
     {
       // Opening setting file
-      XfceRc* settings = xfce_rc_simple_open(file, false);
+      XfceRc* settings_w = xfce_rc_simple_open(file, false);
       g_free(file);
 
       // Ensuring default group is in focus
-      xfce_rc_set_group(settings, "[NULL]");
+      xfce_rc_set_group(settings_w, "[NULL]");
 
       // Updating configuration
-      xfce_rc_write_entry(settings, "viewer_type", "curve");
+      xfce_rc_write_entry(settings_w, "viewer_type", "curve");
 
       // Close settings file
-      xfce_rc_close(settings);
+      xfce_rc_close(settings_w);
     }
     else
     {
@@ -514,17 +514,17 @@ void PreferencesWindow::on_bar_radiobutton_toggled()
     if (file)
     {
       // Opening setting file
-      XfceRc* settings = xfce_rc_simple_open(file, false);
+      XfceRc* settings_w = xfce_rc_simple_open(file, false);
       g_free(file);
 
       // Ensuring default group is in focus
-      xfce_rc_set_group(settings, "[NULL]");
+      xfce_rc_set_group(settings_w, "[NULL]");
 
       // Updating configuration
-      xfce_rc_write_entry(settings, "viewer_type", "bar");
+      xfce_rc_write_entry(settings_w, "viewer_type", "bar");
 
       // Close settings file
-      xfce_rc_close(settings);
+      xfce_rc_close(settings_w);
     }
     else
     {
@@ -554,17 +554,17 @@ void PreferencesWindow::on_vbar_radiobutton_toggled()
     if (file)
     {
       // Opening setting file
-      XfceRc* settings = xfce_rc_simple_open(file, false);
+      XfceRc* settings_w = xfce_rc_simple_open(file, false);
       g_free(file);
 
       // Ensuring default group is in focus
-      xfce_rc_set_group(settings, "[NULL]");
+      xfce_rc_set_group(settings_w, "[NULL]");
 
       // Updating configuration
-      xfce_rc_write_entry(settings, "viewer_type", "vbar");
+      xfce_rc_write_entry(settings_w, "viewer_type", "vbar");
 
       // Close settings file
-      xfce_rc_close(settings);
+      xfce_rc_close(settings_w);
     }
     else
     {
@@ -594,17 +594,17 @@ void PreferencesWindow::on_column_radiobutton_toggled()
     if (file)
     {
       // Opening setting file
-      XfceRc* settings = xfce_rc_simple_open(file, false);
+      XfceRc* settings_w = xfce_rc_simple_open(file, false);
       g_free(file);
 
       // Ensuring default group is in focus
-      xfce_rc_set_group(settings, "[NULL]");
+      xfce_rc_set_group(settings_w, "[NULL]");
 
       // Updating configuration
-      xfce_rc_write_entry(settings, "viewer_type", "column");
+      xfce_rc_write_entry(settings_w, "viewer_type", "column");
 
       // Close settings file
-      xfce_rc_close(settings);
+      xfce_rc_close(settings_w);
     }
     else
     {
@@ -634,17 +634,17 @@ void PreferencesWindow::on_text_radiobutton_toggled()
     if (file)
     {
       // Opening setting file
-      XfceRc* settings = xfce_rc_simple_open(file, false);
+      XfceRc* settings_w = xfce_rc_simple_open(file, false);
       g_free(file);
 
       // Ensuring default group is in focus
-      xfce_rc_set_group(settings, "[NULL]");
+      xfce_rc_set_group(settings_w, "[NULL]");
 
       // Updating configuration
-      xfce_rc_write_entry(settings, "viewer_type", "text");
+      xfce_rc_write_entry(settings_w, "viewer_type", "text");
 
       // Close settings file
-      xfce_rc_close(settings);
+      xfce_rc_close(settings_w);
     }
     else
     {
@@ -673,17 +673,17 @@ void PreferencesWindow::on_flame_radiobutton_toggled()
     if (file)
     {
       // Opening setting file
-      XfceRc* settings = xfce_rc_simple_open(file, false);
+      XfceRc* settings_w = xfce_rc_simple_open(file, false);
       g_free(file);
 
       // Ensuring default group is in focus
-      xfce_rc_set_group(settings, "[NULL]");
+      xfce_rc_set_group(settings_w, "[NULL]");
 
       // Updating configuration
-      xfce_rc_write_entry(settings, "viewer_type", "flame");
+      xfce_rc_write_entry(settings_w, "viewer_type", "flame");
 
       // Close settings file
-      xfce_rc_close(settings);
+      xfce_rc_close(settings_w);
     }
     else
     {
@@ -717,18 +717,18 @@ void PreferencesWindow::on_size_scale_changed()
   if (file)
   {
     // Opening setting file
-    XfceRc* settings = xfce_rc_simple_open(file, false);
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
     g_free(file);
 
     // Ensuring default group is in focus
-    xfce_rc_set_group(settings, "[NULL]");
+    xfce_rc_set_group(settings_w, "[NULL]");
 
     // Updating configuration
-    xfce_rc_write_int_entry(settings, "viewer_size",
+    xfce_rc_write_int_entry(settings_w, "viewer_size",
       size_scale_to_pixels(i));
 
     // Close settings file
-    xfce_rc_close(settings);
+    xfce_rc_close(settings_w);
   }
   else
   {
@@ -839,15 +839,15 @@ void PreferencesWindow::on_selection_changed()
     if (file)
     {
       // One exists - loading readonly settings
-      XfceRc* settings = xfce_rc_simple_open(file, true);
+      XfceRc* settings_ro = xfce_rc_simple_open(file, true);
       g_free(file);
 
       // Loading color
-      xfce_rc_set_group(settings, mon_dir.c_str());
-      color = xfce_rc_read_int_entry(settings, "color", 0);
+      xfce_rc_set_group(settings_ro, mon_dir.c_str());
+      color = xfce_rc_read_int_entry(settings_ro, "color", 0);
 
       // Close settings file
-      xfce_rc_close(settings);
+      xfce_rc_close(settings_ro);
     }
 
     // Applying colour
@@ -887,9 +887,9 @@ bool PreferencesWindow::on_closed(GdkEventAny *)
 
 Monitor *PreferencesWindow::run_choose_monitor_window(const Glib::ustring &str)
 {
-  ChooseMonitorWindow chooser(applet.get_icon(), *window);
+  ChooseMonitorWindow chooser(applet.panel_applet, *window);
 
-  return chooser.run(applet.panel_applet, str);
+  return chooser.run(str);
 }
 
 void PreferencesWindow::add_to_monitors_list(Monitor *mon)
@@ -942,17 +942,17 @@ void PreferencesWindow::save_font_details(Glib::ustring font_details)
   if (file)
   {
     // Opening setting file
-    XfceRc* settings = xfce_rc_simple_open(file, false);
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
     g_free(file);
 
     // Ensuring default group is in focus
-    xfce_rc_set_group(settings, "[NULL]");
+    xfce_rc_set_group(settings_w, "[NULL]");
 
     // Updating configuration
-    xfce_rc_write_entry(settings, "viewer_font", font_details.c_str());
+    xfce_rc_write_entry(settings_w, "viewer_font", font_details.c_str());
 
     // Close settings file
-    xfce_rc_close(settings);
+    xfce_rc_close(settings_w);
   }
   else
   {

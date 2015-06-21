@@ -25,11 +25,19 @@
 #include <config.h>
 
 #include <string>
+#include <vector>
+
 #include <glib/gtypes.h>
 
 #if HAVE_LIBSENSORS
 #include <sensors/sensors.h>
 #endif
+
+// For XfcePanelPlugin
+extern "C"
+{
+#include <libxfce4panel/libxfce4panel.h>
+}
 
 #include "monitor.hpp"
 
@@ -49,7 +57,7 @@ public:
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
-  virtual void save(XfceRc *settings);
+  virtual void save(XfceRc *settings_w);
 
   static int const max_no_cpus;
 
@@ -76,7 +84,7 @@ public:
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
-  virtual void save(XfceRc *settings);
+  virtual void save(XfceRc *settings_w);
 
 private:
   virtual double do_measure();
@@ -96,8 +104,8 @@ public:
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
-  virtual void save(XfceRc *settings);
-  virtual void load(XfceRc *settings);
+  virtual void save(XfceRc *settings_w);
+  virtual void load(XfceRc *settings_ro);
 
 private:
   virtual double do_measure();
@@ -117,7 +125,7 @@ public:
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
-  virtual void save(XfceRc *settings);
+  virtual void save(XfceRc *settings_w);
 
 private:
   virtual double do_measure();
@@ -137,7 +145,7 @@ public:
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
-  virtual void save(XfceRc *settings);
+  virtual void save(XfceRc *settings_w);
 
 private:
   virtual double do_measure();
@@ -155,8 +163,25 @@ public:
     all_data, incoming_data, outgoing_data
   };
 
-  NetworkLoadMonitor(const Glib::ustring &interface, int interface_no,
-         Direction direction);
+  /* There haven't been many different interfaces commonly used on machines,
+   * so a simple enum should be good enough to maintain them now this information
+   * is separate from the interface name and is required in the configuration,
+   * also can't really tie to a string due to translation
+   * See also default interface name configuration in interface_type_names */
+  enum InterfaceType {
+     ethernet_first,
+     ethernet_second,
+     ethernet_third,
+     modem,
+     serial_link,
+     wireless_first,
+     wireless_second,
+     wireless_third,
+     NUM_INTERFACE_TYPES
+  };
+
+  NetworkLoadMonitor(InterfaceType &interface_type,
+                     Direction direction, XfcePanelPlugin *panel_applet);
 
   virtual double max();
   virtual bool fixed_max();
@@ -164,13 +189,39 @@ public:
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
-  virtual void save(XfceRc *settings);
-  virtual void load(XfceRc *settings);
+  virtual void save(XfceRc *settings_w);
+  virtual void load(XfceRc *settings_ro);
   virtual void possibly_add_sync_with(Monitor *other);
   virtual void remove_sync_with(Monitor *other);
 
+  /* Allow to maintain list of interface names separate to individual monitor
+   * objects
+   * configure_interface_names needs to read and possibly write the configuration
+   * file hence takes an applet pointer */
+  static Glib::ustring get_interface_name(InterfaceType type,
+                                          XfcePanelPlugin *panel_applet);
+  static Glib::ustring get_default_interface_name(InterfaceType type);
+  static void set_interface_name(InterfaceType type,
+                                 const Glib::ustring interface_name);
+  static const Glib::ustring interface_type_to_string(const InterfaceType type,
+                                                              bool short_ver);
+  static bool interface_exists(const Glib::ustring& interface_name);
+
+  /* Function dedicated to saving interface names the standard interface types
+   * are mapped to */
+  static void save_interfaces(XfceRc *settings_w);
+
+  static void restore_default_interface_names(XfceRc *settings_w);
+
 private:
   virtual double do_measure();
+
+  // Can't initialise a static vector properly so trying this
+  static std::vector<Glib::ustring> initialise_default_interface_names();
+  static void configure_interface_names(XfcePanelPlugin *panel_applet);
+
+  XfcePanelPlugin *pnl_applet;  // Needed to allow do_measure to call
+                                // get_interface_name(*panel_applet)
 
   guint64 max_value;    // maximum measured capacity of line
   long int time_difference; // no. of msecs. between the last two calls
@@ -178,12 +229,18 @@ private:
   guint64 byte_count;   // number of bytes at last call
   long int time_stamp_secs, time_stamp_usecs; // time stamp for last call
 
-  Glib::ustring interface;  // e.g. "eth"
-  int interface_no;   // e.g. 0
+  InterfaceType interface_type;  // Interface name is now fetched from the type
+                                 // when needed
   Direction direction;
 
   typedef std::list<NetworkLoadMonitor *> nlm_seq;
   nlm_seq sync_monitors;
+
+  /* Storage for default or customised interface names for all types - can't
+   * initialise vector here?? */
+  static std::vector<Glib::ustring> interface_type_names;
+  static std::vector<Glib::ustring> interface_type_names_default;
+  static bool interface_names_configured;
 };
 
 
@@ -198,8 +255,8 @@ public:
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
-  virtual void save(XfceRc *settings);
-  virtual void load(XfceRc *settings);
+  virtual void save(XfceRc *settings_w);
+  virtual void load(XfceRc *settings_ro);
 
 private:
   virtual double do_measure();
@@ -221,8 +278,8 @@ public:
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
-  virtual void save(XfceRc *settings);
-  virtual void load(XfceRc *settings);
+  virtual void save(XfceRc *settings_w);
+  virtual void load(XfceRc *settings_ro);
 
 private:
   virtual double do_measure();

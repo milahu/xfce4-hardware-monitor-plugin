@@ -122,16 +122,16 @@ void save_monitors(Applet *applet)
   if (file)
   {
     // Opening setting file
-    XfceRc* settings = xfce_rc_simple_open(file, false);
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
     g_free(file);
 
     // Looping for all monitors and calling save on each
     for (monitor_iter i = applet->monitors.begin(),
          end = applet->monitors.end(); i != end; ++i)
-      (*i)->save(settings);
+      (*i)->save(settings_w);
 
     // Close settings file
-    xfce_rc_close(settings);
+    xfce_rc_close(settings_w);
   }
   else
   {
@@ -167,30 +167,30 @@ Applet::Applet(XfcePanelPlugin *plugin)
   next_color(0)
 {
   // Search for settings file
-  XfceRc* settings = NULL;
+  XfceRc* settings_ro = NULL;
   gchar* file = xfce_panel_plugin_lookup_rc_file(panel_applet);
   
   if (file)
   {
-    // One exists - loading readonly settings
-    settings = xfce_rc_simple_open(file, true);
+    // One exists - loading settings
+    settings_ro = xfce_rc_simple_open(file, true);
     g_free(file);
 
     // Ensuring default group is in focus
-    xfce_rc_set_group(settings, "[NULL]");
+    xfce_rc_set_group(settings_ro, "[NULL]");
 
-    icon_path = xfce_rc_read_entry(settings, "icon-path", icon_path.c_str());
-    viewer_type = xfce_rc_read_entry(settings, "viewer_type",
+    icon_path = xfce_rc_read_entry(settings_ro, "icon-path", icon_path.c_str());
+    viewer_type = xfce_rc_read_entry(settings_ro, "viewer_type",
       viewer_type.c_str());
-    viewer_size = xfce_rc_read_int_entry(settings, "viewer_size",
+    viewer_size = xfce_rc_read_int_entry(settings_ro, "viewer_size",
       viewer_size);
-    viewer_font = xfce_rc_read_entry(settings, "viewer_font",
+    viewer_font = xfce_rc_read_entry(settings_ro, "viewer_font",
       viewer_font.c_str());
-    background_color = xfce_rc_read_int_entry(settings, "background_color",
+    background_color = xfce_rc_read_int_entry(settings_ro, "background_color",
       background_color);
-    use_background_color = xfce_rc_read_bool_entry(settings,
+    use_background_color = xfce_rc_read_bool_entry(settings_ro,
       "use_background_color", use_background_color);
-    next_color = xfce_rc_read_int_entry(settings, "next_color",
+    next_color = xfce_rc_read_int_entry(settings_ro, "next_color",
       next_color);
   }
   
@@ -216,13 +216,13 @@ Applet::Applet(XfcePanelPlugin *plugin)
    * seems that it needs to be done in or after the mainloop kicks off */
 
   // Loading up monitors
-  monitor_seq mon = load_monitors(settings);
+  monitor_seq mon = load_monitors(settings_ro, plugin);
   for (monitor_iter i = mon.begin(), end = mon.end(); i != end; ++i)
     add_monitor(*i);
 
   // All settings loaded
-  if (settings)
-    xfce_rc_close(settings);
+  if (settings_ro)
+    xfce_rc_close(settings_ro);
 
   /* Connect plugin signals to functions - since I'm not really interested
    * in the plugin but the applet pointer, swapped results in the signal
@@ -427,17 +427,17 @@ unsigned int Applet::get_fg_color()
   if (file)
   {
     // Opening setting file
-    XfceRc* settings = xfce_rc_simple_open(file, false);
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
     g_free(file);
 
     // Ensuring default group is in focus
-    xfce_rc_set_group(settings, "[NULL]");
+    xfce_rc_set_group(settings_w, "[NULL]");
 
     // Saving next_color
-    xfce_rc_write_int_entry(settings, "next_color", next_color);
+    xfce_rc_write_int_entry(settings_w, "next_color", next_color);
     
     // Close settings file
-    xfce_rc_close(settings);
+    xfce_rc_close(settings_w);
   }
   else
   {
@@ -539,8 +539,8 @@ void Applet::add_monitor(Monitor *monitor)
   add_sync_for(monitor);
   monitors.push_back(monitor);
 
-  /* Read and write config locations and the open call are be different
-   * in XFCE4 - hence the duplication here */
+  /* Read and write config locations and the open call are different in XFCE4 -
+   * hence the duplication here */
 
   /* Checking if monitor has a defined settings directory and therefore
    * settings to load */
@@ -555,14 +555,14 @@ void Applet::add_monitor(Monitor *monitor)
     if (file)
     {
       // Opening setting file
-      XfceRc* settings = xfce_rc_simple_open(file, false);
+      XfceRc* settings_w = xfce_rc_simple_open(file, false);
       g_free(file);
 
       // Saving monitor
-      monitor->save(settings);
+      monitor->save(settings_w);
 
       // Close settings file
-      xfce_rc_close(settings);
+      xfce_rc_close(settings_w);
     }
     else
     {
@@ -581,14 +581,14 @@ void Applet::add_monitor(Monitor *monitor)
     if (file)
     {
       // One exists - loading readonly settings
-      XfceRc* settings = xfce_rc_simple_open(file, true);
+      XfceRc* settings_ro = xfce_rc_simple_open(file, true);
       g_free(file);
 
       // Load settings for monitor
-      monitor->load(settings);
+      monitor->load(settings_ro);
       
       // Close settings file
-      xfce_rc_close(settings);
+      xfce_rc_close(settings_ro);
     }
     else
     {
@@ -615,16 +615,16 @@ void Applet::remove_monitor(Monitor *monitor)
   if (file)
   {
     // Opening setting file
-    XfceRc* settings = xfce_rc_simple_open(file, false);
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
     g_free(file);
 
     // Removing settings group associated with the monitor if it exists
-    if (xfce_rc_has_group(settings, monitor->get_settings_dir().c_str()))
-      xfce_rc_delete_group(settings, monitor->get_settings_dir().c_str(),
+    if (xfce_rc_has_group(settings_w, monitor->get_settings_dir().c_str()))
+      xfce_rc_delete_group(settings_w, monitor->get_settings_dir().c_str(),
         FALSE);
 
     // Close settings file
-    xfce_rc_close(settings);
+    xfce_rc_close(settings_w);
   }
   else
   {
@@ -660,14 +660,14 @@ void Applet::replace_monitor(Monitor *prev_mon, Monitor *new_mon)
   if (file)
   {
     // One exists - loading readonly settings
-    XfceRc* settings = xfce_rc_simple_open(file, true);
+    XfceRc* settings_ro = xfce_rc_simple_open(file, true);
     g_free(file);
 
     // Load settings
-    new_mon->load(settings);
+    new_mon->load(settings_ro);
     
     // Close settings file
-    xfce_rc_close(settings);
+    xfce_rc_close(settings_ro);
   }
   else
   {
@@ -682,14 +682,14 @@ void Applet::replace_monitor(Monitor *prev_mon, Monitor *new_mon)
   if (file)
   {
     // Opening setting file
-    XfceRc* settings = xfce_rc_simple_open(file, false);
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
     g_free(file);
 
     // Saving settings
-    new_mon->save(settings);
+    new_mon->save(settings_w);
     
     // Close settings file
-    xfce_rc_close(settings);
+    xfce_rc_close(settings_w);
   }
   else
   {
@@ -732,15 +732,15 @@ Glib::ustring Applet::find_empty_monitor_dir()
   if (file)
   {
     // One exists - loading readonly settings
-    XfceRc* settings = xfce_rc_simple_open(file, true);
+    XfceRc* settings_ro = xfce_rc_simple_open(file, true);
     g_free(file);
 
     do {
       mon_dir = String::ucompose("%1", c++);
-    } while (xfce_rc_has_group(settings, mon_dir.c_str()));
+    } while (xfce_rc_has_group(settings_ro, mon_dir.c_str()));
     
     // Close settings file
-    xfce_rc_close(settings);
+    xfce_rc_close(settings_ro);
   }
   else
   {

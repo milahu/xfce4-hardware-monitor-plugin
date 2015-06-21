@@ -37,12 +37,11 @@
 #include <glibtop/loadavg.h>
 #include <glibtop/fsusage.h>
 #include <glibtop/netload.h>
-
+#include <glibtop/netlist.h>
 
 #include "monitor-impls.hpp"
 #include "ucompose.hpp"
 #include "i18n.hpp"
-
 
 /* Decay factor for maximum values (log_0.999(0.9) = 105 iterations
  * before reduced 10%). This is now no longer used for CurveView - the
@@ -55,15 +54,15 @@ double const max_decay = 0.999;
 //
 
 std::list<Monitor *>
-load_monitors(XfceRc* settings)
+load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
 {
   std::list<Monitor *> monitors;
 
   // Checking if settings currently exist
-  if (settings)
+  if (settings_ro)
   {
     // They do - fetching list of monitors
-    gchar** settings_monitors = xfce_rc_get_groups(settings);
+    gchar** settings_monitors = xfce_rc_get_groups(settings_ro);
 
     // They do - looping for all monitors
     for (int i = 0; settings_monitors[i] != NULL; ++i)
@@ -73,15 +72,15 @@ load_monitors(XfceRc* settings)
         continue;
 
       // Setting the correct group prior to loading settings
-      xfce_rc_set_group(settings, settings_monitors[i]);
+      xfce_rc_set_group(settings_ro, settings_monitors[i]);
 
       // Obtaining monitor type
-      Glib::ustring type = xfce_rc_read_entry(settings, "type", "");
+      Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
 
       if (type == "cpu_usage")
       {
         // Obtaining cpu_no
-        int cpu_no = xfce_rc_read_int_entry(settings, "cpu_no", -1);
+        int cpu_no = xfce_rc_read_int_entry(settings_ro, "cpu_no", -1);
 
         // Creating CPU usage monitor with provided number if valid
         if (cpu_no == -1)
@@ -98,11 +97,11 @@ load_monitors(XfceRc* settings)
       else if (type == "disk_usage")
       {
         // Obtaining volume mount directory
-        Glib::ustring mount_dir = xfce_rc_read_entry(settings,
+        Glib::ustring mount_dir = xfce_rc_read_entry(settings_ro,
           "mount_dir", "/");
 
         // Obtaining whether to show free space or not
-        bool show_free = xfce_rc_read_bool_entry(settings, "show_free",
+        bool show_free = xfce_rc_read_bool_entry(settings_ro, "show_free",
           false);
 
         // Creating disk usage monitor
@@ -110,16 +109,72 @@ load_monitors(XfceRc* settings)
       }
       else if (type == "network_load")
       {
-        // Fetching interface type
-        Glib::ustring inter = xfce_rc_read_entry(settings, "interface",
-          "eth");
+        NetworkLoadMonitor::InterfaceType inter_type(NetworkLoadMonitor::ethernet_first);
 
-        // Fetching interface number
-        int inter_no = xfce_rc_read_int_entry(settings, "interface_no",
-          0);
+        // Debug code
+        std::cout << "HARDWARE MONITOR PLUGIN: Before interface_no detection\n";
+
+        /* Deprecated config check (<=v1.4.6) - is the interface defined by a
+         * count? */
+        if (xfce_rc_has_entry(settings_ro, "interface_no"))
+        {
+          // Debug code
+          std::cout << "HARDWARE MONITOR PLUGIN: interface_no detected!\n";
+
+          // It is - fetching interface number
+          int inter_no = xfce_rc_read_int_entry(settings_ro, "interface_no", 0);
+
+          // Determining interface type
+          Glib::ustring inter = xfce_rc_read_entry(settings_ro, "interface",
+                                                   "eth0");
+          if (inter == "eth" && inter_no == 0)
+            inter_type = NetworkLoadMonitor::ethernet_first;
+          else if (inter == "eth" && inter_no == 1)
+            inter_type = NetworkLoadMonitor::ethernet_second;
+          else if (inter == "eth" && inter_no == 2)
+            inter_type = NetworkLoadMonitor::ethernet_third;
+          else if (inter == "ppp")
+            inter_type = NetworkLoadMonitor::modem;
+          else if (inter == "slip")
+            inter_type = NetworkLoadMonitor::serial_link;
+
+          // In the original form, only one wireless interface was available
+          else if (inter == "wlan")
+            inter_type = NetworkLoadMonitor::wireless_first;
+
+          // Search for a writeable settings file, create one if it doesnt exist
+          gchar* file = xfce_panel_plugin_save_location(panel_plugin, true);
+          if (file)
+          {
+            XfceRc* settings_w = xfce_rc_simple_open(file, false);
+            g_free(file);
+
+            // Removing deprecated interface settings
+            xfce_rc_set_group(settings_w, settings_monitors[i]);
+            xfce_rc_delete_entry(settings_w, "interface_no", FALSE);
+            xfce_rc_delete_entry(settings_w, "interface", FALSE);
+            xfce_rc_write_int_entry(settings_w, "interface_type", int(inter_type));
+
+            // Close settings file
+            xfce_rc_close(settings_w);
+          }
+          else
+          {
+            // Unable to obtain writeable config file - informing user
+            std::cerr << _("Unable to obtain writeable config file path in order"
+                           " to remove deprecated configuration in "
+                           "load_monitors!\n");
+          }
+        }
+        else
+        {
+            // Up to date configuration - interface_type will be available
+            inter_type = static_cast<NetworkLoadMonitor::InterfaceType>(xfce_rc_read_int_entry(settings_ro,                                                                                                                                       "interface_type",
+                                               NetworkLoadMonitor::ethernet_first));
+        }
 
         // Fetching interface 'direction' setting
-        int inter_direction = xfce_rc_read_int_entry(settings,
+        int inter_direction = xfce_rc_read_int_entry(settings_ro,
           "interface_direction", NetworkLoadMonitor::all_data);
 
         // Converting direction setting into dedicated type
@@ -133,12 +188,12 @@ load_monitors(XfceRc* settings)
           dir = NetworkLoadMonitor::all_data;
 
         // Creating network load monitor
-        monitors.push_back(new NetworkLoadMonitor(inter, inter_no, dir));
+        monitors.push_back(new NetworkLoadMonitor(inter_type, dir, panel_plugin));
       }
       else if (type == "temperature")
       {
         // Fetching temperature number
-        int temperature_no = xfce_rc_read_int_entry(settings,
+        int temperature_no = xfce_rc_read_int_entry(settings_ro,
           "temperature_no", 0);
 
         // Creating temperature monitor
@@ -147,7 +202,7 @@ load_monitors(XfceRc* settings)
       else if (type == "fan_speed")
       {
         // Fetching fan number
-        int fan_no = xfce_rc_read_int_entry(settings, "fan_no", 0);
+        int fan_no = xfce_rc_read_int_entry(settings_ro, "fan_no", 0);
 
         // Creating fan monitor
         monitors.push_back(new FanSpeedMonitor(fan_no));
@@ -316,15 +371,15 @@ int CpuUsageMonitor::update_interval()
   return 1000;
 }
 
-void CpuUsageMonitor::save(XfceRc *settings)
+void CpuUsageMonitor::save(XfceRc *settings_w)
 {
   // Fetching assigned settings group
   Glib::ustring dir = get_settings_dir();
 
   // Saving settings
-  xfce_rc_set_group(settings, dir.c_str());
-  xfce_rc_write_entry(settings, "type", "cpu_usage");
-  xfce_rc_write_int_entry(settings, "cpu_no", cpu_no);
+  xfce_rc_set_group(settings_w, dir.c_str());
+  xfce_rc_write_entry(settings_w, "type", "cpu_usage");
+  xfce_rc_write_int_entry(settings_w, "cpu_no", cpu_no);
 }
 
 
@@ -384,14 +439,14 @@ int SwapUsageMonitor::update_interval()
   return 10 * 1000;
 }
 
-void SwapUsageMonitor::save(XfceRc *settings)
+void SwapUsageMonitor::save(XfceRc *settings_w)
 {
   // Fetching assigned settings group
   Glib::ustring dir = get_settings_dir();
 
   // Saving settings
-  xfce_rc_set_group(settings, dir.c_str());
-  xfce_rc_write_entry(settings, "type", "swap_usage");
+  xfce_rc_set_group(settings_w, dir.c_str());
+  xfce_rc_write_entry(settings_w, "type", "swap_usage");
 }
 
 
@@ -458,30 +513,30 @@ int LoadAverageMonitor::update_interval()
   return 30 * 1000;
 }
 
-void LoadAverageMonitor::save(XfceRc *settings)
+void LoadAverageMonitor::save(XfceRc *settings_w)
 {
   // Fetching assigned settings group
   Glib::ustring dir = get_settings_dir();
 
   // Saving settings
-  xfce_rc_set_group(settings, dir.c_str());
-  xfce_rc_write_entry(settings, "type", "load_average");
+  xfce_rc_set_group(settings_w, dir.c_str());
+  xfce_rc_write_entry(settings_w, "type", "load_average");
 
   // No support for floats - stringifying
   Glib::ustring setting = String::ucompose("%1", max_value);
-  xfce_rc_write_entry(settings, "max", setting.c_str());
+  xfce_rc_write_entry(settings_w, "max", setting.c_str());
 }
 
-void LoadAverageMonitor::load(XfceRc *settings)
+void LoadAverageMonitor::load(XfceRc *settings_ro)
 {
   // Fetching assigned settings group
   Glib::ustring dir = get_settings_dir();
 
   // Loading settings - no support for floats, unstringifying
-  xfce_rc_set_group(settings, dir.c_str());
-  Glib::ustring type = xfce_rc_read_entry(settings, "type", "");
+  xfce_rc_set_group(settings_ro, dir.c_str());
+  Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
   if (type == "load_average")
-    max_value = atof(xfce_rc_read_entry(settings, "max", "5"));
+    max_value = atof(xfce_rc_read_entry(settings_ro, "max", "5"));
 }
 
 
@@ -541,14 +596,14 @@ int MemoryUsageMonitor::update_interval()
   return 10 * 1000;
 }
 
-void MemoryUsageMonitor::save(XfceRc *settings)
+void MemoryUsageMonitor::save(XfceRc *settings_w)
 {
   // Fetching assigned settings group
   Glib::ustring dir = get_settings_dir();
 
   // Saving settings
-  xfce_rc_set_group(settings, dir.c_str());
-  xfce_rc_write_entry(settings, "type", "memory_usage");
+  xfce_rc_set_group(settings_w, dir.c_str());
+  xfce_rc_write_entry(settings_w, "type", "memory_usage");
 }
 
 
@@ -627,16 +682,16 @@ int DiskUsageMonitor::update_interval()
   return 60 * 1000;
 }
 
-void DiskUsageMonitor::save(XfceRc *settings)
+void DiskUsageMonitor::save(XfceRc *settings_w)
 {
   // Fetching assigned settings group
   Glib::ustring dir = get_settings_dir();
 
   // Saving settings
-  xfce_rc_set_group(settings, dir.c_str());
-  xfce_rc_write_entry(settings, "type", "disk_usage");
-  xfce_rc_write_entry(settings, "mount_dir", mount_dir.c_str());
-  xfce_rc_write_bool_entry(settings, "show_free", show_free);
+  xfce_rc_set_group(settings_w, dir.c_str());
+  xfce_rc_write_entry(settings_w, "type", "disk_usage");
+  xfce_rc_write_entry(settings_w, "mount_dir", mount_dir.c_str());
+  xfce_rc_write_bool_entry(settings_w, "show_free", show_free);
 }
 
 
@@ -644,10 +699,19 @@ void DiskUsageMonitor::save(XfceRc *settings)
 // class NetworkLoadMonitor
 //
 
-NetworkLoadMonitor::NetworkLoadMonitor(const Glib::ustring &inter, int inter_no,
-               Direction dir)
+/* Static intialisation - can't initialise in class declaration?? Can't have
+ * non-declaration statements here either, so can't directly populate the
+ * defaults vector... the main type names vector isn't initialised here as the
+ * associated function loads and saves settings */
+std::vector<Glib::ustring> NetworkLoadMonitor::interface_type_names = std::vector<Glib::ustring>(NUM_INTERFACE_TYPES);
+std::vector<Glib::ustring> NetworkLoadMonitor::interface_type_names_default = initialise_default_interface_names();
+
+bool NetworkLoadMonitor::interface_names_configured = false;
+
+NetworkLoadMonitor::NetworkLoadMonitor(InterfaceType &inter_type, Direction dir,
+                                       XfcePanelPlugin* panel_applet)
   : max_value(1), byte_count(0), time_stamp_secs(0), time_stamp_usecs(0),
-    interface(inter), interface_no(inter_no), direction(dir)
+    interface_type(inter_type), direction(dir), pnl_applet(panel_applet)
 {
 }
 
@@ -655,8 +719,11 @@ double NetworkLoadMonitor::do_measure()
 {
   glibtop_netload netload;
 
-  glibtop_get_netload(&netload,
-          String::ucompose("%1%2", interface, interface_no).c_str());
+  /* Obtaining interface name - this can change after monitor is instantiated
+   * hence fetching each time */
+  Glib::ustring interface = get_interface_name(interface_type, pnl_applet);
+
+  glibtop_get_netload(&netload, interface.c_str());
   guint64 val, measured_bytes;
 
   if (direction == all_data)
@@ -745,23 +812,7 @@ Glib::ustring NetworkLoadMonitor::format_value(double val)
 
 Glib::ustring NetworkLoadMonitor::get_name()
 {
-  Glib::ustring str;
-
-  if (interface == "eth" && interface_no == 0)
-    str = _("Ethernet (first)");
-  else if (interface == "eth" && interface_no == 1)
-    str = _("Ethernet (second)");
-  else if (interface == "eth" && interface_no == 2)
-    str = _("Ethernet (third)");
-  else if (interface == "ppp" && interface_no == 0)
-    str = _("Modem");
-  else if (interface == "slip" && interface_no == 0)
-    str = _("Serial link");
-  else if (interface == "wlan" && interface_no == 0)
-    str = _("Wireless");
-  else
-    // unknown, someone must have been fiddling with the config file
-    str = String::ucompose("%1%2", interface, interface_no);
+  Glib::ustring str = interface_type_to_string(interface_type, false);
 
   if (direction == incoming_data)
     // %1 is the network connection, e.g. "Ethernet (first)", in signifies
@@ -777,23 +828,8 @@ Glib::ustring NetworkLoadMonitor::get_name()
 
 Glib::ustring NetworkLoadMonitor::get_short_name()
 {
-  Glib::ustring str;
-
-  if (interface == "eth")
-    // short for an ethernet card
-    str = String::ucompose(_("Eth. %1"), interface_no + 1);
-  else if (interface == "ppp" && interface_no == 0)
-    // short for modem
-    str = _("Mod.");
-  else if (interface == "slip" && interface_no == 0)
-    // short for serial link
-    str = _("Ser.");
-  else if (interface == "wlan" && interface_no == 0)
-    // short for wireless
-    str = _("W.less.");
-  else
-    // unknown, someone must have been fiddling with the config file
-    str = String::ucompose("%1%2", interface, interface_no);
+  // Have not merged this with get_name in order to keep the interface the same
+  Glib::ustring str = interface_type_to_string(interface_type, true);
 
   if (direction == incoming_data)
     str = String::ucompose(_("%1, in"), str);
@@ -808,45 +844,41 @@ int NetworkLoadMonitor::update_interval()
   return 1000;
 }
 
-void NetworkLoadMonitor::save(XfceRc *settings)
+void NetworkLoadMonitor::save(XfceRc *settings_w)
 {
   // Fetching assigned settings group
   Glib::ustring dir = get_settings_dir();
 
   // Saving settings
-  xfce_rc_set_group(settings, dir.c_str());
-  xfce_rc_write_entry(settings, "type", "network_load");
-  xfce_rc_write_entry(settings, "interface", interface.c_str());
-  xfce_rc_write_int_entry(settings, "interface_no", interface_no);
-  xfce_rc_write_int_entry(settings, "interface_direction",
+  xfce_rc_set_group(settings_w, dir.c_str());
+  xfce_rc_write_entry(settings_w, "type", "network_load");
+  xfce_rc_write_int_entry(settings_w, "interface_type", int(interface_type));
+  xfce_rc_write_int_entry(settings_w, "interface_direction",
     int(direction));
-  xfce_rc_write_int_entry(settings, "max", int(max_value));
+  xfce_rc_write_int_entry(settings_w, "max", int(max_value));
 }
 
-void NetworkLoadMonitor::load(XfceRc *settings)
+void NetworkLoadMonitor::load(XfceRc *settings_ro)
 {
   // Fetching assigned settings group
   Glib::ustring dir = get_settings_dir();
 
   /* Loading settings - ensuring the settings are for the particular
    * network monitor?? */
-  xfce_rc_set_group(settings, dir.c_str());
-  Glib::ustring type = xfce_rc_read_entry(settings, "type", ""),
-    setting_interface = xfce_rc_read_entry(settings, "interface", "");
-  if (type == "network_load" && setting_interface == interface
-    && xfce_rc_read_int_entry(settings, "interface_no", 0) == interface_no
-    && xfce_rc_read_int_entry(settings, "interface_direction",
-      int(incoming_data)) == int(direction))
-  {
-    max_value = xfce_rc_read_int_entry(settings, "max", 0);
-  }
+  xfce_rc_set_group(settings_ro, dir.c_str());
+  Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
+  InterfaceType inter_type = static_cast<InterfaceType>(xfce_rc_read_int_entry(settings_ro, "interface_type", int(ethernet_first)));
+  Direction inter_direction = static_cast<Direction>(xfce_rc_read_int_entry(settings_ro, "interface_direction" ,int(incoming_data)));
+
+  if (type == "network_load" && inter_type == interface_type
+      && inter_direction == direction)
+      max_value = xfce_rc_read_int_entry(settings_ro, "max", 0);
 }
 
 void NetworkLoadMonitor::possibly_add_sync_with(Monitor *other)
 {
   if (NetworkLoadMonitor *o = dynamic_cast<NetworkLoadMonitor *>(other))
-    if (interface == o->interface && interface_no == o->interface_no
-  && direction != o->direction)
+    if (interface_type == o->interface_type && direction != o->direction)
       sync_monitors.push_back(o);
 }
 
@@ -859,6 +891,409 @@ void NetworkLoadMonitor::remove_sync_with(Monitor *other)
     sync_monitors.erase(i);
 }
 
+void NetworkLoadMonitor::configure_interface_names(XfcePanelPlugin *panel_applet)
+{
+  if (interface_names_configured)
+    return;
+
+  bool write_settings_ethernet_first = false, write_settings_ethernet_second = false,
+      write_settings_ethernet_third = false, write_settings_modem = false,
+      write_settings_serial_link = false, write_settings_wireless_first = false,
+      write_settings_wireless_second = false, write_settings_wireless_third = false;
+
+  gchar* file = xfce_panel_plugin_lookup_rc_file(panel_applet);
+  if (file)
+  {
+    XfceRc* settings_ro = xfce_rc_simple_open(file, true);
+    g_free(file);
+
+    // Ensuring default group is in focus
+    xfce_rc_set_group(settings_ro, "[NULL]");
+
+    Glib::ustring setting_name = String::ucompose(
+          "network_type_%1_interface_name",
+          int(ethernet_first));
+    if (xfce_rc_has_entry(settings_ro, setting_name.c_str()))
+      interface_type_names[ethernet_first] = xfce_rc_read_entry(
+            settings_ro, setting_name.c_str(),
+            get_default_interface_name(ethernet_first).c_str());
+    else
+    {
+      interface_type_names[ethernet_first] =
+          get_default_interface_name(ethernet_first);
+      write_settings_ethernet_first = true;
+    }
+
+    setting_name = String::ucompose(
+          "network_type_%1_interface_name",
+          int(ethernet_second));
+    if (xfce_rc_has_entry(settings_ro, setting_name.c_str()))
+      interface_type_names[ethernet_second] = xfce_rc_read_entry(
+            settings_ro, setting_name.c_str(),
+            get_default_interface_name(ethernet_second).c_str());
+    else
+    {
+      interface_type_names[ethernet_second] =
+          get_default_interface_name(ethernet_second);
+      write_settings_ethernet_second = true;
+    }
+
+    setting_name = String::ucompose(
+          "network_type_%1_interface_name",
+          int(ethernet_third));
+    if (xfce_rc_has_entry(settings_ro, setting_name.c_str()))
+      interface_type_names[ethernet_third] = xfce_rc_read_entry(
+            settings_ro, setting_name.c_str(),
+            get_default_interface_name(ethernet_third).c_str());
+    else
+    {
+      interface_type_names[ethernet_third] =
+          get_default_interface_name(ethernet_third);
+      write_settings_ethernet_third = true;
+    }
+
+    setting_name = String::ucompose(
+          "network_type_%1_interface_name", int(modem));
+    if (xfce_rc_has_entry(settings_ro, setting_name.c_str()))
+      interface_type_names[modem] = xfce_rc_read_entry(
+            settings_ro, setting_name.c_str(),
+            get_default_interface_name(modem).c_str());
+    else
+    {
+      interface_type_names[modem] = get_default_interface_name(modem);
+      write_settings_modem = true;
+    }
+
+    setting_name = String::ucompose(
+          "network_type_%1_interface_name", int(serial_link));
+    if (xfce_rc_has_entry(settings_ro, setting_name.c_str()))
+      interface_type_names[serial_link] = xfce_rc_read_entry(
+            settings_ro, setting_name.c_str(),
+            get_default_interface_name(serial_link).c_str());
+    else
+    {
+      interface_type_names[serial_link] =
+          get_default_interface_name(serial_link);
+      write_settings_serial_link = true;
+    }
+
+    setting_name = String::ucompose(
+          "network_type_%1_interface_name", int(wireless_first));
+    if (xfce_rc_has_entry(settings_ro, setting_name.c_str()))
+      interface_type_names[wireless_first] = xfce_rc_read_entry(
+            settings_ro, setting_name.c_str(),
+            get_default_interface_name(wireless_first).c_str());
+    else
+    {
+      interface_type_names[wireless_first] =
+          get_default_interface_name(wireless_first);
+      write_settings_wireless_first = true;
+    }
+
+    setting_name = String::ucompose(
+          "network_type_%1_interface_name", int(wireless_second));
+    if (xfce_rc_has_entry(settings_ro, setting_name.c_str()))
+      interface_type_names[wireless_second] = xfce_rc_read_entry(
+            settings_ro, setting_name.c_str(),
+            get_default_interface_name(wireless_first).c_str());
+    else
+    {
+      interface_type_names[wireless_second] =
+          get_default_interface_name(wireless_second);
+      write_settings_wireless_second = true;
+    }
+
+    setting_name = String::ucompose(
+          "network_type_%1_interface_name", int(wireless_third));
+    if (xfce_rc_has_entry(settings_ro, setting_name.c_str()))
+      interface_type_names[wireless_third] = xfce_rc_read_entry(
+            settings_ro, setting_name.c_str(),
+            get_default_interface_name(wireless_third).c_str());
+    else
+    {
+      interface_type_names[wireless_third] =
+          get_default_interface_name(wireless_third);
+      write_settings_wireless_third = true;
+    }
+
+    /* Writing out settings if any interface name didn't previously exist -
+    * this is only going to happen once as configurations essentially get
+    * upgraded */
+    if (write_settings_ethernet_first || write_settings_ethernet_second
+        || write_settings_ethernet_third || write_settings_modem
+        || write_settings_serial_link || write_settings_wireless_first
+        || write_settings_wireless_second || write_settings_wireless_third)
+    {
+      // Search for a writeable settings file, create one if it doesnt exist
+      gchar* file = xfce_panel_plugin_save_location(panel_applet, true);
+
+      if (file)
+      {
+        XfceRc* settings_w = xfce_rc_simple_open(file, false);
+        g_free(file);
+
+        // Saving all interface names that have been set
+        if (write_settings_ethernet_first)
+        {
+          setting_name = String::ucompose("network_type_%1_interface_name",
+                                          int(ethernet_first));
+          xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                              interface_type_names[ethernet_first].c_str());
+        }
+        if (write_settings_ethernet_second)
+        {
+          setting_name = String::ucompose("network_type_%1_interface_name",
+                                          int(ethernet_second));
+          xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                              interface_type_names[ethernet_second].c_str());
+        }
+        if (write_settings_ethernet_third)
+        {
+          setting_name = String::ucompose("network_type_%1_interface_name",
+                                          int(ethernet_third));
+          xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                              interface_type_names[ethernet_third].c_str());
+        }
+        if (write_settings_modem)
+        {
+          setting_name = String::ucompose("network_type_%1_interface_name",
+                                          int(modem));
+          xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                              interface_type_names[modem].c_str());
+        }
+        if (write_settings_serial_link)
+        {
+          setting_name = String::ucompose("network_type_%1_interface_name",
+                                          int(serial_link));
+          xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                              interface_type_names[serial_link].c_str());
+        }
+        if (write_settings_wireless_first)
+        {
+          setting_name = String::ucompose("network_type_%1_interface_name",
+                                          int(wireless_first));
+          xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                              interface_type_names[wireless_first].c_str());
+        }
+        if (write_settings_wireless_second)
+        {
+          setting_name = String::ucompose("network_type_%1_interface_name",
+                                          int(wireless_second));
+          xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                              interface_type_names[wireless_second].c_str());
+        }
+        if (write_settings_wireless_third)
+        {
+          setting_name = String::ucompose("network_type_%1_interface_name",
+                                          int(wireless_third));
+          xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                              interface_type_names[wireless_third].c_str());
+        }
+
+        xfce_rc_close(settings_w);
+      }
+      else
+      {
+        // Unable to obtain writeable config file - informing user
+        std::cerr << _("Unable to obtain writeable config file path in order to"
+                       " save interface names in NetworkLoadMonitor::"
+                       "get_interface_name!\n");
+        return;
+      }
+    }
+
+    xfce_rc_close(settings_ro);
+  }
+  else
+  {
+    // Unable to obtain read-only config file - informing user
+    std::cerr << _("Unable to obtain read-only config file path in order to "
+                   "configure interface names in NetworkLoadMonitor::"
+                   "configure_interface_names!");
+    return;
+  }
+
+  interface_names_configured = true;
+}
+
+Glib::ustring NetworkLoadMonitor::get_interface_name(InterfaceType type,
+                                                     XfcePanelPlugin *panel_applet)
+{
+  // Load saved interface names if not done yet and enforcing defaults
+  configure_interface_names(panel_applet);
+
+  // Debug code
+ /* std::cout << "get_interface_name called for " << interface_type_to_string(type,
+                                                                            false)
+            << ", returning " << interface_type_names[type] << "\n";*/
+
+  // Returning requested interface name
+  return interface_type_names[type];
+}
+
+Glib::ustring NetworkLoadMonitor::get_default_interface_name(InterfaceType type)
+{
+  return interface_type_names_default[type];
+}
+
+void NetworkLoadMonitor::set_interface_name(InterfaceType type, const Glib::ustring interface_name)
+{
+  interface_type_names[type] = interface_name;
+}
+
+std::vector<Glib::ustring> NetworkLoadMonitor::initialise_default_interface_names()
+{
+  std::vector<Glib::ustring> inter_type_names_default = std::
+      vector<Glib::ustring>(NUM_INTERFACE_TYPES);
+  inter_type_names_default[ethernet_first] = "eth0";
+  inter_type_names_default[ethernet_second] = "eth1";
+  inter_type_names_default[ethernet_third] = "eth2";
+  inter_type_names_default[modem] = "ppp";
+  inter_type_names_default[serial_link] = "slip";
+  inter_type_names_default[wireless_first] = "wlan0";
+  inter_type_names_default[wireless_second] = "wlan1";
+  inter_type_names_default[wireless_third] = "wlan2";
+  return inter_type_names_default;
+}
+
+void NetworkLoadMonitor::restore_default_interface_names(XfceRc *settings_w)
+{
+  interface_type_names = initialise_default_interface_names();
+  NetworkLoadMonitor::save_interfaces(settings_w);
+}
+
+const Glib::ustring NetworkLoadMonitor::interface_type_to_string(const InterfaceType type, const bool short_ver)
+{
+  Glib::ustring interface_type_str;
+
+  switch(type)
+  {
+    case ethernet_first:
+      if (short_ver)
+        interface_type_str = _("Eth. 1");
+      else
+        interface_type_str = _("Ethernet (first)");
+      break;
+
+    case ethernet_second:
+      if (short_ver)
+        interface_type_str = _("Eth. 2");
+      else
+        interface_type_str = _("Ethernet (second)");
+      break;
+
+    case ethernet_third:
+      if (short_ver)
+        interface_type_str = _("Eth. 3");
+      else
+        interface_type_str = _("Ethernet (third)");
+      break;
+
+    case modem:
+      if (short_ver)
+        interface_type_str = _("Mod.");
+      else
+        interface_type_str = _("Modem");
+      break;
+
+    case serial_link:
+      if (short_ver)
+        interface_type_str = _("Ser.");
+      else
+        interface_type_str = _("Serial link");
+      break;
+
+    case wireless_first:
+      if (short_ver)
+        interface_type_str = _("W.less. 1");
+      else
+        interface_type_str = _("Wireless (first)");
+      break;
+
+    case wireless_second:
+      if (short_ver)
+        interface_type_str = _("W.less. 2");
+      else
+        interface_type_str = _("Wireless (second)");
+      break;
+
+    case wireless_third:
+      if (short_ver)
+        interface_type_str = _("W.less. 3");
+      else
+        interface_type_str = _("Wireless (third)");
+      break;
+  }
+
+  return interface_type_str;
+
+}
+
+bool NetworkLoadMonitor::interface_exists(const Glib::ustring &interface_name)
+{
+  glibtop_netlist buf;
+  char **devices;
+  int i;
+  bool found_device = false;
+
+  // Attempting to locate specified network interface
+  devices = glibtop_get_netlist(&buf);
+  for(i = 0; i < buf.number; ++i)
+  {
+    // Debug code
+    /*std::cout << "Device to search for: " << interface_name << ", device "
+                 "compared with: " << devices[i] << "\n";*/
+
+    if (interface_name == devices[i])
+    {
+      found_device = true;
+      break;
+    }
+  }
+  g_strfreev(devices);
+
+  return found_device;
+}
+
+void NetworkLoadMonitor::save_interfaces(XfceRc *settings_w)
+{
+  // Ensuring default group is in focus
+  xfce_rc_set_group(settings_w, "[NULL]");
+
+  // Saving interface names
+  Glib::ustring setting_name = String::ucompose("network_type_%1_interface_name",
+                                                int(ethernet_first));
+  xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                      interface_type_names[ethernet_first].c_str());
+  setting_name = String::ucompose("network_type_%1_interface_name",
+                                  int(ethernet_second));
+  xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                      interface_type_names[ethernet_second].c_str());
+  setting_name = String::ucompose("network_type_%1_interface_name",
+                                  int(ethernet_third));
+  xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                      interface_type_names[ethernet_third].c_str());
+  setting_name = String::ucompose("network_type_%1_interface_name",
+                                  int(modem));
+  xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                      interface_type_names[modem].c_str());
+  setting_name = String::ucompose("network_type_%1_interface_name",
+                                  int(serial_link));
+  xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                      interface_type_names[serial_link].c_str());
+  setting_name = String::ucompose("network_type_%1_interface_name",
+                                  int(wireless_first));
+  xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                      interface_type_names[wireless_first].c_str());
+  setting_name = String::ucompose("network_type_%1_interface_name",
+                                  int(wireless_second));
+  xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                      interface_type_names[wireless_second].c_str());
+  setting_name = String::ucompose("network_type_%1_interface_name",
+                                  int(wireless_third));
+  xfce_rc_write_entry(settings_w, setting_name.c_str(),
+                      interface_type_names[wireless_third].c_str());
+}
 
 //
 // implementation of sensors wrapper
@@ -1043,33 +1478,33 @@ int TemperatureMonitor::update_interval()
   return 20 * 1000;
 }
 
-void TemperatureMonitor::save(XfceRc *settings)
+void TemperatureMonitor::save(XfceRc *settings_w)
 {
   // Fetching assigned settings group
   Glib::ustring dir = get_settings_dir();
 
   // Saving settings
-  xfce_rc_set_group(settings, dir.c_str());
-  xfce_rc_write_entry(settings, "type", "temperature");
-  xfce_rc_write_int_entry(settings, "temperature_no", sensors_no);
+  xfce_rc_set_group(settings_w, dir.c_str());
+  xfce_rc_write_entry(settings_w, "type", "temperature");
+  xfce_rc_write_int_entry(settings_w, "temperature_no", sensors_no);
 
   // No support for floats - stringifying
   Glib::ustring setting = String::ucompose("%1", max_value);
-  xfce_rc_write_entry(settings, "max", setting.c_str());
+  xfce_rc_write_entry(settings_w, "max", setting.c_str());
 }
 
-void TemperatureMonitor::load(XfceRc *settings)
+void TemperatureMonitor::load(XfceRc *settings_ro)
 {
   // Fetching assigned settings group
   Glib::ustring dir = get_settings_dir();
 
   /* Loading settings, making sure the right sensor is loaded. No support
    * for floats, unstringifying */
-  xfce_rc_set_group(settings, dir.c_str());
-  Glib::ustring type = xfce_rc_read_entry(settings, "type", "");
-  if (type == "temperature" && xfce_rc_read_int_entry(settings,
+  xfce_rc_set_group(settings_ro, dir.c_str());
+  Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
+  if (type == "temperature" && xfce_rc_read_int_entry(settings_ro,
     "temperature_no", 0) == sensors_no)
-    max_value = atof(xfce_rc_read_entry(settings, "max", "40"));
+    max_value = atof(xfce_rc_read_entry(settings_ro, "max", "40"));
 }
 
 
@@ -1139,31 +1574,31 @@ int FanSpeedMonitor::update_interval()
   return 20 * 1000;
 }
 
-void FanSpeedMonitor::save(XfceRc *settings)
+void FanSpeedMonitor::save(XfceRc *settings_w)
 {
     // Fetching assigned settings group
   Glib::ustring dir = get_settings_dir();
 
   // Saving settings
-  xfce_rc_set_group(settings, dir.c_str());
-  xfce_rc_write_entry(settings, "type", "fan_speed");
-  xfce_rc_write_int_entry(settings, "fan_no", sensors_no);
+  xfce_rc_set_group(settings_w, dir.c_str());
+  xfce_rc_write_entry(settings_w, "type", "fan_speed");
+  xfce_rc_write_int_entry(settings_w, "fan_no", sensors_no);
 
   // No support for floats - stringifying
   Glib::ustring setting = String::ucompose("%1", max_value);
-  xfce_rc_write_entry(settings, "max", setting.c_str());
+  xfce_rc_write_entry(settings_w, "max", setting.c_str());
 }
 
-void FanSpeedMonitor::load(XfceRc *settings)
+void FanSpeedMonitor::load(XfceRc *settings_ro)
 {
   // Fetching assigned settings group
   Glib::ustring dir = get_settings_dir();
 
   /* Loading settings, making sure the right fan is loaded. No support
    * for floats, unstringifying */
-  xfce_rc_set_group(settings, dir.c_str());
-  Glib::ustring type = xfce_rc_read_entry(settings, "type", "");
-  if (type == "fan_speed" && xfce_rc_read_int_entry(settings, "fan_no",
-    0) == sensors_no)
-    max_value = atof(xfce_rc_read_entry(settings, "max", "1"));
+  xfce_rc_set_group(settings_ro, dir.c_str());
+  Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
+  int fan_no = xfce_rc_read_int_entry(settings_ro, "fan_no", 0);
+  if (type == "fan_speed" && fan_no == sensors_no)
+    max_value = atof(xfce_rc_read_entry(settings_ro, "max", "1"));
 }

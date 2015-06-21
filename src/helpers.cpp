@@ -1,7 +1,7 @@
 /* Helper functions.
  *
  * Copyright (c) 2003 Ole Laursen.
- * Copyright (c) 2013 OmegaPhil (OmegaPhil@startmail.com)
+ * Copyright (c) 2013, 2015 OmegaPhil (OmegaPhil@startmail.com)
  *
  * This program is free software; you can redistribute it and/or 
  * modify it under the terms of the GNU General Public License as 
@@ -38,6 +38,23 @@ void fatal_error(const Glib::ustring &msg)
   
   exit(1);
 }
+
+// See header note for why buttons isn't a Gtk type
+/*
+int warning_dialog(const Glib::ustring &msg, const Glib::ustring &title,
+                   Glib::RefPtr<Gdk::Pixbuf> icon, const int buttons)
+{
+  Gtk::ButtonsType buttons_type = static_cast<Gtk::ButtonsType>(buttons);
+
+  Gtk::MessageDialog d(msg, false, Gtk::MESSAGE_WARNING, buttons_type);
+
+  d.set_modal();
+  d.set_title(title);
+  d.set_icon(icon);
+
+  return d.run();
+}
+*/
 
 Glib::ustring truncate_string(Glib::ustring s, unsigned int n)
 {

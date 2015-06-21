@@ -1,7 +1,7 @@
 /* Helper functions.
  *
  * Copyright (c) 2003 Ole Laursen.
- * Copyright (c) 2013 OmegaPhil (OmegaPhil@startmail.com)
+ * Copyright (c) 2013, 2015 OmegaPhil (OmegaPhil@startmail.com)
  *
  * This program is free software; you can redistribute it and/or 
  * modify it under the terms of the GNU General Public License as 
@@ -22,7 +22,12 @@
 #ifndef HELPERS_HPP
 #define HELPERS_HPP
 
+//#include <gdkmm/pixbuf.h>  // For icon in warning_dialog
 #include <glibmm/ustring.h>
+
+/* Can't include gtkmm/messagedialog.h here as it causes X11 header to be
+ * included before gtkmm?? */
+//#define LOCAL_GTK_BUTTONS_OK 1
 
 // from www.boost.org - derivation from this class makes the derived class
 // noncopyable
@@ -37,5 +42,13 @@ private:
 };
 
 void fatal_error(const Glib::ustring &msg);
+
+/* Attempting to host the warning_dialog code here has failed completely -
+ * constant bullshit include errors either not allowing namespace items to be
+ * defined, or some X11/gtkmm clash again - this is all needed to allow for
+ * the parameters passed here */
+/*int warning_dialog(const Glib::ustring &msg, const Glib::ustring &title,
+                   Glib::RefPtr<Gdk::Pixbuf> icon,
+                   const int buttons = LOCAL_GTK_BUTTONS_OK);*/
 
 #endif

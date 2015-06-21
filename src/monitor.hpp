@@ -33,6 +33,7 @@ extern "C"
 
 #include "helpers.hpp"
 
+
 class Monitor: noncopyable
 {
 public:
@@ -88,10 +89,10 @@ public:
   virtual int update_interval() = 0;
 
   // Save information about the monitor
-  virtual void save(XfceRc *settings) = 0;
+  virtual void save(XfceRc *settings_w) = 0;
 
   // Load any internal monitor state
-  virtual void load(XfceRc *settings)
+  virtual void load(XfceRc *settings_ro)
   {
   }
 
@@ -105,10 +106,10 @@ public:
   virtual void remove_sync_with(Monitor *other)
   {
   }
-  
+
 protected:
   double measured_value;
-  
+
 private:
 
   // Perform actual measurement, for derived classes
@@ -125,6 +126,11 @@ private:
 typedef std::list<Monitor *> monitor_seq;
 typedef monitor_seq::iterator monitor_iter;
 
-monitor_seq load_monitors(XfceRc* settings);
+/* Forward declaration for load_monitors - including the panel header at the top
+ * causes glibmm/object.h to complain that X11/Xlib.h has been included ahead
+ * of it?? Why is the include tolerated in applet.hpp then? */
+typedef struct _XfcePanelPlugin        XfcePanelPlugin;
+
+monitor_seq load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin);
 
 #endif

@@ -39,7 +39,6 @@ extern "C"
 #include <libxfce4panel/libxfce4panel.h>
 }
 
-
 #include "monitor.hpp"
 
 class PreferencesWindow; 

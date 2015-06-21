@@ -32,10 +32,12 @@
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/dialog.h>
 #include <gtkmm/entry.h>
+#include <gtkmm/liststore.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/optionmenu.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/treeview.h>
 #include <glibmm/ustring.h>
 
 extern "C"
@@ -49,12 +51,14 @@ class Monitor;
 class ChooseMonitorWindow: public sigc::trackable
 {
 public:
-  ChooseMonitorWindow(Glib::RefPtr<Gdk::Pixbuf> icon, Gtk::Window &parent);
+
+  /* panel_applet is required here as the user can edit NetworkLoadMonitor
+   * interface names through a settings dialog, and this needs special saving */
+  ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local, Gtk::Window &parent);
   ~ChooseMonitorWindow();
 
   // given a monitor directory (may be ""), return a new monitor or 0
-  Monitor *run(XfcePanelPlugin* panel_applet,
-    const Glib::ustring &mon_dir);
+  Monitor *run(const Glib::ustring &mon_dir);
   
 private:
   Glib::RefPtr<Gnome::Glade::Xml> ui;
@@ -83,19 +87,43 @@ private:
   Gtk::Box *network_load_options;
   Gtk::OptionMenu *network_type_optionmenu;
   Gtk::OptionMenu *network_direction_optionmenu;
+  Gtk::TreeView *network_interfaces_treeview;
+  Gtk::Button *network_interfaces_restore_defaults_button;
 
   Gtk::Box *temperature_box, *temperature_options;
   Gtk::OptionMenu *temperature_optionmenu;
   Gtk::Box *fan_speed_box, *fan_speed_options;
   Gtk::OptionMenu *fan_speed_optionmenu;
-  
+
+  XfcePanelPlugin* panel_applet;
+
+  // For the advanced settings network interface name treeview
+  class NetworkInterfacesNamesCols: public Gtk::TreeModel::ColumnRecord
+  {
+  public:
+    Gtk::TreeModelColumn<Glib::ustring> interface_type;
+    Gtk::TreeModelColumn<Glib::ustring> interface_name;
+
+    NetworkInterfacesNamesCols() { add(interface_type); add(interface_name); }
+  };
+
+  /* Note that the example MonitorColumns implementation in preferences-window.hpp
+   * seems to maintain multiple static instances of the columns class, don't
+   * know why it isn't just a single static member like below */
+  static NetworkInterfacesNamesCols nc;
+
+  Glib::RefPtr<Gtk::ListStore> network_interfaces_names_store;
+  typedef Gtk::ListStore::iterator store_iter;
+
   // GUI
   void on_cpu_usage_radiobutton_toggled();
   void on_disk_usage_radiobutton_toggled();
-  void on_network_load_radiobutton_toggled();
-  void on_temperature_radiobutton_toggled();
   void on_fan_speed_radiobutton_toggled();
-  
+  void on_network_load_radiobutton_toggled();
+  void on_network_interfaces_restore_defaults_button_clicked();
+  void on_temperature_radiobutton_toggled();
+  void on_network_interface_name_edited(const Glib::ustring& path,
+                                        const Glib::ustring& new_text);
   void on_help_button_clicked();
   bool on_closed(GdkEventAny *);
 };

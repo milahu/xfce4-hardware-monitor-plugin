@@ -276,20 +276,20 @@ void FlameView::do_attach(Monitor *monitor)
   if (file)
   {
     // One exists - loading readonly settings
-    XfceRc* settings = xfce_rc_simple_open(file, true);
+    XfceRc* settings_ro = xfce_rc_simple_open(file, true);
     g_free(file);
 
     // Loading color
-    xfce_rc_set_group(settings, dir.c_str());
-    if (xfce_rc_has_entry(settings, "color"))
+    xfce_rc_set_group(settings_ro, dir.c_str());
+    if (xfce_rc_has_entry(settings_ro, "color"))
     {
-      color = xfce_rc_read_int_entry(settings, "color",
+      color = xfce_rc_read_int_entry(settings_ro, "color",
         applet->get_fg_color());
       color_missing = false;
     }
 
     // Close settings file
-    xfce_rc_close(settings);
+    xfce_rc_close(settings_ro);
   }
 
   /* Saving color if it was not recorded. XFCE4 configuration is done in
@@ -305,15 +305,15 @@ void FlameView::do_attach(Monitor *monitor)
     if (file)
     {
       // Opening setting file
-      XfceRc* settings = xfce_rc_simple_open(file, false);
+      XfceRc* settings_w = xfce_rc_simple_open(file, false);
       g_free(file);
 
       // Saving color
-      xfce_rc_set_group(settings, dir.c_str());
-      xfce_rc_write_int_entry(settings, "color", int(color));
+      xfce_rc_set_group(settings_w, dir.c_str());
+      xfce_rc_write_int_entry(settings_w, "color", int(color));
 
       // Close settings file
-      xfce_rc_close(settings);
+      xfce_rc_close(settings_w);
     }
     else
     {
