@@ -338,7 +338,7 @@ bool CpuUsageMonitor::fixed_max()
   return true;
 }
 
-Glib::ustring CpuUsageMonitor::format_value(double val)
+Glib::ustring CpuUsageMonitor::format_value(double val, bool compact)
 {
   return String::ucompose(_("%1%%"), precision(1), 100 * val);
 }
@@ -411,11 +411,13 @@ bool SwapUsageMonitor::fixed_max()
   return false;
 }
 
-Glib::ustring SwapUsageMonitor::format_value(double val)
+Glib::ustring SwapUsageMonitor::format_value(double val, bool compact)
 {
+  Glib::ustring format = compact ? _("%1M"): _("%1 MB");
+
   val /= 1000000;
 
-  return String::ucompose(_("%1 Mb"), decimal_digits(val, 3), val);
+  return String::ucompose(format, decimal_digits(val, 3), val);
 }
 
 Glib::ustring SwapUsageMonitor::get_name()
@@ -486,7 +488,7 @@ bool LoadAverageMonitor::fixed_max()
   return false;
 }
 
-Glib::ustring LoadAverageMonitor::format_value(double val)
+Glib::ustring LoadAverageMonitor::format_value(double val, bool compact)
 {
   return String::ucompose("%1", precision(1), val);
 }
@@ -568,11 +570,13 @@ bool MemoryUsageMonitor::fixed_max()
   return false;
 }
 
-Glib::ustring MemoryUsageMonitor::format_value(double val)
+Glib::ustring MemoryUsageMonitor::format_value(double val, bool compact)
 {
+  Glib::ustring format = compact ? _("%1M") : _("%1 MB");
+
   val /= 1000000;
 
-  return String::ucompose(_("%1 Mb"), decimal_digits(val, 3), val);
+  return String::ucompose(format, decimal_digits(val, 3), val);
 }
 
 Glib::ustring MemoryUsageMonitor::get_name()
@@ -643,22 +647,28 @@ bool DiskUsageMonitor::fixed_max()
   return false;
 }
 
-Glib::ustring DiskUsageMonitor::format_value(double val)
+Glib::ustring DiskUsageMonitor::format_value(double val, bool compact)
 {
+  Glib::ustring format;
+
   if (val >= 1000 * 1000 * 1000) {
     val /= 1000 * 1000 * 1000;
-    return String::ucompose(_("%1 GB"), decimal_digits(val, 3), val);
+    format = compact ? _("%1G") : _("%1 GB");
+    return String::ucompose(format, decimal_digits(val, 3), val);
   }
   else if (val >= 1000 * 1000) {
     val /= 1000 * 1000;
-    return String::ucompose(_("%1 MB"), decimal_digits(val, 3), val);
+    format = compact ? _("%1M") : _("%1 MB");
+    return String::ucompose(format, decimal_digits(val, 3), val);
   }
   else if (val >= 1000) {
     val /= 1000;
-    return String::ucompose(_("%1 kB"), decimal_digits(val, 3), val);
+    format = compact ? _("%1K"): _("%1 KB");
+    return String::ucompose(format, decimal_digits(val, 3), val);
   }
   else
-    return String::ucompose(_("%1 B"), decimal_digits(val, 3), val);
+    format = compact ? _("%1B") : _("%1 B");
+    return String::ucompose(format, decimal_digits(val, 3), val);
 }
 
 Glib::ustring DiskUsageMonitor::get_name()
@@ -781,8 +791,10 @@ bool NetworkLoadMonitor::fixed_max()
   return false;
 }
 
-Glib::ustring NetworkLoadMonitor::format_value(double val)
+Glib::ustring NetworkLoadMonitor::format_value(double val, bool compact)
 {
+  Glib::ustring format;
+
   // 1000 ms = 1 s
   val = val / time_difference * 1000;
 
@@ -791,18 +803,24 @@ Glib::ustring NetworkLoadMonitor::format_value(double val)
 
   if (val >= 1000 * 1000 * 1000) {
     val /= 1000 * 1000 * 1000;
-    return String::ucompose(_("%1 GB/s"), decimal_digits(val, 3), val);
+    format = compact ? _("%1G") : _("%1 GB/s");
+    return String::ucompose(format, decimal_digits(val, 3), val);
   }
   else if (val >= 1000 * 1000) {
     val /= 1000 * 1000;
-    return String::ucompose(_("%1 MB/s"), decimal_digits(val, 3), val);
+    format = compact ? _("%1M") : _("%1 MB/s");
+    return String::ucompose(format, decimal_digits(val, 3), val);
   }
   else if (val >= 1000) {
     val /= 1000;
-    return String::ucompose(_("%1 kB/s"), decimal_digits(val, 3), val);
+    format = compact ? _("%1K") : _("%1 KB/s");
+    return String::ucompose(format, decimal_digits(val, 3), val);
   }
   else
-    return String::ucompose(_("%1 B/s"), decimal_digits(val, 3), val);
+  {
+    format = compact ? _("%1B") : _("%1 B/s");
+    return String::ucompose(format, decimal_digits(val, 3), val);
+  }
 }
 
 Glib::ustring NetworkLoadMonitor::get_name()
@@ -1446,7 +1464,7 @@ bool TemperatureMonitor::fixed_max()
 }
 
 
-Glib::ustring TemperatureMonitor::format_value(double val)
+Glib::ustring TemperatureMonitor::format_value(double val, bool compact)
 {
   // %2 contains the degree sign (the following 'C' stands for Celsius)
   return String::ucompose(_("%1%2C"), decimal_digits(val, 3), val, "\xc2\xb0");
@@ -1543,7 +1561,7 @@ bool FanSpeedMonitor::fixed_max()
   return false;
 }
 
-Glib::ustring FanSpeedMonitor::format_value(double val)
+Glib::ustring FanSpeedMonitor::format_value(double val, bool compact)
 {
   // rpm is rotations per minute
   return String::ucompose(_("%1 rpm"), val, val);

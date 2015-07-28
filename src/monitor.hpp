@@ -77,7 +77,7 @@ public:
 
   /* Convert float to string which represents an actual number with the
    * appropriate unit */
-  virtual Glib::ustring format_value(double val) = 0;
+  virtual Glib::ustring format_value(double val, bool compact = false) = 0;
 
   // Return a descriptive name
   virtual Glib::ustring get_name() = 0;

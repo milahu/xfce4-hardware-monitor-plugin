@@ -53,7 +53,7 @@ public:
 
   virtual double max();
   virtual bool fixed_max();
-  virtual Glib::ustring format_value(double val);
+  virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
@@ -80,7 +80,7 @@ public:
 
   virtual double max();
   virtual bool fixed_max();
-  virtual Glib::ustring format_value(double val);
+  virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
@@ -100,7 +100,7 @@ public:
 
   virtual double max();
   virtual bool fixed_max();
-  virtual Glib::ustring format_value(double val);
+  virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
@@ -121,7 +121,7 @@ public:
 
   virtual double max();
   virtual bool fixed_max();
-  virtual Glib::ustring format_value(double val);
+  virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
@@ -141,7 +141,7 @@ public:
 
   virtual double max();
   virtual bool fixed_max();
-  virtual Glib::ustring format_value(double val);
+  virtual Glib::ustring format_value(double val, bool compact= false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
@@ -185,7 +185,7 @@ public:
 
   virtual double max();
   virtual bool fixed_max();
-  virtual Glib::ustring format_value(double val);
+  virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
@@ -251,7 +251,7 @@ public:
 
   virtual double max();
   virtual bool fixed_max();
-  virtual Glib::ustring format_value(double val);
+  virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
@@ -274,7 +274,7 @@ public:
 
   virtual double max();
   virtual bool fixed_max();
-  virtual Glib::ustring format_value(double val);
+  virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
