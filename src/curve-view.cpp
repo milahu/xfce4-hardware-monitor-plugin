@@ -27,6 +27,7 @@
 #include "curve-view.hpp"
 #include "applet.hpp"
 #include "monitor.hpp"
+#include "ucompose.hpp"
 #include "value-history.hpp"
 
 
@@ -134,6 +135,7 @@ double Curve::get_max_value()
   return value_history.get_max_value();
 }
 
+
 //
 // class CurveView
 //
@@ -141,7 +143,7 @@ double Curve::get_max_value()
 int const CurveView::pixels_per_sample = 2;
 
 CurveView::CurveView()
-  : CanvasView(true)
+  : CanvasView(true), text_overlay(NULL)
 {
 }
 
@@ -149,6 +151,7 @@ CurveView::~CurveView()
 {
   for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
     delete *i;
+  delete text_overlay;
 }
 
 void CurveView::do_update()
@@ -242,13 +245,49 @@ void CurveView::do_detach(Monitor *monitor)
 void CurveView::do_draw_loop()
 {
   double max = 0;
+  Glib::ustring max_formatted;
 
   // Obtain maximum value of all curves in the view
   for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
     if ((*i)->get_max_value() > max)
       max = (*i)->get_max_value();
 
-  // Draw the curves with the unified max value
+  /* Draw the curves with the unified max value, use first monitor to obtain
+   * the text formatted value (with units) - this mainly makes sense if all
+   * curves belong to the same monitor type */
   for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
+  {
+    if (max_formatted.empty())
+      max_formatted = (*i)->monitor->format_value(max);
     (*i)->draw(*canvas, width(), height(), max);
+  }
+
+  // Determination of text to overlay
+  Glib::ustring overlay_text = _("Max: ") + max_formatted;
+
+  /* Checking if overlay is already initialised
+   * Possibility that text is not shown at start up - not failing consistently
+   * now though, when it does, even resetting via switching views is not enough */
+  if (!text_overlay)
+  {
+    /* Font and colour are required to output text, anchor is used to define
+     * what point on the item (canvas thing) to take as the 'centre' to then
+     * place on the canvas - e.g. ANCHOR_NW means the top-left corner is the
+     * 'centre' and the item will be placed exactly as you would expect it to.
+     * The default is GTK_ANCHOR_CENTER, hence text gets clipped in half top
+     * and side */
+    text_overlay = new Gnome::Canvas::Text(*canvas->root());
+    text_overlay->property_anchor() = Gtk::ANCHOR_NW;
+    text_overlay->property_text() = overlay_text;
+    text_overlay->property_font() = "Sans 8";
+    text_overlay->property_fill_color() = "black";
+
+    // Positioning text at the bottom of the canvas
+    text_overlay->property_y() = applet->get_height() -
+                                 text_overlay->property_text_height();
+  }
+
+  // It is - updating if it has changed
+  else if (text_overlay->property_text() != overlay_text)
+    text_overlay->property_text() = overlay_text;
 }

@@ -27,6 +27,7 @@
 #include <memory>
 
 #include <libgnomecanvasmm/canvas.h>
+#include <libgnomecanvasmm/text.h>
 #include <glibmm/ustring.h>
 
 #include "canvas-view.hpp"
@@ -48,10 +49,12 @@ private:
   virtual void do_detach(Monitor *monitor);
   virtual void do_draw_loop();
 
-  // must be destroyed before the canvas
+  // Must be destroyed before the canvas
   typedef std::list<Curve *> curve_sequence;
   typedef curve_sequence::iterator curve_iterator;
   curve_sequence curves;
+
+  Gnome::Canvas::Text *text_overlay;  // Text 'overlay' for the CurveView
 };
 
 #endif
