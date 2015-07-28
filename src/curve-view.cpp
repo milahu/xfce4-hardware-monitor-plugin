@@ -143,7 +143,8 @@ double Curve::get_max_value()
 int const CurveView::pixels_per_sample = 2;
 
 CurveView::CurveView()
-  : CanvasView(true), text_overlay(NULL)
+  : CanvasView(true), text_overlay_enabled(false), text_overlay(NULL),
+    use_compact_format(false)
 {
 }
 
@@ -245,25 +246,48 @@ void CurveView::do_detach(Monitor *monitor)
 void CurveView::do_draw_loop()
 {
   double max = 0;
-  Glib::ustring max_formatted;
+  Glib::ustring max_formatted, monitor_data;
+
+  // Debug code
+  use_compact_format = true;
+  separator_string = " ";
+  text_overlay_enabled = true;
 
   // Obtain maximum value of all curves in the view
   for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
     if ((*i)->get_max_value() > max)
       max = (*i)->get_max_value();
 
-  /* Draw the curves with the unified max value, use first monitor to obtain
-   * the text formatted value (with units) - this mainly makes sense if all
-   * curves belong to the same monitor type */
   for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
   {
-    if (max_formatted.empty())
-      max_formatted = (*i)->monitor->format_value(max);
+    if (text_overlay_enabled)
+    {
+      /* Using first monitor to obtain the text formatted value (with units) -
+       * this mainly makes sense if all curves belong to the same monitor type */
+      if (max_formatted.empty())
+        max_formatted = (*i)->monitor->format_value(max, use_compact_format);
+
+      // Collecting a string of monitor data to overlay later
+      if (monitor_data.empty())
+      {
+        monitor_data = (*i)->monitor->format_value((*i)->monitor->value(),
+                                                   use_compact_format);
+      }
+      else
+      {
+        monitor_data.append(separator_string +
+                            (*i)->monitor->format_value((*i)->monitor->value(),
+                                                        use_compact_format));
+      }
+    }
+
+    // Drawing the curves with the unified max value
     (*i)->draw(*canvas, width(), height(), max);
   }
 
   // Determination of text to overlay
-  Glib::ustring overlay_text = _("Max: ") + max_formatted;
+  Glib::ustring overlay_text = use_compact_format ? _("M:") : _("Max: ");
+  overlay_text.append(max_formatted + separator_string + monitor_data);
 
   /* Checking if overlay is already initialised
    * Possibility that text is not shown at start up - not failing consistently

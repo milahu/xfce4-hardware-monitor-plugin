@@ -54,7 +54,11 @@ private:
   typedef curve_sequence::iterator curve_iterator;
   curve_sequence curves;
 
-  Gnome::Canvas::Text *text_overlay;  // Text 'overlay' for the CurveView
+  // Text 'overlay' data and settings
+  bool text_overlay_enabled;
+  Gnome::Canvas::Text *text_overlay;
+  Glib::ustring separator_string;
+  bool use_compact_format;
 };
 
 #endif
