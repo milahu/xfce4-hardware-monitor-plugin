@@ -69,6 +69,12 @@ public:
   void set_viewer_size(const int size);
   const Glib::ustring get_viewer_font();
   void set_viewer_font(const Glib::ustring font_details);
+  bool get_viewer_text_overlay_enabled() const;
+  void set_viewer_text_overlay_enabled(bool enabled);
+  const Glib::ustring get_viewer_text_overlay_format_string();
+  void set_viewer_text_overlay_format_string(const Glib::ustring format_string);
+  const Glib::ustring get_viewer_text_overlay_separator();
+  void set_viewer_text_overlay_separator(const Glib::ustring separator);
   void viewer_type_listener(const Glib::ustring viewer_type);
   void background_color_listener(unsigned int background_color);
   void use_background_color_listener(gboolean use_background_color);
@@ -105,6 +111,10 @@ private:
   Glib::ustring icon_path;
   Glib::ustring viewer_type;
   Glib::ustring viewer_font;
+  bool viewer_text_overlay_enabled;
+  Glib::ustring viewer_text_overlay_format_string;
+  Glib::ustring viewer_text_overlay_separator;
+
   int viewer_size;
   int background_color;
   gboolean use_background_color;

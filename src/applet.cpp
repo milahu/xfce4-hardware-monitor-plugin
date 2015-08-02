@@ -164,7 +164,10 @@ Applet::Applet(XfcePanelPlugin *plugin)
   viewer_size(96),  // Arbitrary default, see later in this function for notes
   background_color(0x00000000),  // black as the night
   use_background_color(false),
-  next_color(0)
+  next_color(0),
+  viewer_text_overlay_enabled(false),
+  viewer_text_overlay_format_string("%a %m"),
+  viewer_text_overlay_separator(" ")
 {
   // Search for settings file
   XfceRc* settings_ro = NULL;
@@ -192,6 +195,13 @@ Applet::Applet(XfcePanelPlugin *plugin)
       "use_background_color", use_background_color);
     next_color = xfce_rc_read_int_entry(settings_ro, "next_color",
       next_color);
+    viewer_text_overlay_enabled = xfce_rc_read_bool_entry(settings_ro,
+      "viewer_text_overlay_enabled", viewer_text_overlay_enabled);
+    viewer_text_overlay_format_string = xfce_rc_read_entry(settings_ro,
+      "viewer_text_overlay_format_string",
+      viewer_text_overlay_format_string.c_str());
+    viewer_text_overlay_separator = xfce_rc_read_entry(settings_ro,
+      "viewer_text_overlay_separator", viewer_text_overlay_separator.c_str());
   }
   
   // Loading icon
@@ -532,6 +542,36 @@ const Glib::ustring Applet::get_viewer_font()
 void Applet::set_viewer_font(const Glib::ustring font_details)
 {
   viewer_font = font_details;
+}
+
+bool Applet::get_viewer_text_overlay_enabled() const
+{
+  return viewer_text_overlay_enabled;
+}
+
+void Applet::set_viewer_text_overlay_enabled(bool enabled)
+{
+  viewer_text_overlay_enabled = enabled;
+}
+
+const Glib::ustring Applet::get_viewer_text_overlay_format_string()
+{
+  return viewer_text_overlay_format_string;
+}
+
+void Applet::set_viewer_text_overlay_format_string(const Glib::ustring format_string)
+{
+  viewer_text_overlay_format_string = format_string;
+}
+
+const Glib::ustring Applet::get_viewer_text_overlay_separator()
+{
+  return viewer_text_overlay_separator;
+}
+
+void Applet::set_viewer_text_overlay_separator(const Glib::ustring separator)
+{
+  viewer_text_overlay_separator = separator;
 }
 
 void Applet::add_monitor(Monitor *monitor)

@@ -75,6 +75,10 @@ private:
   Gtk::Widget *font_outer_vbox;
   Gtk::CheckButton *font_checkbutton;
   Gtk::FontButton *fontbutton;
+  Gtk::Widget *text_overlay_outer_vbox;
+  Gtk::CheckButton *text_overlay_checkbutton;
+  Gtk::Entry *text_overlay_format_string_entry;
+  Gtk::Entry *text_overlay_separator_entry;
 
   Gtk::Button *remove_button;
   Gtk::Button *change_button;
@@ -105,7 +109,7 @@ private:
   typedef Gtk::ListStore::iterator store_iter;
   
   // Originally gconf callbacks
-  void viewer_type_listener(const Glib::ustring viewer_type);
+  void viewer_type_listener(const Glib::ustring viewer_type, bool enable);
   void background_color_listener(unsigned int background_color);
   void use_background_color_listener(bool use_background_color);
   void size_listener(int viewer_size);
@@ -132,6 +136,10 @@ private:
   void on_font_checkbutton_toggled();
   void on_fontbutton_set();
 
+  void on_text_overlay_checkbutton_toggled();
+  bool on_text_overlay_format_string_focus_out(GdkEventFocus *event);
+  bool on_text_overlay_separator_focus_out(GdkEventFocus *event);
+
   void on_add_button_clicked();
   void on_remove_button_clicked();
   void on_change_button_clicked();
@@ -152,7 +160,10 @@ private:
   void connect_monitor_colorbutton(Gtk::ColorButton *colorbutton);
 
   void save_font_details(Glib::ustring font_details);
-  
+  void save_text_overlay_enabled(bool enabled);
+  void save_text_overlay_format_string(const Glib::ustring format_string);
+  void save_text_overlay_separator(const Glib::ustring separator);
+
   Applet &applet;
 };
 

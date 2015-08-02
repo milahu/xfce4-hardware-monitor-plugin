@@ -23,8 +23,6 @@
 
 #include <sigc++/bind.h>
 
-#include <gtkmm/button.h>
-
 #include <cassert>
 #include <iostream>
 
@@ -104,6 +102,23 @@ PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
     .connect(sigc::mem_fun(*this,
                            &PreferencesWindow::on_fontbutton_set));
 
+  ui->get_widget("text_overlay_outer_vbox", text_overlay_outer_vbox);
+
+  ui->get_widget("text_overlay_checkbutton", text_overlay_checkbutton);
+  text_overlay_checkbutton->signal_toggled()
+    .connect(sigc::mem_fun(*this,
+                      &PreferencesWindow::on_text_overlay_checkbutton_toggled));
+
+  ui->get_widget("format_string_entry", text_overlay_format_string_entry);
+  text_overlay_format_string_entry->signal_focus_out_event()
+      .connect(sigc::mem_fun(*this,
+                  &PreferencesWindow::on_text_overlay_format_string_focus_out));
+
+  ui->get_widget("separator_string_entry", text_overlay_separator_entry);
+  text_overlay_separator_entry->signal_focus_out_event()
+      .connect(sigc::mem_fun(*this,
+               &PreferencesWindow::on_text_overlay_separator_focus_out));
+
 
   ui->get_widget("background_colorbutton", background_colorbutton);
   background_colorbutton->signal_color_set()
@@ -117,8 +132,8 @@ PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
   background_color_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this,
           &PreferencesWindow::on_background_color_radiobutton_toggled));
-  
-  
+
+
   // Connect the Monitor tab widgets
   Gtk::Button *add_button;
   ui->get_widget("add_button", add_button);
@@ -171,11 +186,17 @@ PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
   connect_monitor_colorbutton(flame_colorbutton);
 
   // Fill in values
-  viewer_type_listener(applet.get_viewer_type());
+  viewer_type_listener(applet.get_viewer_type(), true);
   background_color_listener(applet.get_background_color());
   use_background_color_listener(applet.get_use_background_color());
   size_listener(applet.get_viewer_size());
   font_listener(applet.get_viewer_font());
+  if (applet.get_viewer_text_overlay_enabled())
+    text_overlay_checkbutton->set_active();
+  text_overlay_format_string_entry->
+      set_text(applet.get_viewer_text_overlay_format_string());
+  text_overlay_separator_entry->
+      set_text(applet.get_viewer_text_overlay_separator());
 
   for (monitor_iter i = monitors.begin(), end = monitors.end();
        i != end; ++i)
@@ -241,49 +262,47 @@ namespace
 }
 
 
-// Originally gconf callbacks
-void PreferencesWindow::viewer_type_listener(const Glib::ustring viewer_type)
+/* Originally gconf callbacks
+ * This code is separated out from the radiobutton toggling code as the
+ * PreferencesWindow constructor needs to set up the UI via this too */
+void PreferencesWindow::viewer_type_listener(const Glib::ustring viewer_type,
+                                             bool enable)
 {
   if (viewer_type == "curve")
   {
-    if (!curve_radiobutton->get_active())
-      curve_radiobutton->property_active() = true;
-    size_outer_vbox->property_visible() = true;
-    monitor_curve_options->property_visible() = true;
+    curve_radiobutton->property_active() = enable;
+    size_outer_vbox->property_visible() = enable;
+    monitor_curve_options->property_visible() = enable;
+    text_overlay_outer_vbox->property_visible() = enable;
   }
   else if (viewer_type == "bar")
   {
-    if (!bar_radiobutton->get_active())
-      bar_radiobutton->property_active() = true;
-    size_outer_vbox->property_visible() = true;
-    monitor_bar_options->property_visible() = true;
+    bar_radiobutton->property_active() = enable;
+    size_outer_vbox->property_visible() = enable;
+    monitor_bar_options->property_visible() = enable;
   }
   else if (viewer_type == "vbar")
   {
-    if (!vbar_radiobutton->get_active())
-      vbar_radiobutton->property_active() = true;
-    size_outer_vbox->property_visible() = true;
-    monitor_vbar_options->property_visible() = true;
+    vbar_radiobutton->property_active() = enable;
+    size_outer_vbox->property_visible() = enable;
+    monitor_vbar_options->property_visible() = enable;
   }
   else if (viewer_type == "column")
   {
-    if (!column_radiobutton->get_active())
-      column_radiobutton->property_active() = true;
-    size_outer_vbox->property_visible() = true;
-    monitor_column_options->property_visible() = true;
+    column_radiobutton->property_active() = enable;
+    size_outer_vbox->property_visible() = enable;
+    monitor_column_options->property_visible() = enable;
   }
   else if (viewer_type == "text")
   {
-    if (!text_radiobutton->get_active())
-      text_radiobutton->property_active() = true;
-    font_outer_vbox->property_visible() = true;
+    text_radiobutton->property_active() = enable;
+    font_outer_vbox->property_visible() = enable;
   }
   else if (viewer_type == "flame")
   {
-    if (!flame_radiobutton->get_active())
-      flame_radiobutton->property_active() = true;
-    size_outer_vbox->property_visible() = true;
-    monitor_flame_options->property_visible() = true;
+    flame_radiobutton->property_active() = enable;
+    size_outer_vbox->property_visible() = enable;
+    monitor_flame_options->property_visible() = enable;
   }
 
   /* Actually changing the viewer type - background color use etc is set
@@ -496,13 +515,10 @@ void PreferencesWindow::on_curve_radiobutton_toggled()
         " save viewer type in "
         "PreferencesWindow::on_curve_radiobutton_toggled!\n");
     }
-
-    // Changing viewer type
-    viewer_type_listener("curve");
   }
 
-  size_outer_vbox->property_visible() = active;
-  monitor_curve_options->property_visible() = active;
+  // Enabling/disabling viewer as appropriate
+  viewer_type_listener("curve", active);
 }
 
 void PreferencesWindow::on_bar_radiobutton_toggled()
@@ -536,13 +552,10 @@ void PreferencesWindow::on_bar_radiobutton_toggled()
         " save viewer type in "
         "PreferencesWindow::on_bar_radiobutton_toggled!\n");
     }
-
-    // Changing viewer type
-    viewer_type_listener("bar");
   }
 
-  size_outer_vbox->property_visible() = active;
-  monitor_bar_options->property_visible() = active;
+  // Enabling/disabling viewer as appropriate
+  viewer_type_listener("bar", active);
 }
 
 void PreferencesWindow::on_vbar_radiobutton_toggled()
@@ -576,13 +589,10 @@ void PreferencesWindow::on_vbar_radiobutton_toggled()
         " save viewer type in "
         "PreferencesWindow::on_vbar_radiobutton_toggled!\n");
     }
-
-    // Changing viewer type
-    viewer_type_listener("vbar");
   }
 
-  size_outer_vbox->property_visible() = active;
-  monitor_vbar_options->property_visible() = active;
+  // Enabling/disabling viewer as appropriate
+  viewer_type_listener("vbar", active);
 }
 
 void PreferencesWindow::on_column_radiobutton_toggled()
@@ -616,13 +626,10 @@ void PreferencesWindow::on_column_radiobutton_toggled()
         " save viewer type in "
         "PreferencesWindow::on_column_radiobutton_toggled!\n");
     }
-
-    // Changing viewer type
-    viewer_type_listener("column");
   }
-  
-  size_outer_vbox->property_visible() = active;
-  monitor_column_options->property_visible() = active;
+
+  // Enabling/disabling viewer as appropriate
+  viewer_type_listener("column", active);
 }
 
 void PreferencesWindow::on_text_radiobutton_toggled()
@@ -656,12 +663,10 @@ void PreferencesWindow::on_text_radiobutton_toggled()
         " save viewer type in "
         "PreferencesWindow::on_text_radiobutton_toggled!\n");
     }
-
-    // Changing viewer type
-    viewer_type_listener("text");
   }
-  
-  font_outer_vbox->property_visible() = active;
+
+  // Enabling/disabling viewer as appropriate
+  viewer_type_listener("text", active);
 }
 
 void PreferencesWindow::on_flame_radiobutton_toggled()
@@ -695,13 +700,10 @@ void PreferencesWindow::on_flame_radiobutton_toggled()
         " save viewer type in "
         "PreferencesWindow::on_flame_radiobutton_toggled!\n");
     }
-
-    // Changing viewer type
-    viewer_type_listener("flame");
   }
 
-  size_outer_vbox->property_visible() = active;
-  monitor_flame_options->property_visible() = active;
+  // Enabling/disabling viewer as appropriate
+  viewer_type_listener("flame", active);
 }
 
 void PreferencesWindow::on_size_scale_changed()
@@ -768,6 +770,31 @@ void PreferencesWindow::on_fontbutton_set()
 {
   // Saving
   save_font_details(fontbutton->get_font_name());
+}
+
+void PreferencesWindow::on_text_overlay_checkbutton_toggled()
+{
+  bool active = text_overlay_checkbutton->get_active();
+  text_overlay_format_string_entry->set_sensitive(active);
+  text_overlay_separator_entry->set_sensitive(active);
+
+  save_text_overlay_enabled(active);
+}
+
+bool PreferencesWindow::on_text_overlay_format_string_focus_out(GdkEventFocus *event)
+{
+  save_text_overlay_format_string(text_overlay_format_string_entry->get_text());
+
+  // Allow event to propagate
+  return FALSE;
+}
+
+bool PreferencesWindow::on_text_overlay_separator_focus_out(GdkEventFocus *event)
+{
+  save_text_overlay_separator(text_overlay_separator_entry->get_text());
+
+  // Allow event to propagate
+  return FALSE;
 }
 
 void PreferencesWindow::on_add_button_clicked()
@@ -962,5 +989,99 @@ void PreferencesWindow::save_font_details(Glib::ustring font_details)
     // Unable to obtain writeable config file - informing user and exiting
     std::cerr << _("Unable to obtain writeable config file path in order to"
       " save viewer font in save_font_details!\n");
+  }
+}
+
+void PreferencesWindow::save_text_overlay_enabled(bool enabled)
+{
+  applet.set_viewer_text_overlay_enabled(enabled);
+
+  // Search for a writeable settings file, create one if it doesnt exist */
+  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+
+  if (file)
+  {
+    // Opening setting file
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
+    g_free(file);
+
+    // Ensuring default group is in focus
+    xfce_rc_set_group(settings_w, NULL);
+
+    // Updating configuration
+    xfce_rc_write_bool_entry(settings_w, "viewer_text_overlay_enabled", enabled);
+
+    // Close settings file
+    xfce_rc_close(settings_w);
+  }
+  else
+  {
+    // Unable to obtain writeable config file - informing user and exiting
+    std::cerr << _("Unable to obtain writeable config file path in order to"
+      " save viewer text overlay enabled setting in save_text_overlay_enabled!\n");
+  }
+}
+
+void PreferencesWindow::save_text_overlay_format_string(const Glib::ustring format_string)
+{
+  applet.set_viewer_text_overlay_format_string(format_string);
+
+  // Search for a writeable settings file, create one if it doesnt exist */
+  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+
+  if (file)
+  {
+    // Opening setting file
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
+    g_free(file);
+
+    // Ensuring default group is in focus
+    xfce_rc_set_group(settings_w, NULL);
+
+    // Updating configuration
+    xfce_rc_write_entry(settings_w, "viewer_text_overlay_format_string",
+                        format_string.c_str());
+
+    // Close settings file
+    xfce_rc_close(settings_w);
+  }
+  else
+  {
+    // Unable to obtain writeable config file - informing user and exiting
+    std::cerr << _("Unable to obtain writeable config file path in order to"
+                   " save viewer text overlay format string in "
+                   "save_text_overlay_format_string!\n");
+  }
+}
+
+void PreferencesWindow::save_text_overlay_separator(const Glib::ustring separator)
+{
+  applet.set_viewer_text_overlay_separator(separator);
+
+  // Search for a writeable settings file, create one if it doesnt exist */
+  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+
+  if (file)
+  {
+    // Opening setting file
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
+    g_free(file);
+
+    // Ensuring default group is in focus
+    xfce_rc_set_group(settings_w, NULL);
+
+    // Updating configuration
+    xfce_rc_write_entry(settings_w, "viewer_text_overlay_separator",
+                        separator.c_str());
+
+    // Close settings file
+    xfce_rc_close(settings_w);
+  }
+  else
+  {
+    // Unable to obtain writeable config file - informing user and exiting
+    std::cerr << _("Unable to obtain writeable config file path in order to"
+                   " save viewer text overlay separator in "
+                   "save_text_overlay_separator!\n");
   }
 }

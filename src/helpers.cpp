@@ -56,6 +56,18 @@ int warning_dialog(const Glib::ustring &msg, const Glib::ustring &title,
 }
 */
 
+// Why does std::string or Glib::ustring not have a replace all function??
+void find_and_replace(Glib::ustring &source, const Glib::ustring &to_replace,
+                      const Glib::ustring &replace_with)
+{
+  Glib::ustring::size_type pos = 0;
+  while ((pos = source.find(to_replace, pos)) != Glib::ustring::npos)
+  {
+    source = source.replace(pos, to_replace.length(), replace_with);
+    pos += replace_with.length();
+  }
+}
+
 Glib::ustring truncate_string(Glib::ustring s, unsigned int n)
 {
   // for when a string needs to be truncated

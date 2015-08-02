@@ -54,11 +54,13 @@ private:
   typedef curve_sequence::iterator curve_iterator;
   curve_sequence curves;
 
-  // Text 'overlay' data and settings
-  bool text_overlay_enabled;
   Gnome::Canvas::Text *text_overlay;
-  Glib::ustring separator_string;
-  bool use_compact_format;
+
+  // Text overlay format string substitution codes
+  static const Glib::ustring monitor_full;
+  static const Glib::ustring monitor_compact;
+  static const Glib::ustring graph_max_full;
+  static const Glib::ustring graph_max_compact;
 };
 
 #endif

@@ -42,6 +42,8 @@ private:
 };
 
 void fatal_error(const Glib::ustring &msg);
+void find_and_replace(Glib::ustring &source, const Glib::ustring &to_replace,
+                      const Glib::ustring &replace_with);
 
 /* Attempting to host the warning_dialog code here has failed completely -
  * constant bullshit include errors either not allowing namespace items to be

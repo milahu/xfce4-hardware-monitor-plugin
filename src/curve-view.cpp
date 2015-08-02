@@ -26,6 +26,7 @@
 
 #include "curve-view.hpp"
 #include "applet.hpp"
+#include "helpers.hpp"
 #include "monitor.hpp"
 #include "ucompose.hpp"
 #include "value-history.hpp"
@@ -142,9 +143,15 @@ double Curve::get_max_value()
 
 int const CurveView::pixels_per_sample = 2;
 
+// Text overlay format string substitution codes
+const Glib::ustring CurveView::monitor_full = "%M";
+const Glib::ustring CurveView::monitor_compact = "%m";
+const Glib::ustring CurveView::graph_max_full = "%A";
+const Glib::ustring CurveView::graph_max_compact = "%a";
+
+
 CurveView::CurveView()
-  : CanvasView(true), text_overlay_enabled(false), text_overlay(NULL),
-    use_compact_format(false)
+  : CanvasView(true), text_overlay(NULL)
 {
 }
 
@@ -246,17 +253,34 @@ void CurveView::do_detach(Monitor *monitor)
 void CurveView::do_draw_loop()
 {
   double max = 0;
-  Glib::ustring max_formatted, monitor_data;
-
-  // Debug code
-  use_compact_format = true;
-  separator_string = " ";
-  text_overlay_enabled = true;
+  Glib::ustring max_formatted, max_formatted_compact, monitor_data,
+      monitor_data_compact, text_overlay_format_string,
+      separator_string = applet->get_viewer_text_overlay_separator();
+  bool graph_max_needed = false, graph_max_compact_needed = false,
+      monitor_data_needed = false, monitor_data_compact_needed = false,
+      text_overlay_enabled = applet->get_viewer_text_overlay_enabled();
 
   // Obtain maximum value of all curves in the view
   for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
     if ((*i)->get_max_value() > max)
       max = (*i)->get_max_value();
+
+  // If the text overlay is enabled, detecting all information required to output
+  if (text_overlay_enabled)
+  {
+    text_overlay_format_string = applet->get_viewer_text_overlay_format_string();
+
+    /* Glib::ustring::npos is the strange way C++ flags as a failure to find a
+     * string */
+    if (text_overlay_format_string.find(monitor_full) != Glib::ustring::npos)
+      monitor_data_needed = true;
+    if (text_overlay_format_string.find(monitor_compact) != Glib::ustring::npos)
+      monitor_data_compact_needed = true;
+    if (text_overlay_format_string.find(graph_max_full) != Glib::ustring::npos)
+      graph_max_needed = true;
+    if (text_overlay_format_string.find(graph_max_compact) != Glib::ustring::npos)
+      graph_max_compact_needed = true;
+  }
 
   for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
   {
@@ -264,20 +288,40 @@ void CurveView::do_draw_loop()
     {
       /* Using first monitor to obtain the text formatted value (with units) -
        * this mainly makes sense if all curves belong to the same monitor type */
-      if (max_formatted.empty())
-        max_formatted = (*i)->monitor->format_value(max, use_compact_format);
+      if (graph_max_needed && max_formatted.empty())
+        max_formatted += "Max:" + separator_string +
+            (*i)->monitor->format_value(max, false);
+      if (graph_max_compact_needed && max_formatted_compact.empty())
+        max_formatted_compact += "M:" + (*i)->monitor->format_value(max, true);
 
       // Collecting a string of monitor data to overlay later
-      if (monitor_data.empty())
+      if (monitor_data_needed)
       {
-        monitor_data = (*i)->monitor->format_value((*i)->monitor->value(),
-                                                   use_compact_format);
+        if (monitor_data.empty())
+        {
+          monitor_data = (*i)->monitor->format_value((*i)->monitor->value(),
+                                                     false);
+        }
+        else
+        {
+          monitor_data.append(separator_string +
+                              (*i)->monitor->format_value((*i)->monitor->value(),
+                                                          false));
+        }
       }
-      else
+      if (monitor_data_compact_needed)
       {
-        monitor_data.append(separator_string +
-                            (*i)->monitor->format_value((*i)->monitor->value(),
-                                                        use_compact_format));
+        if (monitor_data_compact.empty())
+        {
+          monitor_data_compact = (*i)->monitor
+                                  ->format_value((*i)->monitor->value(), true);
+        }
+        else
+        {
+          monitor_data_compact.append(separator_string +
+                              (*i)->monitor->format_value((*i)->monitor->value(),
+                                                          true));
+        }
       }
     }
 
@@ -285,33 +329,46 @@ void CurveView::do_draw_loop()
     (*i)->draw(*canvas, width(), height(), max);
   }
 
-  // Determination of text to overlay
-  Glib::ustring overlay_text = use_compact_format ? _("M:") : _("Max: ");
-  overlay_text.append(max_formatted + separator_string + monitor_data);
-
-  /* Checking if overlay is already initialised
-   * Possibility that text is not shown at start up - not failing consistently
-   * now though, when it does, even resetting via switching views is not enough */
-  if (!text_overlay)
+  // Overlaying text of monitor values if desired
+  if (text_overlay_enabled)
   {
-    /* Font and colour are required to output text, anchor is used to define
-     * what point on the item (canvas thing) to take as the 'centre' to then
-     * place on the canvas - e.g. ANCHOR_NW means the top-left corner is the
-     * 'centre' and the item will be placed exactly as you would expect it to.
-     * The default is GTK_ANCHOR_CENTER, hence text gets clipped in half top
-     * and side */
-    text_overlay = new Gnome::Canvas::Text(*canvas->root());
-    text_overlay->property_anchor() = Gtk::ANCHOR_NW;
-    text_overlay->property_text() = overlay_text;
-    text_overlay->property_font() = "Sans 8";
-    text_overlay->property_fill_color() = "black";
+    /* Generation of text to overlay - C++ does not have 'replace all'
+     * functionality??? Presumably using regex would be too slow for here? */
+    Glib::ustring overlay_text = text_overlay_format_string;
+    if (monitor_data_needed)
+      find_and_replace(overlay_text, monitor_full, monitor_data);
+    if (monitor_data_compact_needed)
+        find_and_replace(overlay_text, monitor_compact, monitor_data_compact);
+    if (graph_max_needed)
+      find_and_replace(overlay_text, graph_max_full, max_formatted);
+    if (graph_max_compact_needed)
+      find_and_replace(overlay_text, graph_max_compact, max_formatted_compact);
 
-    // Positioning text at the bottom of the canvas
-    text_overlay->property_y() = applet->get_height() -
-                                 text_overlay->property_text_height();
+    /* Checking if overlay is already initialised
+     * Possibility that text is not shown at start up - not failing consistently
+     * now though, when it does, even resetting via switching views is not enough */
+    // TODO: Still a bug here
+    if (!text_overlay)
+    {
+      /* Font and colour are required to output text, anchor is used to define
+       * what point on the item (canvas thing) to take as the 'centre' to then
+       * place on the canvas - e.g. ANCHOR_NW means the top-left corner is the
+       * 'centre' and the item will be placed exactly as you would expect it to.
+       * The default is GTK_ANCHOR_CENTER, hence text gets clipped in half top
+       * and side */
+      text_overlay = new Gnome::Canvas::Text(*canvas->root());
+      text_overlay->property_anchor() = Gtk::ANCHOR_NW;
+      text_overlay->property_text() = overlay_text;
+      text_overlay->property_font() = "Sans 8";
+      text_overlay->property_fill_color() = "black";
+
+      // Positioning text at the bottom of the canvas
+      text_overlay->property_y() = applet->get_height() -
+          text_overlay->property_text_height();
+    }
+
+    // It is - updating if it has changed
+    else if (text_overlay->property_text() != overlay_text)
+      text_overlay->property_text() = overlay_text;
   }
-
-  // It is - updating if it has changed
-  else if (text_overlay->property_text() != overlay_text)
-    text_overlay->property_text() = overlay_text;
 }
