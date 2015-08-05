@@ -65,13 +65,19 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
   ui->get_widget("all_cpus_radiobutton", all_cpus_radiobutton);
   ui->get_widget("one_cpu_radiobutton", one_cpu_radiobutton);
   ui->get_widget("cpu_no_spinbutton", cpu_no_spinbutton);
+  ui->get_widget("cpu_usage_tag_entry", cpu_tag);
+  ui->get_widget("load_average_tag_entry", load_average_tag);
 
   ui->get_widget("mount_dir_entry", mount_dir_entry);
   ui->get_widget("show_free_checkbutton", show_free_checkbutton);
+  ui->get_widget("disk_usage_tag_entry", disk_usage_tag);
+  ui->get_widget("memory_tag_entry", memory_usage_tag);
+  ui->get_widget("swap_tag_entry", swap_usage_tag);
 
   ui->get_widget("network_type_optionmenu", network_type_optionmenu);
   ui->get_widget("network_direction_optionmenu", network_direction_optionmenu);
   ui->get_widget("network_interfaces_treeview", network_interfaces_treeview);
+  ui->get_widget("network_load_tag_entry", network_load_tag);
 
   /* Need special code here to set the desired stock icon as glade doesn't support
    * setting a stock icon but custom text, and as soon as you change the label
@@ -86,10 +92,12 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
   ui->get_widget("temperature_box", temperature_box);
   ui->get_widget("temperature_options", temperature_options);
   ui->get_widget("temperature_optionmenu", temperature_optionmenu);
+  ui->get_widget("temperature_tag_entry", temperature_tag);
 
   ui->get_widget("fan_speed_box", fan_speed_box);
   ui->get_widget("fan_speed_options", fan_speed_options);
   ui->get_widget("fan_speed_optionmenu", fan_speed_optionmenu);
+  ui->get_widget("fan_speed_tag_entry", fan_speed_tag);
   
   cpu_usage_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
@@ -203,43 +211,51 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
     if (!mon_dir.empty())
     {
       xfce_rc_set_group(settings_ro, mon_dir.c_str());
-      Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
+      Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", ""),
+                    tag = xfce_rc_read_entry(settings_ro, "tag", "");
 
       if (type == "memory_usage")
       {
         device_notebook->set_current_page(1);
         memory_usage_radiobutton->set_active();
+        memory_usage_tag->set_text(tag);
       }
       else if (type == "load_average")
       {
         device_notebook->set_current_page(0);
         load_average_radiobutton->set_active();
+        load_average_tag->set_text(tag);
       }
       else if (type == "disk_usage")
       {
         device_notebook->set_current_page(1);
         disk_usage_radiobutton->set_active();
+        disk_usage_tag->set_text(tag);
       }
       else if (type == "swap_usage")
       {
         device_notebook->set_current_page(1);
         swap_usage_radiobutton->set_active();
+        swap_usage_tag->set_text(tag);
       }
       else if (type == "network_load")
       {
         device_notebook->set_current_page(2);
         network_load_radiobutton->set_active();
+        network_load_tag->set_text(tag);
       }
       else if (type == "temperature")
       {
         device_notebook->set_current_page(3);
         temperature_radiobutton->set_active();
+        temperature_tag->set_text(tag);
       }
       else
       {
         device_notebook->set_current_page(0);
         // FIXME: use schema?
         cpu_usage_radiobutton->set_active();
+        cpu_tag->set_text(tag);
       }
       
       // Fill in cpu info
@@ -390,20 +406,22 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
 
       if (cpu_usage_radiobutton->get_active())
         if (one_cpu_radiobutton->get_active())
-          mon = new CpuUsageMonitor(int(cpu_no_spinbutton->get_value()) - 1);
+          mon = new CpuUsageMonitor(int(cpu_no_spinbutton->get_value()) - 1,
+                                    cpu_tag->get_text());
         else
-          mon = new CpuUsageMonitor;
+          mon = new CpuUsageMonitor(cpu_tag->get_text());
       else if (memory_usage_radiobutton->get_active())
-        mon = new MemoryUsageMonitor;
+        mon = new MemoryUsageMonitor(memory_usage_tag->get_text());
       else if (swap_usage_radiobutton->get_active())
-        mon = new SwapUsageMonitor;
+        mon = new SwapUsageMonitor(swap_usage_tag->get_text());
       else if (load_average_radiobutton->get_active())
-        mon = new LoadAverageMonitor;
+        mon = new LoadAverageMonitor(load_average_tag->get_text());
       else if (disk_usage_radiobutton->get_active()) {
         Glib::ustring mount_dir = mount_dir_entry->get_text();
         bool show_free = show_free_checkbutton->get_active();
         // FIXME: check that mount_dir is valid
-        mon = new DiskUsageMonitor(mount_dir, show_free);
+        mon = new DiskUsageMonitor(mount_dir, show_free,
+                                   disk_usage_tag->get_text());
       }
       else if (network_load_radiobutton->get_active())
       {
@@ -425,12 +443,15 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
           break;
         }
 
-        mon = new NetworkLoadMonitor(interface_type, dir, panel_applet);
+        mon = new NetworkLoadMonitor(interface_type, dir,
+                                     network_load_tag->get_text(), panel_applet);
       }
       else if (temperature_radiobutton->get_active())
-        mon = new TemperatureMonitor(temperature_optionmenu->get_history());
+        mon = new TemperatureMonitor(temperature_optionmenu->get_history(),
+                                     temperature_tag->get_text());
       else if (fan_speed_radiobutton->get_active())
-        mon = new FanSpeedMonitor(fan_speed_optionmenu->get_history());
+        mon = new FanSpeedMonitor(fan_speed_optionmenu->get_history(),
+                                  fan_speed_tag->get_text());
 
       return mon;
     }

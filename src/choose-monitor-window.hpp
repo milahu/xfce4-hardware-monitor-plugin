@@ -76,24 +76,25 @@ private:
     *fan_speed_radiobutton;
 
   Gtk::Box *cpu_usage_options;
-  Gtk::RadioButton *all_cpus_radiobutton;
-  Gtk::RadioButton *one_cpu_radiobutton;
+  Gtk::RadioButton *all_cpus_radiobutton, *one_cpu_radiobutton;
   Gtk::SpinButton *cpu_no_spinbutton;
+  Gtk::Entry *cpu_tag, *load_average_tag;
 
   Gtk::Box *disk_usage_options;
-  Gtk::Entry *mount_dir_entry;
+  Gtk::Entry *mount_dir_entry, *disk_usage_tag, *memory_usage_tag,
+             *swap_usage_tag;
   Gtk::CheckButton *show_free_checkbutton;
 
   Gtk::Box *network_load_options;
-  Gtk::OptionMenu *network_type_optionmenu;
-  Gtk::OptionMenu *network_direction_optionmenu;
+  Gtk::OptionMenu *network_type_optionmenu, *network_direction_optionmenu;
   Gtk::TreeView *network_interfaces_treeview;
   Gtk::Button *network_interfaces_restore_defaults_button;
+  Gtk::Entry *network_load_tag;
 
-  Gtk::Box *temperature_box, *temperature_options;
-  Gtk::OptionMenu *temperature_optionmenu;
-  Gtk::Box *fan_speed_box, *fan_speed_options;
-  Gtk::OptionMenu *fan_speed_optionmenu;
+  Gtk::Box *temperature_box, *temperature_options, *fan_speed_box,
+           *fan_speed_options;
+  Gtk::OptionMenu *temperature_optionmenu, *fan_speed_optionmenu;
+  Gtk::Entry *temperature_tag, *fan_speed_tag;
 
   XfcePanelPlugin* panel_applet;
 

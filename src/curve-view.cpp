@@ -299,28 +299,28 @@ void CurveView::do_draw_loop()
       {
         if (monitor_data.empty())
         {
-          monitor_data = (*i)->monitor->format_value((*i)->monitor->value(),
-                                                     false);
+          monitor_data = (*i)->monitor->tag + ":" + separator_string +
+                     (*i)->monitor->format_value((*i)->monitor->value(), false);
         }
         else
         {
-          monitor_data.append(separator_string +
-                              (*i)->monitor->format_value((*i)->monitor->value(),
-                                                          false));
+          monitor_data.append(separator_string + (*i)->monitor->tag + ":" +
+                              separator_string +
+                    (*i)->monitor->format_value((*i)->monitor->value(), false));
         }
       }
       if (monitor_data_compact_needed)
       {
         if (monitor_data_compact.empty())
         {
-          monitor_data_compact = (*i)->monitor
-                                  ->format_value((*i)->monitor->value(), true);
+          monitor_data_compact = (*i)->monitor->tag + ":" +
+                      (*i)->monitor->format_value((*i)->monitor->value(), true);
         }
         else
         {
-          monitor_data_compact.append(separator_string +
-                              (*i)->monitor->format_value((*i)->monitor->value(),
-                                                          true));
+          monitor_data_compact.append(separator_string + (*i)->monitor->tag +
+                                      ":" +
+                     (*i)->monitor->format_value((*i)->monitor->value(), true));
         }
       }
     }

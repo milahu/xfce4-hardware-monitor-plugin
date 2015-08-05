@@ -37,8 +37,8 @@ extern "C"
 class Monitor: noncopyable
 {
 public:
-  Monitor()
-    : measured_value(0)
+  Monitor(const Glib::ustring &tag_string)
+    : measured_value(0), tag(tag_string)
   {
   }
   
@@ -68,7 +68,12 @@ public:
   {
     return settings_dir;
   }
-  
+
+  /* Storing the user-defined tag for the monitor - this is a short piece of text
+   * to identify the data source when its value is output in the optional text
+   * overlay in the CurveView */
+  Glib::ustring tag;
+
   // The max value that the monitor may attain
   virtual double max() = 0;
 

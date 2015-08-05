@@ -48,8 +48,9 @@ extern "C"
 class CpuUsageMonitor: public Monitor
 {
 public:
-  CpuUsageMonitor();    // monitor all cpus
-  CpuUsageMonitor(int cpu_no);  // monitor only cpu no.
+  CpuUsageMonitor(const Glib::ustring &tag_string);    // Monitor all CPUs
+  CpuUsageMonitor(int cpu_no, const Glib::ustring &tag_string);  // Monitor only
+                                                                 // CPU no.
 
   virtual double max();
   virtual bool fixed_max();
@@ -76,7 +77,7 @@ private:
 class SwapUsageMonitor: public Monitor
 {
 public:
-  SwapUsageMonitor();
+  SwapUsageMonitor(const Glib::ustring &tag_string);
 
   virtual double max();
   virtual bool fixed_max();
@@ -96,7 +97,7 @@ private:
 class LoadAverageMonitor: public Monitor
 {
 public:
-  LoadAverageMonitor();
+  LoadAverageMonitor(const Glib::ustring &tag_string);
 
   virtual double max();
   virtual bool fixed_max();
@@ -117,7 +118,7 @@ private:
 class MemoryUsageMonitor: public Monitor
 {
 public:
-  MemoryUsageMonitor();
+  MemoryUsageMonitor(const Glib::ustring &tag_string);
 
   virtual double max();
   virtual bool fixed_max();
@@ -137,7 +138,8 @@ private:
 class DiskUsageMonitor: public Monitor
 {
 public:
-  DiskUsageMonitor(const std::string &mount_dir, bool show_free);
+  DiskUsageMonitor(const std::string &mount_dir, bool show_free,
+                   const Glib::ustring &tag_string);
 
   virtual double max();
   virtual bool fixed_max();
@@ -181,7 +183,8 @@ public:
   };
 
   NetworkLoadMonitor(InterfaceType &interface_type,
-                     Direction direction, XfcePanelPlugin *panel_applet);
+                     Direction direction, const Glib::ustring &tag_string,
+                     XfcePanelPlugin *panel_applet);
 
   virtual double max();
   virtual bool fixed_max();
@@ -247,7 +250,9 @@ private:
 class TemperatureMonitor: public Monitor
 {
 public:
-  TemperatureMonitor(int no); // no. in the temperature features
+
+  // no. in the temperature features
+  TemperatureMonitor(int no, const Glib::ustring &tag_string);
 
   virtual double max();
   virtual bool fixed_max();
@@ -270,7 +275,9 @@ private:
 class FanSpeedMonitor: public Monitor
 {
 public:
-  FanSpeedMonitor(int no);  // no. in the fan features
+
+  // no. in the fan features
+  FanSpeedMonitor(int no, const Glib::ustring &tag_string);
 
   virtual double max();
   virtual bool fixed_max();

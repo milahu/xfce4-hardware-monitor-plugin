@@ -75,8 +75,9 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
       // Setting the correct group prior to loading settings
       xfce_rc_set_group(settings_ro, settings_monitors[i]);
 
-      // Obtaining monitor type
-      Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
+      // Obtaining general monitor details
+      Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", ""),
+          tag = xfce_rc_read_entry(settings_ro, "tag", "");
 
       if (type == "cpu_usage")
       {
@@ -85,16 +86,16 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
 
         // Creating CPU usage monitor with provided number if valid
         if (cpu_no == -1)
-          monitors.push_back(new CpuUsageMonitor);
+          monitors.push_back(new CpuUsageMonitor(tag));
         else
-          monitors.push_back(new CpuUsageMonitor(cpu_no));
+          monitors.push_back(new CpuUsageMonitor(cpu_no, tag));
       }
       else if (type == "memory_usage")
-        monitors.push_back(new MemoryUsageMonitor);
+        monitors.push_back(new MemoryUsageMonitor(tag));
       else if (type == "swap_usage")
-        monitors.push_back(new SwapUsageMonitor);
+        monitors.push_back(new SwapUsageMonitor(tag));
       else if (type == "load_average")
-        monitors.push_back(new LoadAverageMonitor);
+        monitors.push_back(new LoadAverageMonitor(tag));
       else if (type == "disk_usage")
       {
         // Obtaining volume mount directory
@@ -106,7 +107,7 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
           false);
 
         // Creating disk usage monitor
-        monitors.push_back(new DiskUsageMonitor(mount_dir, show_free));
+        monitors.push_back(new DiskUsageMonitor(mount_dir, show_free, tag));
       }
       else if (type == "network_load")
       {
@@ -183,7 +184,8 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
           dir = NetworkLoadMonitor::all_data;
 
         // Creating network load monitor
-        monitors.push_back(new NetworkLoadMonitor(inter_type, dir, panel_plugin));
+        monitors.push_back(new NetworkLoadMonitor(inter_type, dir,
+                                                  tag, panel_plugin));
       }
       else if (type == "temperature")
       {
@@ -192,7 +194,7 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
           "temperature_no", 0);
 
         // Creating temperature monitor
-        monitors.push_back(new TemperatureMonitor(temperature_no));
+        monitors.push_back(new TemperatureMonitor(temperature_no, tag));
       }
       else if (type == "fan_speed")
       {
@@ -200,7 +202,7 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
         int fan_no = xfce_rc_read_int_entry(settings_ro, "fan_no", 0);
 
         // Creating fan monitor
-        monitors.push_back(new FanSpeedMonitor(fan_no));
+        monitors.push_back(new FanSpeedMonitor(fan_no, tag));
       }
 
       // Saving the monitor's settings root
@@ -213,7 +215,7 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
 
   // Always start with a CpuUsageMonitor - FIXME: use schema?
   if (monitors.empty())
-    monitors.push_back(new CpuUsageMonitor);
+    monitors.push_back(new CpuUsageMonitor(""));
 
   return monitors;
 }
@@ -273,12 +275,14 @@ Precision decimal_digits(double val, int n)
 
 int const CpuUsageMonitor::max_no_cpus = GLIBTOP_NCPU;
 
-CpuUsageMonitor::CpuUsageMonitor()
-  : cpu_no(all_cpus), total_time(0), nice_time(0), idle_time(0), iowait_time(0)
+CpuUsageMonitor::CpuUsageMonitor(const Glib::ustring &tag_string)
+  : Monitor(tag_string), cpu_no(all_cpus), total_time(0), nice_time(0),
+    idle_time(0), iowait_time(0)
 {}
 
-CpuUsageMonitor::CpuUsageMonitor(int cpu)
-  : cpu_no(cpu), total_time(0), nice_time(0), idle_time(0), iowait_time(0)
+CpuUsageMonitor::CpuUsageMonitor(int cpu, const Glib::ustring &tag_string)
+  : Monitor(tag_string), cpu_no(cpu), total_time(0), nice_time(0), idle_time(0),
+    iowait_time(0)
 {
   if (cpu_no < 0 || cpu_no >= max_no_cpus)
     cpu_no = all_cpus;
@@ -375,6 +379,7 @@ void CpuUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "cpu_usage");
   xfce_rc_write_int_entry(settings_w, "cpu_no", cpu_no);
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
 
@@ -382,8 +387,8 @@ void CpuUsageMonitor::save(XfceRc *settings_w)
 // class SwapUsageMonitor
 //
 
-SwapUsageMonitor::SwapUsageMonitor()
-  : max_value(0)
+SwapUsageMonitor::SwapUsageMonitor(const Glib::ustring &tag_string)
+  : Monitor(tag_string), max_value(0)
 {
 }
 
@@ -444,6 +449,7 @@ void SwapUsageMonitor::save(XfceRc *settings_w)
   // Saving settings
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "swap_usage");
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
 
@@ -451,8 +457,8 @@ void SwapUsageMonitor::save(XfceRc *settings_w)
 // class LoadAverageMonitor
 //
 
-LoadAverageMonitor::LoadAverageMonitor()
-  : max_value(1.0)
+LoadAverageMonitor::LoadAverageMonitor(const Glib::ustring &tag_string)
+  : Monitor(tag_string), max_value(1.0)
 {
 }
 
@@ -518,6 +524,7 @@ void LoadAverageMonitor::save(XfceRc *settings_w)
   // Saving settings
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "load_average");
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 
   // No support for floats - stringifying
   Glib::ustring setting = String::ucompose("%1", max_value);
@@ -541,8 +548,8 @@ void LoadAverageMonitor::load(XfceRc *settings_ro)
 // class MemoryUsageMonitor
 //
 
-MemoryUsageMonitor::MemoryUsageMonitor()
-  : max_value(0)
+MemoryUsageMonitor::MemoryUsageMonitor(const Glib::ustring &tag_string)
+  : Monitor(tag_string), max_value(0)
 {
 }
 
@@ -603,6 +610,7 @@ void MemoryUsageMonitor::save(XfceRc *settings_w)
   // Saving settings
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "memory_usage");
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
 
@@ -610,8 +618,9 @@ void MemoryUsageMonitor::save(XfceRc *settings_w)
 // class DiskUsageMonitor
 //
 
-DiskUsageMonitor::DiskUsageMonitor(const std::string &dir, bool free)
-  : max_value(0), mount_dir(dir), show_free(free)
+DiskUsageMonitor::DiskUsageMonitor(const std::string &dir, bool free,
+                                   const Glib::ustring &tag_string)
+  : Monitor(tag_string), max_value(0), mount_dir(dir), show_free(free)
 {
 }
 
@@ -697,6 +706,7 @@ void DiskUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "type", "disk_usage");
   xfce_rc_write_entry(settings_w, "mount_dir", mount_dir.c_str());
   xfce_rc_write_bool_entry(settings_w, "show_free", show_free);
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
 
@@ -714,9 +724,11 @@ std::vector<Glib::ustring> NetworkLoadMonitor::interface_type_names_default = in
 bool NetworkLoadMonitor::interface_names_configured = false;
 
 NetworkLoadMonitor::NetworkLoadMonitor(InterfaceType &inter_type, Direction dir,
+                                       const Glib::ustring &tag_string,
                                        XfcePanelPlugin* panel_applet)
-  : max_value(1), byte_count(0), time_stamp_secs(0), time_stamp_usecs(0),
-    interface_type(inter_type), direction(dir), pnl_applet(panel_applet)
+  : Monitor(tag_string), max_value(1), byte_count(0), time_stamp_secs(0),
+    time_stamp_usecs(0),interface_type(inter_type), direction(dir),
+    pnl_applet(panel_applet)
 {
 }
 
@@ -869,6 +881,7 @@ void NetworkLoadMonitor::save(XfceRc *settings_w)
   xfce_rc_write_int_entry(settings_w, "interface_direction",
     int(direction));
   xfce_rc_write_int_entry(settings_w, "max", int(max_value));
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
 void NetworkLoadMonitor::load(XfceRc *settings_ro)
@@ -1428,8 +1441,8 @@ double Sensors::get_value(int chip_no, int feature_no)
 
 double const Sensors::invalid_max = -1000000;
 
-TemperatureMonitor::TemperatureMonitor(int no)
-  : sensors_no(no)
+TemperatureMonitor::TemperatureMonitor(int no, const Glib::ustring &tag_string)
+  : Monitor(tag_string), sensors_no(no)
 {
   Sensors::FeatureInfo info
     = Sensors::instance().get_temperature_features()[sensors_no];
@@ -1500,6 +1513,7 @@ void TemperatureMonitor::save(XfceRc *settings_w)
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "temperature");
   xfce_rc_write_int_entry(settings_w, "temperature_no", sensors_no);
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 
   // No support for floats - stringifying
   Glib::ustring setting = String::ucompose("%1", max_value);
@@ -1526,8 +1540,8 @@ void TemperatureMonitor::load(XfceRc *settings_ro)
 // class FanSpeedMonitor
 //
 
-FanSpeedMonitor::FanSpeedMonitor(int no)
-  : sensors_no(no)
+FanSpeedMonitor::FanSpeedMonitor(int no, const Glib::ustring &tag_string)
+  : Monitor(tag_string), sensors_no(no)
 {
   Sensors::FeatureInfo info
     = Sensors::instance().get_fan_features()[sensors_no];
@@ -1596,6 +1610,7 @@ void FanSpeedMonitor::save(XfceRc *settings_w)
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "fan_speed");
   xfce_rc_write_int_entry(settings_w, "fan_no", sensors_no);
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 
   // No support for floats - stringifying
   Glib::ustring setting = String::ucompose("%1", max_value);
