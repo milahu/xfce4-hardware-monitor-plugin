@@ -59,7 +59,10 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
   ui->get_widget("fan_speed_radiobutton", fan_speed_radiobutton);
 
   ui->get_widget("cpu_usage_options", cpu_usage_options);
+  ui->get_widget("load_average_options", load_average_options);
   ui->get_widget("disk_usage_options", disk_usage_options);
+  ui->get_widget("memory_usage_options", memory_usage_options);
+  ui->get_widget("swap_usage_options", swap_usage_options);
   ui->get_widget("network_load_options", network_load_options);
 
   ui->get_widget("all_cpus_radiobutton", all_cpus_radiobutton);
@@ -103,9 +106,21 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_cpu_usage_radiobutton_toggled));
 
+  load_average_radiobutton->signal_toggled()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_load_average_radiobutton_toggled));
+
   disk_usage_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_disk_usage_radiobutton_toggled));
+
+  memory_usage_radiobutton->signal_toggled()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_memory_usage_radiobutton_toggled));
+
+  swap_usage_radiobutton->signal_toggled()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_swap_usage_radiobutton_toggled));
 
   network_load_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
@@ -113,7 +128,7 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
 
   network_interfaces_restore_defaults_button->signal_clicked()
       .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
-                             on_network_interfaces_restore_defaults_button_clicked));
+                        on_network_interfaces_restore_defaults_button_clicked));
 
   temperature_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
@@ -470,10 +485,28 @@ void ChooseMonitorWindow::on_cpu_usage_radiobutton_toggled()
     = cpu_usage_radiobutton->get_active();
 }
 
+void ChooseMonitorWindow::on_load_average_radiobutton_toggled()
+{
+  load_average_options->property_sensitive()
+    = load_average_radiobutton->get_active();
+}
+
 void ChooseMonitorWindow::on_disk_usage_radiobutton_toggled()
 {
   disk_usage_options->property_sensitive()
     = disk_usage_radiobutton->get_active();
+}
+
+void ChooseMonitorWindow::on_memory_usage_radiobutton_toggled()
+{
+  memory_usage_options->property_sensitive()
+    = memory_usage_radiobutton->get_active();
+}
+
+void ChooseMonitorWindow::on_swap_usage_radiobutton_toggled()
+{
+  swap_usage_options->property_sensitive()
+    = swap_usage_radiobutton->get_active();
 }
 
 void ChooseMonitorWindow::on_fan_speed_radiobutton_toggled()

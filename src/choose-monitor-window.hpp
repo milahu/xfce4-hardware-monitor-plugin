@@ -66,21 +66,16 @@ private:
   Gtk::Dialog *window;
   Gtk::Notebook *device_notebook;
   
-  Gtk::RadioButton *cpu_usage_radiobutton,
-    *memory_usage_radiobutton,
-    *swap_usage_radiobutton,
-    *load_average_radiobutton,
-    *disk_usage_radiobutton,
-    *network_load_radiobutton,
-    *temperature_radiobutton,
-    *fan_speed_radiobutton;
+  Gtk::RadioButton *cpu_usage_radiobutton, *memory_usage_radiobutton,
+    *swap_usage_radiobutton, *load_average_radiobutton, *disk_usage_radiobutton,
+    *network_load_radiobutton, *temperature_radiobutton, *fan_speed_radiobutton;
 
-  Gtk::Box *cpu_usage_options;
+  Gtk::Box *cpu_usage_options, *load_average_options;
   Gtk::RadioButton *all_cpus_radiobutton, *one_cpu_radiobutton;
   Gtk::SpinButton *cpu_no_spinbutton;
   Gtk::Entry *cpu_tag, *load_average_tag;
 
-  Gtk::Box *disk_usage_options;
+  Gtk::Box *disk_usage_options, *memory_usage_options, *swap_usage_options;
   Gtk::Entry *mount_dir_entry, *disk_usage_tag, *memory_usage_tag,
              *swap_usage_tag;
   Gtk::CheckButton *show_free_checkbutton;
@@ -118,7 +113,10 @@ private:
 
   // GUI
   void on_cpu_usage_radiobutton_toggled();
+  void on_load_average_radiobutton_toggled();
   void on_disk_usage_radiobutton_toggled();
+  void on_memory_usage_radiobutton_toggled();
+  void on_swap_usage_radiobutton_toggled();
   void on_fan_speed_radiobutton_toggled();
   void on_network_load_radiobutton_toggled();
   void on_network_interfaces_restore_defaults_button_clicked();

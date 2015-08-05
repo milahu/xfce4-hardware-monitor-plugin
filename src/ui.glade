@@ -536,7 +536,7 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHBox" id="memory_options">
+                      <widget class="GtkHBox" id="memory_usage_options">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
@@ -635,7 +635,7 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHBox" id="swap_options">
+                      <widget class="GtkHBox" id="swap_usage_options">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
