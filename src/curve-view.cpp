@@ -359,8 +359,6 @@ void CurveView::do_draw_loop()
       text_overlay = new Gnome::Canvas::Text(*canvas->root());
       text_overlay->property_anchor() = Gtk::ANCHOR_NW;
       text_overlay->property_text() = overlay_text;
-      text_overlay->property_font() = "Sans 8";
-      text_overlay->property_fill_color() = "black";
 
       // Positioning text at the bottom of the canvas
       text_overlay->property_y() = applet->get_height() -
@@ -370,5 +368,18 @@ void CurveView::do_draw_loop()
     // It is - updating if it has changed
     else if (text_overlay->property_text() != overlay_text)
       text_overlay->property_text() = overlay_text;
+
+    /* Setting/fixing changed font and colour - doing it here since the CurveView
+     * updates so frequently that its not worth also setting it directly from the
+     * UI etc */
+    Glib::ustring font_details = applet->get_viewer_text_overlay_font();
+    if (font_details.empty())
+      font_details = "Sans 8";
+    if (text_overlay->property_font() != font_details)
+      text_overlay->property_font() = font_details;
+
+    int color = applet->get_viewer_text_overlay_color();
+    if (text_overlay->property_fill_color_rgba() != color)
+      text_overlay->property_fill_color_rgba() = color;
   }
 }

@@ -59,42 +59,27 @@ private:
   Gtk::Window *window;
   
   Gtk::SpinButton *update_interval_spinbutton;
-  Gtk::RadioButton *panel_background_radiobutton;
-  Gtk::RadioButton *background_color_radiobutton;
+  Gtk::RadioButton *panel_background_radiobutton, *background_color_radiobutton;
   Gtk::ColorButton *background_colorbutton;
   
-  Gtk::RadioButton *curve_radiobutton;
-  Gtk::RadioButton *bar_radiobutton;
-  Gtk::RadioButton *vbar_radiobutton;
-  Gtk::RadioButton *column_radiobutton;
-  Gtk::RadioButton *text_radiobutton;
-  Gtk::RadioButton *flame_radiobutton;
-
-  Gtk::Widget *size_outer_vbox;
+  Gtk::RadioButton *curve_radiobutton, *bar_radiobutton, *vbar_radiobutton,
+                   *column_radiobutton, *text_radiobutton, *flame_radiobutton;
+  Gtk::Widget *size_outer_vbox, *font_outer_vbox, *text_overlay_outer_vbox;
   Gtk::Scale *size_scale;
-  Gtk::Widget *font_outer_vbox;
-  Gtk::CheckButton *font_checkbutton;
-  Gtk::FontButton *fontbutton;
-  Gtk::Widget *text_overlay_outer_vbox;
-  Gtk::CheckButton *text_overlay_checkbutton;
-  Gtk::Entry *text_overlay_format_string_entry;
-  Gtk::Entry *text_overlay_separator_entry;
+  Gtk::CheckButton *font_checkbutton, *text_overlay_checkbutton,
+                   *text_overlay_font_checkbutton;
+  Gtk::FontButton *fontbutton, *text_overlay_fontbutton;
+  Gtk::Entry *text_overlay_format_string_entry, *text_overlay_separator_entry;
+  Gtk::ColorButton *text_overlay_colorbutton;
 
-  Gtk::Button *remove_button;
-  Gtk::Button *change_button;
+  Gtk::Button *remove_button, *change_button;
   Gtk::TreeView *monitor_treeview;
   Gtk::Widget *monitor_options;
 
-  Gtk::Widget *monitor_curve_options;
-  Gtk::ColorButton *line_colorbutton;
-  Gtk::Widget *monitor_bar_options;
-  Gtk::ColorButton *bar_colorbutton;
-  Gtk::Widget *monitor_vbar_options;
-  Gtk::ColorButton *vbar_colorbutton;
-  Gtk::Widget *monitor_column_options;
-  Gtk::ColorButton *column_colorbutton;
-  Gtk::Widget *monitor_flame_options;
-  Gtk::ColorButton *flame_colorbutton;
+  Gtk::Widget *monitor_curve_options, *monitor_bar_options, *monitor_vbar_options,
+              *monitor_column_options, *monitor_flame_options;
+  Gtk::ColorButton *line_colorbutton, *bar_colorbutton, *vbar_colorbutton,
+                   *column_colorbutton, *flame_colorbutton;
   
   class MonitorColumns: public Gtk::TreeModel::ColumnRecord
   {
@@ -113,8 +98,10 @@ private:
   void background_color_listener(unsigned int background_color);
   void use_background_color_listener(bool use_background_color);
   void size_listener(int viewer_size);
-  void font_listener(const Glib::ustring viewer_font);
+  void font_listener(Gtk::CheckButton *checkbutton, Gtk::FontButton *font_button,
+                     const Glib::ustring viewer_font);
   void monitor_color_listener(unsigned int color);
+  void text_overlay_color_listener(unsigned int color);
 
   void stop_monitor_listeners();
   
@@ -139,6 +126,9 @@ private:
   void on_text_overlay_checkbutton_toggled();
   bool on_text_overlay_format_string_focus_out(GdkEventFocus *event);
   bool on_text_overlay_separator_focus_out(GdkEventFocus *event);
+  void on_text_overlay_font_checkbutton_toggled();
+  void on_text_overlay_fontbutton_set();
+  void on_text_overlay_colorbutton_set();
 
   void on_add_button_clicked();
   void on_remove_button_clicked();
@@ -161,6 +151,7 @@ private:
 
   void save_font_details(Glib::ustring font_details);
   void save_text_overlay_enabled(bool enabled);
+  void save_text_overlay_font_details(Glib::ustring font_details);
   void save_text_overlay_format_string(const Glib::ustring format_string);
   void save_text_overlay_separator(const Glib::ustring separator);
 

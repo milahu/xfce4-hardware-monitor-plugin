@@ -167,7 +167,9 @@ Applet::Applet(XfcePanelPlugin *plugin)
   next_color(0),
   viewer_text_overlay_enabled(false),
   viewer_text_overlay_format_string("%a %m"),
-  viewer_text_overlay_separator(" ")
+  viewer_text_overlay_separator(" "),
+  viewer_text_overlay_font(""),
+  viewer_text_overlay_color(0x00000000)
 {
   // Search for settings file
   XfceRc* settings_ro = NULL;
@@ -202,6 +204,10 @@ Applet::Applet(XfcePanelPlugin *plugin)
       viewer_text_overlay_format_string.c_str());
     viewer_text_overlay_separator = xfce_rc_read_entry(settings_ro,
       "viewer_text_overlay_separator", viewer_text_overlay_separator.c_str());
+    viewer_text_overlay_font = xfce_rc_read_entry(settings_ro,
+      "viewer_text_overlay_font", viewer_text_overlay_font.c_str());
+    viewer_text_overlay_color = xfce_rc_read_int_entry(settings_ro,
+      "viewer_text_overlay_color", viewer_text_overlay_color);
   }
   
   // Loading icon
@@ -564,7 +570,7 @@ void Applet::set_viewer_text_overlay_format_string(const Glib::ustring format_st
   viewer_text_overlay_format_string = format_string;
 }
 
-const Glib::ustring Applet::get_viewer_text_overlay_separator()
+const Glib::ustring Applet::get_viewer_text_overlay_separator() const
 {
   return viewer_text_overlay_separator;
 }
@@ -572,6 +578,36 @@ const Glib::ustring Applet::get_viewer_text_overlay_separator()
 void Applet::set_viewer_text_overlay_separator(const Glib::ustring separator)
 {
   viewer_text_overlay_separator = separator;
+}
+
+bool Applet::get_viewer_text_overlay_use_font() const
+{
+  return viewer_text_overlay_use_font;
+}
+
+void Applet::set_viewer_text_overlay_use_font(bool enabled)
+{
+  viewer_text_overlay_use_font = enabled;
+}
+
+const Glib::ustring Applet::get_viewer_text_overlay_font()
+{
+  return viewer_text_overlay_font;
+}
+
+void Applet::set_viewer_text_overlay_font(const Glib::ustring font_details)
+{
+  viewer_text_overlay_font = font_details;
+}
+
+const int Applet::get_viewer_text_overlay_color() const
+{
+  return viewer_text_overlay_color;
+}
+
+void Applet::set_viewer_text_overlay_color(const int color)
+{
+  viewer_text_overlay_color = color;
 }
 
 void Applet::add_monitor(Monitor *monitor)

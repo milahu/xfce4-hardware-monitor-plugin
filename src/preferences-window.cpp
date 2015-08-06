@@ -119,6 +119,21 @@ PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
       .connect(sigc::mem_fun(*this,
                &PreferencesWindow::on_text_overlay_separator_focus_out));
 
+  ui->get_widget("text_overlay_font_checkbutton", text_overlay_font_checkbutton);
+  text_overlay_font_checkbutton->signal_toggled()
+    .connect(sigc::mem_fun(*this,
+                 &PreferencesWindow::on_text_overlay_font_checkbutton_toggled));
+
+  ui->get_widget("text_overlay_fontbutton", text_overlay_fontbutton);
+  text_overlay_fontbutton->signal_font_set()
+      .connect(sigc::mem_fun(*this,
+               &PreferencesWindow::on_text_overlay_fontbutton_set));
+
+  ui->get_widget("text_overlay_colorbutton", text_overlay_colorbutton);
+  text_overlay_colorbutton->signal_color_set()
+      .connect(sigc::mem_fun(*this,
+               &PreferencesWindow::on_text_overlay_colorbutton_set));
+
 
   ui->get_widget("background_colorbutton", background_colorbutton);
   background_colorbutton->signal_color_set()
@@ -190,13 +205,16 @@ PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
   background_color_listener(applet.get_background_color());
   use_background_color_listener(applet.get_use_background_color());
   size_listener(applet.get_viewer_size());
-  font_listener(applet.get_viewer_font());
+  font_listener(font_checkbutton, fontbutton, applet.get_viewer_font());
   if (applet.get_viewer_text_overlay_enabled())
     text_overlay_checkbutton->set_active();
   text_overlay_format_string_entry->
       set_text(applet.get_viewer_text_overlay_format_string());
   text_overlay_separator_entry->
       set_text(applet.get_viewer_text_overlay_separator());
+  font_listener(text_overlay_font_checkbutton, text_overlay_fontbutton,
+                applet.get_viewer_text_overlay_font());
+  text_overlay_color_listener(applet.get_viewer_text_overlay_color());
 
   for (monitor_iter i = monitors.begin(), end = monitors.end();
        i != end; ++i)
@@ -343,18 +361,21 @@ void PreferencesWindow::size_listener(int viewer_size)
   applet.set_viewer_size(viewer_size);
 }
 
-void PreferencesWindow::font_listener(const Glib::ustring viewer_font)
+// This works with more than one font button now
+void PreferencesWindow::font_listener(Gtk::CheckButton *checkbutton,
+                                      Gtk::FontButton *font_button,
+                                      const Glib::ustring viewer_font)
 {
   if (viewer_font.empty())
-    font_checkbutton->set_active(false);
+    checkbutton->set_active(false);
   else {
-    if (fontbutton->get_font_name() != viewer_font)
-      fontbutton->set_font_name(viewer_font);
+    if (font_button->get_font_name() != viewer_font)
+      font_button->set_font_name(viewer_font);
 
     /* Must toggle this after setting the font name, otherwise
      * on_font_checkbutton_toggled triggers and overwrites the saved
      * font details with the default ones */
-    font_checkbutton->set_active(true);
+    checkbutton->set_active(true);
   }
 }
 
@@ -370,6 +391,19 @@ void PreferencesWindow::monitor_color_listener(unsigned int color)
   update_colorbutton_if_different(vbar_colorbutton,  r, g, b, a);
   update_colorbutton_if_different(column_colorbutton, r, g, b, a);
   update_colorbutton_if_different(flame_colorbutton,  r, g, b, a);
+}
+
+void PreferencesWindow::text_overlay_color_listener(unsigned int color)
+{
+  unsigned char r = color >> 24,
+    g = color >> 16,
+    b = color >> 8,
+    a = color;
+
+  update_colorbutton_if_different(text_overlay_colorbutton, r, g, b, a);
+
+  // Actually updating the text overlay color
+  applet.set_viewer_text_overlay_color(color);
 }
 
 
@@ -442,7 +476,7 @@ void PreferencesWindow::sync_conf_with_colorbutton(Glib::ustring settings_dir,
 void PreferencesWindow::on_background_colorbutton_set()
 {
   // Settings dir here is the default XFCE4 settings group
-  sync_conf_with_colorbutton(NULL, "background_color",
+  sync_conf_with_colorbutton("", "background_color",
            background_colorbutton);
 
   // Actually apply the color change
@@ -752,8 +786,6 @@ void PreferencesWindow::on_font_checkbutton_toggled()
 {
   bool active = font_checkbutton->get_active();
   
-  fontbutton->set_sensitive(active);
-
   // Obtaining font_details to set
   Glib::ustring font_details;
   if (active)
@@ -763,7 +795,7 @@ void PreferencesWindow::on_font_checkbutton_toggled()
 
   // Saving
   save_font_details(font_details);
-  font_listener(font_details);
+  font_listener(font_checkbutton, fontbutton, font_details);
 }
 
 void PreferencesWindow::on_fontbutton_set()
@@ -777,6 +809,9 @@ void PreferencesWindow::on_text_overlay_checkbutton_toggled()
   bool active = text_overlay_checkbutton->get_active();
   text_overlay_format_string_entry->set_sensitive(active);
   text_overlay_separator_entry->set_sensitive(active);
+  text_overlay_font_checkbutton->set_sensitive(active);
+  text_overlay_fontbutton->set_sensitive(active);
+  text_overlay_colorbutton->set_sensitive(active);
 
   save_text_overlay_enabled(active);
 }
@@ -795,6 +830,40 @@ bool PreferencesWindow::on_text_overlay_separator_focus_out(GdkEventFocus *event
 
   // Allow event to propagate
   return FALSE;
+}
+
+void PreferencesWindow::on_text_overlay_font_checkbutton_toggled()
+{
+  bool active = text_overlay_font_checkbutton->get_active();
+
+  // Obtaining font_details to set
+  Glib::ustring font_details;
+  if (active)
+    font_details = text_overlay_fontbutton->get_font_name();
+  else
+    font_details = "";
+
+  // Saving
+  save_text_overlay_font_details(font_details);
+  font_listener(text_overlay_font_checkbutton, text_overlay_fontbutton,
+                font_details);
+}
+
+void PreferencesWindow::on_text_overlay_fontbutton_set()
+{
+  // Saving
+  save_text_overlay_font_details(text_overlay_fontbutton->get_font_name());
+}
+
+void PreferencesWindow::on_text_overlay_colorbutton_set()
+{
+  // Settings dir here is the default XFCE4 settings group
+  sync_conf_with_colorbutton("", "viewer_text_overlay_color",
+           text_overlay_colorbutton);
+
+  // Actually apply the color change
+  applet.set_viewer_text_overlay_color(
+    get_colorbutton_int(text_overlay_colorbutton));
 }
 
 void PreferencesWindow::on_add_button_clicked()
@@ -989,6 +1058,37 @@ void PreferencesWindow::save_font_details(Glib::ustring font_details)
     // Unable to obtain writeable config file - informing user and exiting
     std::cerr << _("Unable to obtain writeable config file path in order to"
       " save viewer font in save_font_details!\n");
+  }
+}
+
+void PreferencesWindow::save_text_overlay_font_details(Glib::ustring font_details)
+{
+  applet.set_viewer_text_overlay_font(font_details);
+
+  // Search for a writeable settings file, create one if it doesnt exist */
+  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+
+  if (file)
+  {
+    // Opening setting file
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
+    g_free(file);
+
+    // Ensuring default group is in focus
+    xfce_rc_set_group(settings_w, NULL);
+
+    // Updating configuration
+    xfce_rc_write_entry(settings_w, "viewer_text_overlay_font",
+                        font_details.c_str());
+
+    // Close settings file
+    xfce_rc_close(settings_w);
+  }
+  else
+  {
+    // Unable to obtain writeable config file - informing user and exiting
+    std::cerr << _("Unable to obtain writeable config file path in order to"
+      " save viewer text overlay font in save_text_overlay_font_details!\n");
   }
 }
 

@@ -73,8 +73,14 @@ public:
   void set_viewer_text_overlay_enabled(bool enabled);
   const Glib::ustring get_viewer_text_overlay_format_string();
   void set_viewer_text_overlay_format_string(const Glib::ustring format_string);
-  const Glib::ustring get_viewer_text_overlay_separator();
+  const Glib::ustring get_viewer_text_overlay_separator() const;
   void set_viewer_text_overlay_separator(const Glib::ustring separator);
+  bool get_viewer_text_overlay_use_font() const;
+  void set_viewer_text_overlay_use_font(bool enabled);
+  const Glib::ustring get_viewer_text_overlay_font();
+  void set_viewer_text_overlay_font(const Glib::ustring font_details);
+  const int get_viewer_text_overlay_color() const;
+  void set_viewer_text_overlay_color(const int color);
   void viewer_type_listener(const Glib::ustring viewer_type);
   void background_color_listener(unsigned int background_color);
   void use_background_color_listener(gboolean use_background_color);
@@ -108,17 +114,14 @@ private:
   Glib::ustring find_empty_monitor_dir();
 
   // data
-  Glib::ustring icon_path;
-  Glib::ustring viewer_type;
-  Glib::ustring viewer_font;
-  bool viewer_text_overlay_enabled;
-  Glib::ustring viewer_text_overlay_format_string;
-  Glib::ustring viewer_text_overlay_separator;
+  Glib::ustring icon_path, viewer_type, viewer_font;
+  bool viewer_text_overlay_enabled, viewer_text_overlay_use_font;
+  Glib::ustring viewer_text_overlay_format_string, viewer_text_overlay_separator,
+                viewer_text_overlay_font;
+  int viewer_text_overlay_color;
 
-  int viewer_size;
-  int background_color;
+  int viewer_size, background_color, next_color;
   gboolean use_background_color;
-  int next_color;
   Glib::RefPtr<Gdk::Pixbuf> icon;
   std::auto_ptr<Gtk::AboutDialog> about;
   std::auto_ptr<View> view;
