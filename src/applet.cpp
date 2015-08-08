@@ -170,7 +170,7 @@ Applet::Applet(XfcePanelPlugin *plugin)
   viewer_text_overlay_separator(" "),
   viewer_text_overlay_font(""),
   viewer_text_overlay_color(0x00000000),
-  viewer_text_overlay_position(CurveView::bottom_left)
+  viewer_text_overlay_position(CurveView::top_left)
 {
   // Search for settings file
   XfceRc* settings_ro = NULL;
@@ -212,7 +212,7 @@ Applet::Applet(XfcePanelPlugin *plugin)
 
     // Extra care needed for this since enums don't enforce a range...
     int text_overlay_position = xfce_rc_read_int_entry(settings_ro,
-      "viewer_text_overlay_position", 0);
+      "viewer_text_overlay_position", int(CurveView::top_left));
     set_viewer_text_overlay_position(
           static_cast<CurveView::TextOverlayPosition>(text_overlay_position));
   }
