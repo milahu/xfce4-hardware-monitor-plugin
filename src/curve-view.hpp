@@ -43,11 +43,27 @@ public:
   
   static int const pixels_per_sample;
 
+  enum TextOverlayPosition {
+     top_left,
+     top_center,
+     top_right,
+     center,
+     bottom_left,
+     bottom_center,
+     bottom_right,
+     NUM_TEXT_OVERLAY_POSITIONS
+  };
+
+  static const Glib::ustring text_overlay_position_to_string(
+      TextOverlayPosition position);
+
 private:
   virtual void do_update();
   virtual void do_attach(Monitor *monitor);
   virtual void do_detach(Monitor *monitor);
   virtual void do_draw_loop();
+
+  void text_overlay_calc_position(int &x, int &y, TextOverlayPosition position);
 
   // Must be destroyed before the canvas
   typedef std::list<Curve *> curve_sequence;

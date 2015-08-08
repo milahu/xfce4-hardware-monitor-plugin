@@ -359,10 +359,6 @@ void CurveView::do_draw_loop()
       text_overlay = new Gnome::Canvas::Text(*canvas->root());
       text_overlay->property_anchor() = Gtk::ANCHOR_NW;
       text_overlay->property_text() = overlay_text;
-
-      // Positioning text at the bottom of the canvas
-      text_overlay->property_y() = applet->get_height() -
-          text_overlay->property_text_height();
     }
 
     // It is - updating if it has changed
@@ -381,5 +377,82 @@ void CurveView::do_draw_loop()
     int color = applet->get_viewer_text_overlay_color();
     if (text_overlay->property_fill_color_rgba() != color)
       text_overlay->property_fill_color_rgba() = color;
+
+    // Positioning text
+    int x, y;
+    text_overlay_calc_position(x, y, applet->get_viewer_text_overlay_position());
+    if (text_overlay->property_x() != x)
+      text_overlay->property_x() = x;
+    if (text_overlay->property_y() != y)
+      text_overlay->property_y() = y;
   }
+}
+
+const Glib::ustring CurveView::text_overlay_position_to_string(
+      TextOverlayPosition position)
+{
+  switch(position)
+  {
+    case top_left:
+      return _("Top left");
+    case top_center:
+      return _("Top center");
+    case top_right:
+      return _("Top right");
+    case center:
+      return _("Center");
+    case bottom_left:
+      return _("Bottom left");
+    case bottom_center:
+      return _("Bottom center");
+    case bottom_right:
+      return _("Bottom right");
+    default:
+      return _("Top left");
+  }
+}
+
+void CurveView::text_overlay_calc_position(int& x, int& y,
+                                           TextOverlayPosition position)
+{
+  switch(position)
+  {
+    case top_left:
+      x = y = 0;
+      break;
+
+    case top_center:
+      x = (applet->get_width() - text_overlay->property_text_width()) / 2;
+      y = 0;
+      break;
+
+    case top_right:
+      x = applet->get_width() - text_overlay->property_text_width();
+      y = 0;
+      break;
+
+    case center:
+      x = (applet->get_width() - text_overlay->property_text_width()) / 2;
+      y = (applet->get_height() - text_overlay->property_text_height()) / 2;
+      break;
+
+    case bottom_left:
+      x = 0;
+      y = applet->get_height() - text_overlay->property_text_height();
+      break;
+
+    case bottom_center:
+      x = (applet->get_width() - text_overlay->property_text_width()) / 2;
+      y = applet->get_height() - text_overlay->property_text_height();
+      break;
+
+    case bottom_right:
+      x = applet->get_width() - text_overlay->property_text_width();
+      y = applet->get_height() - text_overlay->property_text_height();
+      break;
+
+    default:
+      x = y = 0;
+      break;
+   }
 }

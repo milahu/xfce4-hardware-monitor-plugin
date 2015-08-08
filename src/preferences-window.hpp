@@ -31,6 +31,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/colorbutton.h>
+#include <gtkmm/combobox.h>
 #include <gtkmm/fontbutton.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
@@ -71,6 +72,7 @@ private:
   Gtk::FontButton *fontbutton, *text_overlay_fontbutton;
   Gtk::Entry *text_overlay_format_string_entry, *text_overlay_separator_entry;
   Gtk::ColorButton *text_overlay_colorbutton;
+  Gtk::ComboBox *text_overlay_position_combobox;
 
   Gtk::Button *remove_button, *change_button;
   Gtk::TreeView *monitor_treeview;
@@ -92,7 +94,17 @@ private:
   
   Glib::RefPtr<Gtk::ListStore> monitor_store;
   typedef Gtk::ListStore::iterator store_iter;
-  
+
+  class TextOverlayPositionColumns: public Gtk::TreeModel::ColumnRecord
+  {
+  public:
+    Gtk::TreeModelColumn<Glib::ustring> position;
+
+    TextOverlayPositionColumns() { add(position); }
+  };
+
+  Glib::RefPtr<Gtk::ListStore> text_overlay_position_store;
+
   // Originally gconf callbacks
   void viewer_type_listener(const Glib::ustring viewer_type, bool enable);
   void background_color_listener(unsigned int background_color);
@@ -129,6 +141,7 @@ private:
   void on_text_overlay_font_checkbutton_toggled();
   void on_text_overlay_fontbutton_set();
   void on_text_overlay_colorbutton_set();
+  void on_text_overlay_position_combobox_changed();
 
   void on_add_button_clicked();
   void on_remove_button_clicked();

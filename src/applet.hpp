@@ -40,6 +40,7 @@ extern "C"
 }
 
 #include "monitor.hpp"
+#include "curve-view.hpp"
 
 class PreferencesWindow; 
 class View;
@@ -81,6 +82,9 @@ public:
   void set_viewer_text_overlay_font(const Glib::ustring font_details);
   const int get_viewer_text_overlay_color() const;
   void set_viewer_text_overlay_color(const int color);
+  const CurveView::TextOverlayPosition get_viewer_text_overlay_position();
+  void set_viewer_text_overlay_position(CurveView::TextOverlayPosition
+                                        position);
   void viewer_type_listener(const Glib::ustring viewer_type);
   void background_color_listener(unsigned int background_color);
   void use_background_color_listener(gboolean use_background_color);
@@ -119,6 +123,7 @@ private:
   Glib::ustring viewer_text_overlay_format_string, viewer_text_overlay_separator,
                 viewer_text_overlay_font;
   int viewer_text_overlay_color;
+  CurveView::TextOverlayPosition viewer_text_overlay_position;
 
   int viewer_size, background_color, next_color;
   gboolean use_background_color;

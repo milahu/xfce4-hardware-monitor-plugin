@@ -31,6 +31,7 @@
 #include "gui-helpers.hpp"
 #include "applet.hpp"
 #include "monitor.hpp"
+#include "curve-view.hpp"
 #include "i18n.hpp"
 
 
@@ -134,6 +135,12 @@ PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
       .connect(sigc::mem_fun(*this,
                &PreferencesWindow::on_text_overlay_colorbutton_set));
 
+  // I tried to get at a ComboboxText but libglade does not support it??
+  ui->get_widget("text_overlay_position_combobox",
+                 text_overlay_position_combobox);
+  text_overlay_position_combobox->signal_changed()
+      .connect(sigc::mem_fun(*this,
+               &PreferencesWindow::on_text_overlay_position_combobox_changed));
 
   ui->get_widget("background_colorbutton", background_colorbutton);
   background_colorbutton->signal_color_set()
@@ -148,6 +155,11 @@ PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
     .connect(sigc::mem_fun(*this,
           &PreferencesWindow::on_background_color_radiobutton_toggled));
 
+  // Initialising text overlay position combobox
+  static TextOverlayPositionColumns topc;
+  text_overlay_position_store = Gtk::ListStore::create(topc);
+  text_overlay_position_combobox->set_model(text_overlay_position_store);
+  text_overlay_position_combobox->pack_start(topc.position);
 
   // Connect the Monitor tab widgets
   Gtk::Button *add_button;
@@ -223,6 +235,21 @@ PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
   /* Deselect all to allow the user to discover the relationship
    * between the greyed-out buttons and the treeview */
   monitor_treeview->get_selection()->unselect_all();
+
+  // Populating text overlay position combobox and selecting the correct position
+  CurveView::TextOverlayPosition current_pos, position =
+      applet.get_viewer_text_overlay_position();
+  store_iter i;
+  for (int r = 0; r < CurveView::NUM_TEXT_OVERLAY_POSITIONS; ++r)
+  {
+    current_pos = static_cast<CurveView::TextOverlayPosition>(r);
+
+    i = text_overlay_position_store->append();
+    (*i)[topc.position] = CurveView::text_overlay_position_to_string(current_pos);
+
+    if (position == current_pos)
+      text_overlay_position_combobox->set_active(r);
+  }
 
   // Make sure background colorbutton is grayed out
   background_color_radiobutton->toggled();
@@ -812,6 +839,7 @@ void PreferencesWindow::on_text_overlay_checkbutton_toggled()
   text_overlay_font_checkbutton->set_sensitive(active);
   text_overlay_fontbutton->set_sensitive(active);
   text_overlay_colorbutton->set_sensitive(active);
+  text_overlay_position_combobox->set_sensitive(active);
 
   save_text_overlay_enabled(active);
 }
@@ -864,6 +892,41 @@ void PreferencesWindow::on_text_overlay_colorbutton_set()
   // Actually apply the color change
   applet.set_viewer_text_overlay_color(
     get_colorbutton_int(text_overlay_colorbutton));
+}
+
+void PreferencesWindow::on_text_overlay_position_combobox_changed()
+{
+  int position = text_overlay_position_combobox->get_active_row_number();
+
+  applet.set_viewer_text_overlay_position(
+        static_cast<CurveView::TextOverlayPosition>(position));
+
+  // Search for a writeable settings file, create one if it doesnt exist */
+  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+
+  if (file)
+  {
+    // Opening setting file
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
+    g_free(file);
+
+    // Ensuring default group is in focus
+    xfce_rc_set_group(settings_w, NULL);
+
+    // Updating configuration
+    xfce_rc_write_int_entry(settings_w, "viewer_text_overlay_position",
+                            position);
+
+    // Close settings file
+    xfce_rc_close(settings_w);
+  }
+  else
+  {
+    // Unable to obtain writeable config file - informing user and exiting
+    std::cerr << _("Unable to obtain writeable config file path in order to"
+      " save viewer text overlay position in PreferencesWindow::"
+                   "on_text_overlay_position_combobox_changed!\n");
+  }
 }
 
 void PreferencesWindow::on_add_button_clicked()

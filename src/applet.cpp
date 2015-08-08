@@ -169,7 +169,8 @@ Applet::Applet(XfcePanelPlugin *plugin)
   viewer_text_overlay_format_string("%a %m"),
   viewer_text_overlay_separator(" "),
   viewer_text_overlay_font(""),
-  viewer_text_overlay_color(0x00000000)
+  viewer_text_overlay_color(0x00000000),
+  viewer_text_overlay_position(CurveView::bottom_left)
 {
   // Search for settings file
   XfceRc* settings_ro = NULL;
@@ -208,6 +209,12 @@ Applet::Applet(XfcePanelPlugin *plugin)
       "viewer_text_overlay_font", viewer_text_overlay_font.c_str());
     viewer_text_overlay_color = xfce_rc_read_int_entry(settings_ro,
       "viewer_text_overlay_color", viewer_text_overlay_color);
+
+    // Extra care needed for this since enums don't enforce a range...
+    int text_overlay_position = xfce_rc_read_int_entry(settings_ro,
+      "viewer_text_overlay_position", 0);
+    set_viewer_text_overlay_position(
+          static_cast<CurveView::TextOverlayPosition>(text_overlay_position));
   }
   
   // Loading icon
@@ -608,6 +615,26 @@ const int Applet::get_viewer_text_overlay_color() const
 void Applet::set_viewer_text_overlay_color(const int color)
 {
   viewer_text_overlay_color = color;
+}
+
+const CurveView::TextOverlayPosition Applet::get_viewer_text_overlay_position()
+{
+  return viewer_text_overlay_position;
+}
+
+void Applet::set_viewer_text_overlay_position(CurveView::TextOverlayPosition
+                                      position)
+{
+  // Validating input - an enum does not enforce a range!!
+  if (position < CurveView::top_left ||
+      position >= CurveView::NUM_TEXT_OVERLAY_POSITIONS)
+  {
+    std::cerr << "Applet::set_viewer_text_overlay_position was called with an "
+                 "invalid position: " << position << "!\n";
+    position = CurveView::top_left;
+  }
+
+  viewer_text_overlay_position = position;
 }
 
 void Applet::add_monitor(Monitor *monitor)
