@@ -82,15 +82,17 @@ void Curve::draw(Gnome::Canvas::Canvas &canvas, int width, int height,
   ValueHistory::iterator vi = value_history.values.begin(),
     vend = value_history.values.end();
 
-  // only one point is pointless
+  // Only one point is pointless
   if (std::distance(vi, vend) < 2) 
     return;
 
-  // make sure line is initialised
+  /* Make sure line is initialised - lower to bottom in the canvas' 'z-order' so
+   * that the new text overlay is actually an overlay */
   if (line.get() == 0) {
     line.reset(new Gnome::Canvas::Line(*canvas.root()));
     line->property_smooth() = true;
     line->property_join_style() = Gdk::JOIN_ROUND;
+    line->lower_to_bottom();
   }
 
   // Get drawing attributes with defaults
@@ -111,7 +113,7 @@ void Curve::draw(Gnome::Canvas::Canvas &canvas, int width, int height,
   Gnome::Canvas::Points points;
   points.reserve(value_history.values.size());
 
-  // start from right
+  // Start from right
   double x = width + CurveView::pixels_per_sample * time_offset;
 
   do {
