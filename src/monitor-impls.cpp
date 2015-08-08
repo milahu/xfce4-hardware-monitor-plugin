@@ -889,13 +889,37 @@ void NetworkLoadMonitor::load(XfceRc *settings_ro)
   // Fetching assigned settings group
   Glib::ustring dir = get_settings_dir();
 
-  /* Loading settings - ensuring the settings are for the particular
-   * network monitor?? */
+  // Loading settings
   xfce_rc_set_group(settings_ro, dir.c_str());
   Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
-  InterfaceType inter_type = static_cast<InterfaceType>(xfce_rc_read_int_entry(settings_ro, "interface_type", int(ethernet_first)));
-  Direction inter_direction = static_cast<Direction>(xfce_rc_read_int_entry(settings_ro, "interface_direction" ,int(incoming_data)));
+  int inter_type_int = xfce_rc_read_int_entry(settings_ro, "interface_type",
+                                              int(ethernet_first));
+  int inter_direction_int = xfce_rc_read_int_entry(settings_ro,
+                                                   "interface_direction",
+                                                   int(all_data));
 
+  // Validating input - an enum does not enforce a range!!
+  InterfaceType inter_type;
+  if (inter_type_int < ethernet_first || inter_type_int >= NUM_INTERFACE_TYPES)
+  {
+    std::cerr << "NetworkLoadMonitor::load has read configuration specifying an "
+                 "invalid interface type: " << inter_type_int << "!\n";
+    inter_type = ethernet_first;
+  }
+  else
+    inter_type = static_cast<InterfaceType>(inter_type_int);
+
+  Direction inter_direction;
+  if (inter_direction_int < all_data || inter_direction_int >= NUM_DIRECTIONS)
+  {
+    std::cerr << "NetworkLoadMonitor::load has read configuration specifying an "
+                 "invalid direction: " << inter_direction_int << "!\n";
+    inter_direction = all_data;
+  }
+  else
+    inter_direction = static_cast<Direction>(inter_direction_int);
+
+  // Making sure the monitor type is correct to load further configuration??
   if (type == "network_load" && inter_type == interface_type
       && inter_direction == direction)
       max_value = xfce_rc_read_int_entry(settings_ro, "max", 0);

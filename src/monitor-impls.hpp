@@ -162,7 +162,10 @@ class NetworkLoadMonitor: public Monitor
 {
 public:
   enum Direction {
-    all_data, incoming_data, outgoing_data
+    all_data,
+    incoming_data,
+    outgoing_data,
+    NUM_DIRECTIONS
   };
 
   /* There haven't been many different interfaces commonly used on machines,
