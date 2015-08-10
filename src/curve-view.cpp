@@ -223,7 +223,7 @@ void CurveView::do_attach(Monitor *monitor)
 
       // Saving color
       xfce_rc_set_group(settings_w, dir.c_str());
-      xfce_rc_write_int_entry(settings_w, "color", int(color));
+      xfce_rc_write_int_entry(settings_w, "color", color);
 
       // Close settings file
       xfce_rc_close(settings_w);
@@ -376,7 +376,7 @@ void CurveView::do_draw_loop()
     if (text_overlay->property_font() != font_details)
       text_overlay->property_font() = font_details;
 
-    int color = applet->get_viewer_text_overlay_color();
+    unsigned int color = applet->get_viewer_text_overlay_color();
     if (text_overlay->property_fill_color_rgba() != color)
       text_overlay->property_fill_color_rgba() = color;
 

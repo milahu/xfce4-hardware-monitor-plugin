@@ -437,7 +437,8 @@ unsigned int Applet::get_fg_color()
     0x83A67FB0, 0xC1665AB0, 0x7590AEB0, 0xE0C39ED0, 0x887FA3B0
   };
 
-  // Saving 'current' next color
+  /* Saving 'current' next color - note that this is an index into the colors,
+   * not a color itself */
   int color = next_color;
   
   // Updating next_color
@@ -496,7 +497,7 @@ const Glib::ustring Applet::get_viewer_type()
   return viewer_type;
 }
 
-int Applet::get_background_color() const
+unsigned int Applet::get_background_color() const
 {
   return background_color;
 }
@@ -607,12 +608,12 @@ void Applet::set_viewer_text_overlay_font(const Glib::ustring font_details)
   viewer_text_overlay_font = font_details;
 }
 
-const int Applet::get_viewer_text_overlay_color() const
+const unsigned int Applet::get_viewer_text_overlay_color() const
 {
   return viewer_text_overlay_color;
 }
 
-void Applet::set_viewer_text_overlay_color(const int color)
+void Applet::set_viewer_text_overlay_color(const unsigned int color)
 {
   viewer_text_overlay_color = color;
 }

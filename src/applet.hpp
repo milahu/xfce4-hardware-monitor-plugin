@@ -64,7 +64,7 @@ public:
    * be publically available through GConf, but are private data in the
    * object */
   const Glib::ustring get_viewer_type();
-  int get_background_color() const;
+  unsigned int get_background_color() const;
   gboolean get_use_background_color() const;
   int get_viewer_size() const;
   void set_viewer_size(const int size);
@@ -80,8 +80,8 @@ public:
   void set_viewer_text_overlay_use_font(bool enabled);
   const Glib::ustring get_viewer_text_overlay_font();
   void set_viewer_text_overlay_font(const Glib::ustring font_details);
-  const int get_viewer_text_overlay_color() const;
-  void set_viewer_text_overlay_color(const int color);
+  const unsigned int get_viewer_text_overlay_color() const;
+  void set_viewer_text_overlay_color(const unsigned int color);
   const CurveView::TextOverlayPosition get_viewer_text_overlay_position();
   void set_viewer_text_overlay_position(CurveView::TextOverlayPosition
                                         position);
@@ -122,10 +122,11 @@ private:
   bool viewer_text_overlay_enabled, viewer_text_overlay_use_font;
   Glib::ustring viewer_text_overlay_format_string, viewer_text_overlay_separator,
                 viewer_text_overlay_font;
-  int viewer_text_overlay_color;
+  unsigned int viewer_text_overlay_color;
   CurveView::TextOverlayPosition viewer_text_overlay_position;
 
-  int viewer_size, background_color, next_color;
+  unsigned int background_color;
+  int viewer_size, next_color;
   gboolean use_background_color;
   Glib::RefPtr<Gdk::Pixbuf> icon;
   std::auto_ptr<Gtk::AboutDialog> about;
