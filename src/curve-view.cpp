@@ -346,10 +346,7 @@ void CurveView::do_draw_loop()
     if (graph_max_compact_needed)
       find_and_replace(overlay_text, graph_max_compact, max_formatted_compact);
 
-    /* Checking if overlay is already initialised
-     * Possibility that text is not shown at start up - not failing consistently
-     * now though, when it does, even resetting via switching views is not enough */
-    // TODO: Still a bug here
+    // Checking if overlay is already initialised
     if (!text_overlay)
     {
       /* Font and colour are required to output text, anchor is used to define

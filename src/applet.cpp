@@ -162,14 +162,16 @@ Applet::Applet(XfcePanelPlugin *plugin)
   viewer_type("curve"),
   viewer_font(""),
   viewer_size(96),  // Arbitrary default, see later in this function for notes
-  background_color(0x00000000),  // black as the night
+  background_color(0x000000FF),  // Black as the night - note that the
+                                 // transparency bits need to be set to max to
+                                 // ensure the colour is visible
   use_background_color(false),
   next_color(0),
   viewer_text_overlay_enabled(false),
   viewer_text_overlay_format_string("%a %m"),
   viewer_text_overlay_separator(" "),
   viewer_text_overlay_font(""),
-  viewer_text_overlay_color(0x00000000),
+  viewer_text_overlay_color(0x000000FF),
   viewer_text_overlay_position(CurveView::top_left)
 {
   // Search for settings file
