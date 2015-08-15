@@ -26,6 +26,8 @@
 #include <cassert>
 #include <iostream>
 
+#include <gtkmm/linkbutton.h>
+
 #include "preferences-window.hpp"
 #include "choose-monitor-window.hpp"
 #include "gui-helpers.hpp"
@@ -211,6 +213,12 @@ PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
   ui->get_widget("monitor_flame_options", monitor_flame_options);
   ui->get_widget("flame_colorbutton", flame_colorbutton);
   connect_monitor_colorbutton(flame_colorbutton);
+
+  /* Fix border on help linkbutton - border is specified in the glade config, yet
+   * it is ignored?? */
+  Gtk::LinkButton *link_button;
+  ui->get_widget("help_button", link_button);
+  link_button->set_relief(Gtk::RELIEF_NORMAL);
 
   // Fill in values
   viewer_type_listener(applet.get_viewer_type(), true);

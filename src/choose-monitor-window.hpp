@@ -123,7 +123,6 @@ private:
   void on_temperature_radiobutton_toggled();
   void on_network_interface_name_edited(const Glib::ustring& path,
                                         const Glib::ustring& new_text);
-  void on_help_button_clicked();
   bool on_closed(GdkEventAny *);
 };
 

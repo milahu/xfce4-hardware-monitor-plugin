@@ -23,6 +23,7 @@
 
 #include <sstream>
 
+#include <gtkmm/linkbutton.h>
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>  // For creating a button image from stock
 
@@ -194,13 +195,13 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
     menu->show_all();
   }
 
-  // connect close operations
-  Gtk::Button *help_button;
-  ui->get_widget("help_button", help_button);
+  /* Fix border on help linkbutton - border is specified in the glade config, yet
+   * it is ignored?? */
+  Gtk::LinkButton *link_button;
+  ui->get_widget("help_button", link_button);
+  link_button->set_relief(Gtk::RELIEF_NORMAL);
 
-  help_button->signal_clicked()
-    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::on_help_button_clicked));
-  
+  // Connect close operations
   window->signal_delete_event()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::on_closed));
 }
@@ -628,11 +629,6 @@ void ChooseMonitorWindow::on_temperature_radiobutton_toggled()
 {
   temperature_options->property_sensitive()
     = temperature_radiobutton->get_active();
-}
-
-void ChooseMonitorWindow::on_help_button_clicked()
-{
-  // FIXME: do something
 }
 
 bool ChooseMonitorWindow::on_closed(GdkEventAny *)
