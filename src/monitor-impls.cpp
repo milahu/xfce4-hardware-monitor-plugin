@@ -420,7 +420,7 @@ Glib::ustring SwapUsageMonitor::format_value(double val, bool compact)
 {
   Glib::ustring format = compact ? _("%1M"): _("%1 MB");
 
-  val /= 1000000;
+  val /= 1048576;
 
   return String::ucompose(format, decimal_digits(val, 3), val);
 }
@@ -581,7 +581,7 @@ Glib::ustring MemoryUsageMonitor::format_value(double val, bool compact)
 {
   Glib::ustring format = compact ? _("%1M") : _("%1 MB");
 
-  val /= 1000000;
+  val /= 1048576;
 
   return String::ucompose(format, decimal_digits(val, 3), val);
 }
@@ -660,18 +660,18 @@ Glib::ustring DiskUsageMonitor::format_value(double val, bool compact)
 {
   Glib::ustring format;
 
-  if (val >= 1000 * 1000 * 1000) {
-    val /= 1000 * 1000 * 1000;
+  if (val >= 1024 * 1024 * 1024) {
+    val /= 1024 * 1024 * 1024;
     format = compact ? _("%1G") : _("%1 GB");
     return String::ucompose(format, decimal_digits(val, 3), val);
   }
-  else if (val >= 1000 * 1000) {
-    val /= 1000 * 1000;
+  else if (val >= 1024 * 1024) {
+    val /= 1024 * 1024;
     format = compact ? _("%1M") : _("%1 MB");
     return String::ucompose(format, decimal_digits(val, 3), val);
   }
-  else if (val >= 1000) {
-    val /= 1000;
+  else if (val >= 1024) {
+    val /= 1024;
     format = compact ? _("%1K"): _("%1 KB");
     return String::ucompose(format, decimal_digits(val, 3), val);
   }
@@ -813,18 +813,18 @@ Glib::ustring NetworkLoadMonitor::format_value(double val, bool compact)
   if (val <= 0)     // fix weird problem with negative values
     val = 0;
 
-  if (val >= 1000 * 1000 * 1000) {
-    val /= 1000 * 1000 * 1000;
+  if (val >= 1024 * 1024 * 1024) {
+    val /= 1024 * 1024 * 1024;
     format = compact ? _("%1G") : _("%1 GB/s");
     return String::ucompose(format, decimal_digits(val, 3), val);
   }
-  else if (val >= 1000 * 1000) {
-    val /= 1000 * 1000;
+  else if (val >= 1024 * 1024) {
+    val /= 1024 * 1024;
     format = compact ? _("%1M") : _("%1 MB/s");
     return String::ucompose(format, decimal_digits(val, 3), val);
   }
-  else if (val >= 1000) {
-    val /= 1000;
+  else if (val >= 1024) {
+    val /= 1024;
     format = compact ? _("%1K") : _("%1 KB/s");
     return String::ucompose(format, decimal_digits(val, 3), val);
   }
