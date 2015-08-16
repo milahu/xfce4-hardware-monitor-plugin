@@ -256,7 +256,7 @@ void CurveView::do_draw_loop()
 {
   double max = 0;
   Glib::ustring max_formatted, max_formatted_compact, monitor_data,
-      monitor_data_compact, text_overlay_format_string,
+      monitor_data_compact, text_overlay_format_string, tag_string,
       separator_string = applet->get_viewer_text_overlay_separator();
   bool graph_max_needed = false, graph_max_compact_needed = false,
       monitor_data_needed = false, monitor_data_compact_needed = false,
@@ -299,29 +299,37 @@ void CurveView::do_draw_loop()
       // Collecting a string of monitor data to overlay later
       if (monitor_data_needed)
       {
+        if (!(*i)->monitor->tag.empty())
+          tag_string = (*i)->monitor->tag + ":" + separator_string;
+        else
+          tag_string = "";
+
         if (monitor_data.empty())
         {
-          monitor_data = (*i)->monitor->tag + ":" + separator_string +
+          monitor_data = tag_string +
                      (*i)->monitor->format_value((*i)->monitor->value(), false);
         }
         else
         {
-          monitor_data.append(separator_string + (*i)->monitor->tag + ":" +
-                              separator_string +
+          monitor_data.append(separator_string + tag_string +
                     (*i)->monitor->format_value((*i)->monitor->value(), false));
         }
       }
       if (monitor_data_compact_needed)
       {
+        if (!(*i)->monitor->tag.empty())
+          tag_string = (*i)->monitor->tag + ":";
+        else
+          tag_string = "";
+
         if (monitor_data_compact.empty())
         {
-          monitor_data_compact = (*i)->monitor->tag + ":" +
+          monitor_data_compact = tag_string +
                       (*i)->monitor->format_value((*i)->monitor->value(), true);
         }
         else
         {
-          monitor_data_compact.append(separator_string + (*i)->monitor->tag +
-                                      ":" +
+          monitor_data_compact.append(separator_string + tag_string +
                      (*i)->monitor->format_value((*i)->monitor->value(), true));
         }
       }
