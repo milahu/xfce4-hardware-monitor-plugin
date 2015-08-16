@@ -262,9 +262,6 @@ void CurveView::do_draw_loop()
       monitor_data_needed = false, monitor_data_compact_needed = false,
       text_overlay_enabled = applet->get_viewer_text_overlay_enabled();
 
-  // Debug code
-  std::cout << "Curves count: " << curves.size() << std::endl;
-
   // Obtain maximum value of all curves in the view
   for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
     if ((*i)->get_max_value() > max)
