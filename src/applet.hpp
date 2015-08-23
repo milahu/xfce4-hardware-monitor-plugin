@@ -108,7 +108,6 @@ private:
 
   // the context menu
   void on_preferences_activated();
-  void on_help_activated();
   void on_about_activated();
 
   // looping
@@ -135,7 +134,6 @@ private:
   Gtk::Tooltips tooltips;
 
   friend void display_preferences(Applet *applet);
-  friend void display_help(Applet *applet);
   friend void display_about(Applet *applet);
   friend void save_monitors(Applet *applet);
   friend gboolean size_changed(XfcePanelPlugin* plugin, gint size,

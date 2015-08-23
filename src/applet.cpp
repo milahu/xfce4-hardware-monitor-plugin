@@ -99,11 +99,6 @@ void display_preferences(Applet *applet)
   applet->on_preferences_activated();
 }
 
-void display_help(Applet *applet)
-{
-  applet->on_help_activated();
-}
-
 void display_about(Applet *applet)
 {
   applet->on_about_activated();
@@ -863,11 +858,6 @@ void Applet::on_preferences_activated()
 {
   preferences_window.reset(new PreferencesWindow(*this, monitors));
   preferences_window->show();
-}
-
-void Applet::on_help_activated()
-{
-  // FIXME: do something
 }
 
 void Applet::on_about_activated()
