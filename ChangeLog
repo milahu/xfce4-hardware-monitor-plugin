@@ -1,3 +1,28 @@
+2015-08-23  OmegaPhil <OmegaPhil@startmail.com>
+
+        Release 1.4.7
+
+        * The plugin is now fully documented at
+        http://goodies.xfce.org/projects/panel-plugins/xfce4-hardware-monitor-plugin
+        - help buttons now work and launch a browser with this page.
+        * Advanced users can now configure the interface names used for each
+        interface type associated with the Network Monitor - this accommodates
+        distros that have diverged from the standard UNIX interface naming scheme,
+        and also allows users to overcome the previously hardcoded limited number
+        of interfaces of the same type available to monitor at once. For everyone
+        else, you can now configure 3 wireless interfaces to monitor in line with
+        the number of ethernet interfaces previously. There is still an overall
+        limit of 8 interfaces per plugin/visualisation.
+        * The Curve visualisation/CurveView now supports a very configurable text
+        overlay that allows you to see real values reported by monitors at the
+        same time as the normal line graph (be sure to configure the text tags
+        associated with the individual monitor sources so you don't just get a
+        string of numbers) - you can also now display the maximum value of the
+        graph's scale. This now makes the CurveView a fully functional network
+        bandwidth graph at last.
+        * Sizes and data rates now follow the proper '1024 bytes in a KB' rule.
+
+
 2014-10-24  OmegaPhil <OmegaPhil@startmail.com>
 
 	Release 1.4.6
