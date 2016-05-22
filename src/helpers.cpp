@@ -32,7 +32,7 @@ void fatal_error(const Glib::ustring &msg)
   Gtk::MessageDialog d(msg, Gtk::MESSAGE_ERROR);
 
   d.set_modal();
-  d.set_title(_("Fatal error"));
+  d.set_title(_("Fatal Error"));
 
   d.run();
   

@@ -48,7 +48,11 @@ void PreferencesWindow::connect_monitor_colorbutton(Gtk::ColorButton
 PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
   : applet(applet_)
 {
-  ui = get_glade_xml("preferences_window");
+  // Now we are forced to use top-level widgets this is much more over the top...
+  std::vector<Glib::ustring> objects(2);
+  objects[0] = "preferences_window";
+  objects[1] = "viewer_size_scale_adjustment";
+  ui = get_builder_xml(objects);
 
   ui->get_widget("preferences_window", window);
   window->set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
@@ -217,7 +221,7 @@ PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
   /* Fix border on help linkbutton - border is specified in the glade config, yet
    * it is ignored?? */
   Gtk::LinkButton *link_button;
-  ui->get_widget("help_button", link_button);
+  ui->get_widget("preferences_window_help_button", link_button);
   link_button->set_relief(Gtk::RELIEF_NORMAL);
 
   // Fill in values

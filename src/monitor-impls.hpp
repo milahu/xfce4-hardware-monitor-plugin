@@ -216,8 +216,10 @@ public:
   /* Function dedicated to saving interface names the standard interface types
    * are mapped to */
   static void save_interfaces(XfceRc *settings_w);
-
   static void restore_default_interface_names(XfceRc *settings_w);
+
+  static const Glib::ustring direction_to_string(const Direction direction);
+
 
 private:
   virtual double do_measure();

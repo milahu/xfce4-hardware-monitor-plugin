@@ -30,7 +30,6 @@
 #include "choose-monitor-window.hpp"
 #include "gui-helpers.hpp"
 #include "monitor-impls.hpp"
-#include "i18n.hpp"
 #include "ucompose.hpp"
 
 
@@ -41,7 +40,11 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
                                          Gtk::Window &parent)
   : panel_applet(panel_applet_local)
 {
-  ui = get_glade_xml("choose_monitor_window");
+  // Now we are forced to use top-level widgets this is much more over the top...
+  std::vector<Glib::ustring> objects(2);
+  objects[0] = "choose_monitor_window";
+  objects[1] = "cpu_no_adjustment";
+  ui = get_builder_xml(objects);
 
   ui->get_widget("choose_monitor_window", window);
   window->set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
@@ -55,6 +58,7 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
   ui->get_widget("swap_usage_radiobutton", swap_usage_radiobutton);
   ui->get_widget("load_average_radiobutton", load_average_radiobutton);
   ui->get_widget("disk_usage_radiobutton", disk_usage_radiobutton);
+  ui->get_widget("disk_stats_radiobutton", disk_stats_radiobutton);
   ui->get_widget("network_load_radiobutton", network_load_radiobutton);
   ui->get_widget("temperature_radiobutton", temperature_radiobutton);
   ui->get_widget("fan_speed_radiobutton", fan_speed_radiobutton);
@@ -62,6 +66,7 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
   ui->get_widget("cpu_usage_options", cpu_usage_options);
   ui->get_widget("load_average_options", load_average_options);
   ui->get_widget("disk_usage_options", disk_usage_options);
+  ui->get_widget("disk_stats_options", disk_stats_options);
   ui->get_widget("memory_usage_options", memory_usage_options);
   ui->get_widget("swap_usage_options", swap_usage_options);
   ui->get_widget("network_load_options", network_load_options);
@@ -75,17 +80,20 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
   ui->get_widget("mount_dir_entry", mount_dir_entry);
   ui->get_widget("show_free_checkbutton", show_free_checkbutton);
   ui->get_widget("disk_usage_tag_entry", disk_usage_tag);
+  ui->get_widget("disk_stats_tag_entry", disk_stats_tag);
   ui->get_widget("memory_tag_entry", memory_usage_tag);
   ui->get_widget("swap_tag_entry", swap_usage_tag);
 
-  ui->get_widget("network_type_optionmenu", network_type_optionmenu);
-  ui->get_widget("network_direction_optionmenu", network_direction_optionmenu);
+  ui->get_widget("network_type_combobox", network_type_combobox);
+  ui->get_widget("network_direction_combobox", network_direction_combobox);
   ui->get_widget("network_interfaces_treeview", network_interfaces_treeview);
   ui->get_widget("network_load_tag_entry", network_load_tag);
 
-  /* Need special code here to set the desired stock icon as glade doesn't support
-   * setting a stock icon but custom text, and as soon as you change the label
-   * on a stock button the icon is removed! */
+  /* Need special code here to set the desired stock icon as GTK Builder doesn't
+   * support setting a stock icon but custom text, and as soon as you change the
+   * label on a stock button the icon is removed! Attaching a custom image widget
+   * requires extra hacking in the code, don't see why it is superior to just
+   * this*/
   ui->get_widget("network_interfaces_restore_defaults_button",
                  network_interfaces_restore_defaults_button);
   Gtk::Image *stock_image = Gtk::manage(new Gtk::Image(
@@ -95,14 +103,14 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
 
   ui->get_widget("temperature_box", temperature_box);
   ui->get_widget("temperature_options", temperature_options);
-  ui->get_widget("temperature_optionmenu", temperature_optionmenu);
+  ui->get_widget("temperature_combobox", temperature_combobox);
   ui->get_widget("temperature_tag_entry", temperature_tag);
 
   ui->get_widget("fan_speed_box", fan_speed_box);
   ui->get_widget("fan_speed_options", fan_speed_options);
-  ui->get_widget("fan_speed_optionmenu", fan_speed_optionmenu);
+  ui->get_widget("fan_speed_combobox", fan_speed_combobox);
   ui->get_widget("fan_speed_tag_entry", fan_speed_tag);
-  
+
   cpu_usage_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_cpu_usage_radiobutton_toggled));
@@ -114,6 +122,10 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
   disk_usage_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_disk_usage_radiobutton_toggled));
+
+  disk_stats_radiobutton->signal_toggled()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_disk_stats_radiobutton_toggled));
 
   memory_usage_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
@@ -139,66 +151,109 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_fan_speed_radiobutton_toggled));
 
-  // note 1 off to avoid counting from zero in the interface
+  // Note 1 off to avoid counting from zero in the interface
   cpu_no_spinbutton->set_range(1, CpuUsageMonitor::max_no_cpus);
 
-#if !HAVE_LIBSENSORS            // no sensors support, no options for it
+#if !HAVE_LIBSENSORS            // No sensors support, no options for it
   device_notebook->get_nth_page(3)->hide();
 #endif
 
-  // setup temperature option menu
+  // Setup network interface type combobox
+  static NetworkInterfaceTypeCols nitc;
+  network_interface_type_store = Gtk::ListStore::create(nitc);
+  network_type_combobox->set_model(network_interface_type_store);
+  network_type_combobox->pack_start(nitc.type);
+
+  for (int i = 0; i < NetworkLoadMonitor::NUM_INTERFACE_TYPES; ++i)
+  {
+      NetworkLoadMonitor::InterfaceType interface_type =
+          static_cast<NetworkLoadMonitor::InterfaceType>(i);
+      store_iter iter = network_interface_type_store->append();
+      (*iter)[nitc.type] = NetworkLoadMonitor::
+          interface_type_to_string(interface_type, false);
+  }
+
+  // Setup network direction combobox
+  static NetworkDirectionCols ndc;
+  network_direction_store = Gtk::ListStore::create(ndc);
+  network_direction_combobox->set_model(network_direction_store);
+  network_direction_combobox->pack_start(ndc.direction);
+
+  for (int i = 0; i < NetworkLoadMonitor::NUM_DIRECTIONS; ++i)
+  {
+      NetworkLoadMonitor::Direction direction =
+          static_cast<NetworkLoadMonitor::Direction>(i);
+      store_iter iter = network_direction_store->append();
+      (*iter)[ndc.direction] = NetworkLoadMonitor::direction_to_string(direction);
+  }
+
+  // Setup temperature combobox
+  static SensorsCols tsc;
+  temp_sensors_store = Gtk::ListStore::create(tsc);
+  temperature_combobox->set_model(temp_sensors_store);
+  temperature_combobox->pack_start(tsc.name);
+
   Sensors::FeatureInfoSequence seq
     = Sensors::instance().get_temperature_features();
-  if (!seq.empty()) {
+  if (!seq.empty())
+  {
     temperature_box->set_sensitive(true);
 
-    Gtk::Menu *menu = manage(new Gtk::Menu());
     int counter = 1;
-    for (Sensors::FeatureInfoSequence::iterator i = seq.begin(),
-           end = seq.end(); i != end; ++i) {
+    for (Sensors::FeatureInfoSequence::iterator i = seq.begin(), end = seq.end();
+         i != end; ++i)
+    {
       Glib::ustring s;
       if (!i->description.empty())
+      {
         // %2 is a descriptive string from sensors.conf
         s = String::ucompose(_("Sensor %1: \"%2\""), counter, i->description);
+      }
       else
         s = String::ucompose(_("Sensor %1"), counter);
       
-      menu->append(*manage(new Gtk::MenuItem(s)));
+      store_iter iter = temp_sensors_store->append();
+      (*iter)[tsc.name] = s;
+
       ++counter;
     }
-
-    temperature_optionmenu->set_menu(*menu);
-    menu->show_all();
   }
 
-  // setup fan option menu
+  // Setup fan combobox
+  static SensorsCols fsc;
+  fan_sensors_store = Gtk::ListStore::create(fsc);
+  fan_speed_combobox->set_model(fan_sensors_store);
+  fan_speed_combobox->pack_start(fsc.name);
+
   seq = Sensors::instance().get_fan_features();
-  if (!seq.empty()) {
+  if (!seq.empty())
+  {
     fan_speed_box->set_sensitive(true);
 
-    Gtk::Menu *menu = manage(new Gtk::Menu());
     int counter = 1;
     for (Sensors::FeatureInfoSequence::iterator i = seq.begin(),
-           end = seq.end(); i != end; ++i) {
+           end = seq.end(); i != end; ++i)
+    {
       Glib::ustring s;
       if (!i->description.empty())
+      {
         // %2 is a descriptive string from sensors.conf
         s = String::ucompose(_("Fan %1: \"%2\""), counter, i->description);
+      }
       else
         s = String::ucompose(_("Fan %1"), counter);
       
-      menu->append(*manage(new Gtk::MenuItem(s)));
+      store_iter iter = fan_sensors_store->append();
+      (*iter)[fsc.name] = s;
+
       ++counter;
     }
-
-    fan_speed_optionmenu->set_menu(*menu);
-    menu->show_all();
   }
 
   /* Fix border on help linkbutton - border is specified in the glade config, yet
    * it is ignored?? */
   Gtk::LinkButton *link_button;
-  ui->get_widget("help_button", link_button);
+  ui->get_widget("choose_monitor_help_button", link_button);
   link_button->set_relief(Gtk::RELIEF_NORMAL);
 
   // Connect close operations
@@ -312,39 +367,39 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         switch (interface_type)
         {
           case NetworkLoadMonitor::ethernet_first:
-            network_type_optionmenu->set_history(0);
+            network_type_combobox->set_active(0);
             break;
 
           case NetworkLoadMonitor::ethernet_second:
-            network_type_optionmenu->set_history(1);
+            network_type_combobox->set_active(1);
             break;
 
           case NetworkLoadMonitor::ethernet_third:
-            network_type_optionmenu->set_history(2);
+            network_type_combobox->set_active(2);
             break;
 
           case NetworkLoadMonitor::modem:
-            network_type_optionmenu->set_history(3);
+            network_type_combobox->set_active(3);
             break;
 
           case NetworkLoadMonitor::serial_link:
-            network_type_optionmenu->set_history(4);
+            network_type_combobox->set_active(4);
             break;
 
           case NetworkLoadMonitor::wireless_first:
-            network_type_optionmenu->set_history(5);
+            network_type_combobox->set_active(5);
             break;
 
           case NetworkLoadMonitor::wireless_second:
-            network_type_optionmenu->set_history(6);
+            network_type_combobox->set_active(6);
             break;
 
           case NetworkLoadMonitor::wireless_third:
-            network_type_optionmenu->set_history(7);
+            network_type_combobox->set_active(7);
             break;
 
           default:
-            network_type_optionmenu->set_history(0);
+            network_type_combobox->set_active(0);
             break;
         }
 
@@ -352,17 +407,17 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
           "interface_direction", NetworkLoadMonitor::all_data);
 
         if (direction == NetworkLoadMonitor::incoming_data)
-          network_direction_optionmenu->set_history(1);
+          network_direction_combobox->set_active(1);
         else if (direction == NetworkLoadMonitor::outgoing_data)
-          network_direction_optionmenu->set_history(2);
+          network_direction_combobox->set_active(2);
         else if (direction == NetworkLoadMonitor::all_data)
-          network_direction_optionmenu->set_history(0);
+          network_direction_combobox->set_active(0);
       }
 
       int temperature_no = xfce_rc_read_int_entry(settings_ro,
           "temperature_no", 0);
 
-      temperature_optionmenu->set_history(temperature_no);
+      temperature_combobox->set_active(temperature_no);
 
       xfce_rc_close(settings_ro);
     }
@@ -441,11 +496,11 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
       }
       else if (network_load_radiobutton->get_active())
       {
-        int selected_type = network_type_optionmenu->get_history();
+        int selected_type = network_type_combobox->get_active_row_number();
         NetworkLoadMonitor::InterfaceType interface_type = static_cast<NetworkLoadMonitor::InterfaceType>(selected_type);
 
         NetworkLoadMonitor::Direction dir;
-        switch (network_direction_optionmenu->get_history()) {
+        switch (network_direction_combobox->get_active_row_number()) {
         case NetworkLoadMonitor::incoming_data:
           dir = NetworkLoadMonitor::incoming_data;
           break;
@@ -463,10 +518,10 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
                                      network_load_tag->get_text(), panel_applet);
       }
       else if (temperature_radiobutton->get_active())
-        mon = new TemperatureMonitor(temperature_optionmenu->get_history(),
+        mon = new TemperatureMonitor(temperature_combobox->get_active_row_number(),
                                      temperature_tag->get_text());
       else if (fan_speed_radiobutton->get_active())
-        mon = new FanSpeedMonitor(fan_speed_optionmenu->get_history(),
+        mon = new FanSpeedMonitor(fan_speed_combobox->get_active_row_number(),
                                   fan_speed_tag->get_text());
 
       return mon;
@@ -496,6 +551,12 @@ void ChooseMonitorWindow::on_disk_usage_radiobutton_toggled()
 {
   disk_usage_options->property_sensitive()
     = disk_usage_radiobutton->get_active();
+}
+
+void ChooseMonitorWindow::on_disk_stats_radiobutton_toggled()
+{
+  disk_stats_options->property_sensitive()
+    = disk_stats_radiobutton->get_active();
 }
 
 void ChooseMonitorWindow::on_memory_usage_radiobutton_toggled()

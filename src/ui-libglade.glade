@@ -1,32 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<interface>
-  <requires lib="gtk+" version="2.24"/>
+<glade-interface>
+  <!-- interface-requires gtk+ 2.16 -->
   <!-- interface-naming-policy toplevel-contextual -->
-  <object class="GtkAdjustment" id="cpu_no_adjustment">
-    <property name="lower">1</property>
-    <property name="upper">33</property>
-    <property name="value">1</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
-  <object class="GtkDialog" id="choose_monitor_window">
+  <widget class="GtkDialog" id="choose_monitor_window">
     <property name="can_focus">False</property>
     <property name="border_width">12</property>
     <property name="title" translatable="yes">Choose a Device</property>
     <property name="modal">True</property>
     <property name="type_hint">dialog</property>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="choose_monitor_outer_vbox">
+      <widget class="GtkVBox" id="outer_vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">12</property>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="action_area">
+          <widget class="GtkHButtonBox" id="action_area">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkLinkButton" id="choose_monitor_help_button">
+              <widget class="GtkLinkButton" id="help_button">
                 <property name="label">gtk-help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -34,7 +27,7 @@
                 <property name="has_tooltip">True</property>
                 <property name="use_stock">True</property>
                 <property name="uri">http://goodies.xfce.org/projects/panel-plugins/xfce4-hardware-monitor-plugin#configuration_of_the_device_you_are_monitoring</property>
-              </object>
+              </widget>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
@@ -42,14 +35,15 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="cancel_button">
+              <widget class="GtkButton" id="cancel_button">
                 <property name="label">gtk-cancel</property>
+                <property name="response_id">-6</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-              </object>
+              </widget>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
@@ -57,22 +51,23 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="ok_button">
+              <widget class="GtkButton" id="ok_button">
                 <property name="label">gtk-ok</property>
+                <property name="response_id">-5</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
                 <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-              </object>
+              </widget>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
                 <property name="position">2</property>
               </packing>
             </child>
-          </object>
+          </widget>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
@@ -81,31 +76,31 @@
           </packing>
         </child>
         <child>
-          <object class="GtkNotebook" id="device_notebook">
+          <widget class="GtkNotebook" id="device_notebook">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkVBox" id="system_vbox">
+              <widget class="GtkVBox" id="system_vbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="border_width">12</property>
                 <property name="spacing">12</property>
                 <child>
-                  <object class="GtkVBox" id="cpu_vbox">
+                  <widget class="GtkVBox" id="cpu_vbox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkRadioButton" id="cpu_usage_radiobutton">
+                      <widget class="GtkRadioButton" id="cpu_usage_radiobutton">
                         <property name="label" translatable="yes">C_PU usage</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">The percentage of time that is spent running foreground processes</property>
+                        <property name="tooltip" translatable="yes">The percentage of time that is spent running foreground processes</property>
                         <property name="use_underline">True</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
@@ -113,25 +108,25 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="cpu_usage_options">
+                      <widget class="GtkHBox" id="cpu_usage_options">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkVBox" id="cpu_choose_vbox">
+                          <widget class="GtkVBox" id="cpu_choose_vbox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="spacing">6</property>
                             <child>
-                              <object class="GtkRadioButton" id="all_cpus_radiobutton">
+                              <widget class="GtkRadioButton" id="all_cpus_radiobutton">
                                 <property name="label" translatable="yes">All CPUs</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Monitor all CPUs</property>
+                                <property name="tooltip" translatable="yes">Monitor all CPUs</property>
                                 <property name="use_underline">True</property>
                                 <property name="draw_indicator">True</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
@@ -139,21 +134,21 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkHBox" id="cpu_no_hbox">
+                              <widget class="GtkHBox" id="cpu_no_hbox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="spacing">12</property>
                                 <child>
-                                  <object class="GtkRadioButton" id="one_cpu_radiobutton">
+                                  <widget class="GtkRadioButton" id="one_cpu_radiobutton">
                                     <property name="label" translatable="yes">Only CPU:</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
-                                    <property name="tooltip_text" translatable="yes">Monitor only a single CPU</property>
+                                    <property name="tooltip" translatable="yes">Monitor only a single CPU</property>
                                     <property name="use_underline">True</property>
                                     <property name="draw_indicator">True</property>
                                     <property name="group">all_cpus_radiobutton</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
@@ -161,26 +156,26 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkSpinButton" id="cpu_no_spinbutton">
+                                  <widget class="GtkSpinButton" id="cpu_no_spinbutton">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="tooltip_text" translatable="yes">Which CPU no. to monitor</property>
+                                    <property name="tooltip" translatable="yes">Which CPU no. to monitor</property>
                                     <property name="primary_icon_activatable">False</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="primary_icon_sensitive">True</property>
                                     <property name="secondary_icon_sensitive">True</property>
-                                    <property name="adjustment">cpu_no_adjustment</property>
+                                    <property name="adjustment">1 1 33 1 10 0</property>
                                     <property name="climb_rate">1</property>
                                     <property name="numeric">True</property>
                                     <property name="update_policy">if-valid</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
@@ -188,15 +183,15 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkHBox" id="cpu_tag_hbox">
+                              <widget class="GtkHBox" id="cpu_tag_hbox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <child>
-                                  <object class="GtkLabel" id="cpu_usage_tag_label">
+                                  <widget class="GtkLabel" id="cpu_usage_tag_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">Tag:  </property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
@@ -204,11 +199,11 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="cpu_usage_tag_entry">
+                                  <widget class="GtkEntry" id="cpu_usage_tag_entry">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
+                                    <property name="tooltip" translatable="yes">Tag to display along with monitor data
 in the optional text overlay in a curve
 view</property>
                                     <property name="invisible_char">●</property>
@@ -216,21 +211,21 @@ view</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="primary_icon_sensitive">True</property>
                                     <property name="secondary_icon_sensitive">True</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
                                 <property name="position">2</property>
                               </packing>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
@@ -238,14 +233,14 @@ view</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
@@ -253,21 +248,21 @@ view</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkVBox" id="load_vbox">
+                  <widget class="GtkVBox" id="load_vbox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkRadioButton" id="load_average_radiobutton">
+                      <widget class="GtkRadioButton" id="load_average_radiobutton">
                         <property name="label" translatable="yes">_Load average</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">A running average of the number of simultanous processes</property>
+                        <property name="tooltip" translatable="yes">A running average of the number of simultanous processes</property>
                         <property name="use_underline">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">cpu_usage_radiobutton</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
@@ -275,22 +270,22 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="load_average_options">
+                      <widget class="GtkHBox" id="load_average_options">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="spacing">18</property>
                         <child>
-                          <object class="GtkHBox" id="load_average_tag_vbox">
+                          <widget class="GtkHBox" id="load_average_tag_vbox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="spacing">6</property>
                             <child>
-                              <object class="GtkLabel" id="load_average_tag_label">
+                              <widget class="GtkLabel" id="load_average_tag_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">Tag:</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
@@ -298,11 +293,11 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="load_average_tag_entry">
+                              <widget class="GtkEntry" id="load_average_tag_entry">
                                 <property name="width_request">80</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
+                                <property name="tooltip" translatable="yes">Tag to display along with monitor data
 in the optional text overlay in a curve
 view</property>
                                 <property name="invisible_char">●</property>
@@ -310,14 +305,14 @@ view</property>
                                 <property name="secondary_icon_activatable">False</property>
                                 <property name="primary_icon_sensitive">True</property>
                                 <property name="secondary_icon_sensitive">True</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
@@ -328,54 +323,55 @@ view</property>
                         <child>
                           <placeholder/>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
-              </object>
+              </widget>
             </child>
-            <child type="tab">
-              <object class="GtkLabel" id="system_label">
+            <child>
+              <widget class="GtkLabel" id="system_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">System</property>
-              </object>
+              </widget>
               <packing>
                 <property name="tab_fill">False</property>
+                <property name="type">tab</property>
               </packing>
             </child>
             <child>
-              <object class="GtkVBox" id="storage_vbox">
+              <widget class="GtkVBox" id="storage_vbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="border_width">12</property>
                 <property name="spacing">12</property>
                 <child>
-                  <object class="GtkVBox" id="disk_usage_vbox">
+                  <widget class="GtkVBox" id="disk_usage_vbox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkRadioButton" id="disk_usage_radiobutton">
+                      <widget class="GtkRadioButton" id="disk_usage_radiobutton">
                         <property name="label" translatable="yes">_Disk usage</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">The amount of disk space used</property>
+                        <property name="tooltip" translatable="yes">The amount of disk space used</property>
                         <property name="use_underline">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">cpu_usage_radiobutton</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
@@ -383,26 +379,26 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="disk_usage_options">
+                      <widget class="GtkHBox" id="disk_usage_options">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkVBox" id="disk_usage_options_vbox">
+                          <widget class="GtkVBox" id="disk_usage_options_vbox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="spacing">6</property>
                             <child>
-                              <object class="GtkHBox" id="mount_dir_hbox">
+                              <widget class="GtkHBox" id="mount_dir_hbox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="spacing">12</property>
                                 <child>
-                                  <object class="GtkLabel" id="mount_dir_label">
+                                  <widget class="GtkLabel" id="mount_dir_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">Folder:</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
@@ -410,23 +406,23 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="mount_dir_entry">
+                                  <widget class="GtkEntry" id="mount_dir_entry">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="tooltip_text" translatable="yes">Enter a folder residing on the disk to monitor</property>
+                                    <property name="tooltip" translatable="yes">Enter a folder residing on the disk to monitor</property>
                                     <property name="text" translatable="yes">/</property>
                                     <property name="primary_icon_activatable">False</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="primary_icon_sensitive">True</property>
                                     <property name="secondary_icon_sensitive">True</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">True</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
@@ -434,14 +430,14 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkCheckButton" id="show_free_checkbutton">
+                              <widget class="GtkCheckButton" id="show_free_checkbutton">
                                 <property name="label" translatable="yes">Show _free space instead of used</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
                                 <property name="use_underline">True</property>
                                 <property name="draw_indicator">True</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
@@ -449,18 +445,18 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkHBox" id="disk_usage_tag_hbox">
+                              <widget class="GtkHBox" id="disk_usage_tag_hbox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <child>
-                                  <object class="GtkLabel" id="disk_usage_tag_label">
+                                  <widget class="GtkLabel" id="disk_usage_tag_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
+                                    <property name="tooltip" translatable="yes">Tag to display along with monitor data
 in the optional text overlay in a curve
 view</property>
                                     <property name="label" translatable="yes">Tag:  </property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
@@ -468,11 +464,11 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="disk_usage_tag_entry">
+                                  <widget class="GtkEntry" id="disk_usage_tag_entry">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
+                                    <property name="tooltip" translatable="yes">Tag to display along with monitor data
 in the optional text overlay in a curve
 view</property>
                                     <property name="invisible_char">●</property>
@@ -480,21 +476,21 @@ view</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="primary_icon_sensitive">True</property>
                                     <property name="secondary_icon_sensitive">True</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
                                 <property name="position">2</property>
                               </packing>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
@@ -502,14 +498,14 @@ view</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
@@ -517,22 +513,21 @@ view</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkVBox" id="disk_statistics_vbox">
+                  <widget class="GtkVBox" id="disk_usage_vboxx">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkRadioButton" id="disk_stats_radiobutton">
+                      <widget class="GtkRadioButton" id="disk_stats_radiobutton">
                         <property name="label" translatable="yes">D_isk statistics</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">Disk/device statistics available from /proc/diskstats</property>
+                        <property name="tooltip" translatable="yes">Disk/device statistics available from /proc/diskstats</property>
                         <property name="use_underline">True</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
-                        <property name="group">cpu_usage_radiobutton</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
@@ -540,26 +535,25 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="disk_stats_options">
+                      <widget class="GtkHBox" id="disk_stats_options">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkVBox" id="disk_stats_options_vbox">
+                          <widget class="GtkVBox" id="disk_stats_options_vbox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="spacing">6</property>
                             <child>
-                              <object class="GtkHBox" id="disk_stats_device_hbox">
+                              <widget class="GtkHBox" id="disk_stats_device_hbox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="spacing">12</property>
                                 <child>
-                                  <object class="GtkLabel" id="disk_stats_device_label">
+                                  <widget class="GtkLabel" id="disk_stats_device_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">Disk:</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
@@ -567,17 +561,17 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkComboBox" id="disk_stats_device_combobox">
+                                  <widget class="GtkComboBoxText" id="disk_stats_device_comboboxtext">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">True</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
@@ -585,16 +579,16 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkHBox" id="disk_stats_stat_hbox">
+                              <widget class="GtkHBox" id="disk_stats_stat_hbox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="spacing">12</property>
                                 <child>
-                                  <object class="GtkLabel" id="disk_stats_stat_label">
+                                  <widget class="GtkLabel" id="disk_stats_stat_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">Stat:</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
@@ -602,17 +596,17 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkComboBox" id="disk_stats_stat_combobox">
+                                  <widget class="GtkComboBox" id="disk_stats_stat_combobox">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">True</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
@@ -620,18 +614,18 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkHBox" id="disk_stats_tag_hbox">
+                              <widget class="GtkHBox" id="disk_stats_tag_hbox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <child>
-                                  <object class="GtkLabel" id="disk_stats_tag_label">
+                                  <widget class="GtkLabel" id="disk_stats_tag_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
+                                    <property name="tooltip" translatable="yes">Tag to display along with monitor data
 in the optional text overlay in a curve
 view</property>
                                     <property name="label" translatable="yes">Tag:  </property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
@@ -639,11 +633,11 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="disk_stats_tag_entry">
+                                  <widget class="GtkEntry" id="disk_stats_tag_entry">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
+                                    <property name="tooltip" translatable="yes">Tag to display along with monitor data
 in the optional text overlay in a curve
 view</property>
                                     <property name="invisible_char">●</property>
@@ -651,14 +645,14 @@ view</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="primary_icon_sensitive">True</property>
                                     <property name="secondary_icon_sensitive">True</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
@@ -668,7 +662,7 @@ view</property>
                             <child>
                               <placeholder/>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
@@ -676,14 +670,14 @@ view</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
@@ -691,21 +685,21 @@ view</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkVBox" id="swap_vbox">
+                  <widget class="GtkVBox" id="swap_vbox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkRadioButton" id="swap_usage_radiobutton">
+                      <widget class="GtkRadioButton" id="swap_usage_radiobutton">
                         <property name="label" translatable="yes">_Swap usage</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">The amount of disk-based memory used</property>
+                        <property name="tooltip" translatable="yes">The amount of disk-based memory used</property>
                         <property name="use_underline">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">cpu_usage_radiobutton</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
@@ -713,24 +707,24 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="swap_usage_options">
+                      <widget class="GtkHBox" id="swap_usage_options">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkVBox" id="swap_options_vbox">
+                          <widget class="GtkVBox" id="swap_options_vbox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
-                              <object class="GtkHBox" id="swap_tag_hbox">
+                              <widget class="GtkHBox" id="swap_tag_hbox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <child>
-                                  <object class="GtkLabel" id="swap_tag_label">
+                                  <widget class="GtkLabel" id="swap_tag_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">Tag:  </property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
@@ -738,11 +732,11 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="swap_tag_entry">
+                                  <widget class="GtkEntry" id="swap_tag_entry">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
+                                    <property name="tooltip" translatable="yes">Tag to display along with monitor data
 in the optional text overlay in a curve
 view</property>
                                     <property name="invisible_char">●</property>
@@ -750,14 +744,14 @@ view</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="primary_icon_sensitive">True</property>
                                     <property name="secondary_icon_sensitive">True</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
@@ -767,7 +761,7 @@ view</property>
                             <child>
                               <placeholder/>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
@@ -778,14 +772,14 @@ view</property>
                         <child>
                           <placeholder/>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
@@ -793,21 +787,21 @@ view</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkVBox" id="memory_vbox">
+                  <widget class="GtkVBox" id="memory_vbox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkRadioButton" id="memory_usage_radiobutton">
+                      <widget class="GtkRadioButton" id="memory_usage_radiobutton">
                         <property name="label" translatable="yes">_Memory usage</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">The amount of memory used</property>
+                        <property name="tooltip" translatable="yes">The amount of memory used</property>
                         <property name="use_underline">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">cpu_usage_radiobutton</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
@@ -815,24 +809,24 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="memory_usage_options">
+                      <widget class="GtkHBox" id="memory_usage_options">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkVBox" id="memory_options_vbox">
+                          <widget class="GtkVBox" id="memory_options_vbox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
-                              <object class="GtkHBox" id="memory_tag_hbox">
+                              <widget class="GtkHBox" id="memory_tag_hbox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <child>
-                                  <object class="GtkLabel" id="memory_tag_label">
+                                  <widget class="GtkLabel" id="memory_tag_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">Tag:  </property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
@@ -840,11 +834,11 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="memory_tag_entry">
+                                  <widget class="GtkEntry" id="memory_tag_entry">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
+                                    <property name="tooltip" translatable="yes">Tag to display along with monitor data
 in the optional text overlay in a curve
 view</property>
                                     <property name="invisible_char">●</property>
@@ -852,21 +846,21 @@ view</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="primary_icon_sensitive">True</property>
                                     <property name="secondary_icon_sensitive">True</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
@@ -877,58 +871,59 @@ view</property>
                         <child>
                           <placeholder/>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="position">3</property>
                   </packing>
                 </child>
-              </object>
+              </widget>
               <packing>
                 <property name="position">1</property>
-              </packing>
-            </child>
-            <child type="tab">
-              <object class="GtkLabel" id="storage_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Storage</property>
-              </object>
-              <packing>
-                <property name="position">1</property>
-                <property name="tab_fill">False</property>
               </packing>
             </child>
             <child>
-              <object class="GtkVBox" id="network_vbox">
+              <widget class="GtkLabel" id="storage_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Storage</property>
+              </widget>
+              <packing>
+                <property name="position">1</property>
+                <property name="tab_fill">False</property>
+                <property name="type">tab</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkVBox" id="network_vbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="border_width">12</property>
                 <property name="spacing">12</property>
                 <child>
-                  <object class="GtkVBox" id="network_vbox1">
+                  <widget class="GtkVBox" id="network_vbox1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkRadioButton" id="network_load_radiobutton">
+                      <widget class="GtkRadioButton" id="network_load_radiobutton">
                         <property name="label" translatable="yes">_Network throughput</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">The amount of data sent through a network connection</property>
+                        <property name="tooltip" translatable="yes">The amount of data sent through a network connection</property>
                         <property name="use_underline">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">cpu_usage_radiobutton</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
@@ -936,12 +931,12 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="network_load_options">
+                      <widget class="GtkHBox" id="network_load_options">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkTable" id="network_load_options_table">
+                          <widget class="GtkTable" id="network_load_options_table">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="n_rows">3</property>
@@ -949,12 +944,95 @@ view</property>
                             <property name="column_spacing">12</property>
                             <property name="row_spacing">6</property>
                             <child>
-                              <object class="GtkLabel" id="direction_label">
+                              <widget class="GtkOptionMenu" id="network_type_optionmenu">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip" translatable="yes">Type of connection - Ethernet is the most common local area network adapter type</property>
+                                <child>
+                                  <widget class="GtkMenu" id="menu1">
+                                    <property name="can_focus">False</property>
+                                    <child>
+                                      <widget class="GtkMenuItem" id="ethernet1_item">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Ethernet (first)</property>
+                                        <property name="use_underline">True</property>
+                                      </widget>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkMenuItem" id="ethernet2_item">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Ethernet (second)</property>
+                                        <property name="use_underline">True</property>
+                                      </widget>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkMenuItem" id="ethernet3_item">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Ethernet (third)</property>
+                                        <property name="use_underline">True</property>
+                                      </widget>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkMenuItem" id="modem_item">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Modem</property>
+                                        <property name="use_underline">True</property>
+                                      </widget>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkMenuItem" id="serial_item">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Serial link</property>
+                                        <property name="use_underline">True</property>
+                                      </widget>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkMenuItem" id="wireless1_item">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Wireless (first)</property>
+                                        <property name="use_underline">True</property>
+                                      </widget>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkMenuItem" id="wireless2_item">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Wireless (second)</property>
+                                        <property name="use_underline">True</property>
+                                      </widget>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkMenuItem" id="wireless3_item">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Wireless (third)</property>
+                                        <property name="use_underline">True</property>
+                                      </widget>
+                                    </child>
+                                  </widget>
+                                </child>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="x_options">GTK_FILL</property>
+                                <property name="y_options"/>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="direction_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Direction:</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="top_attach">1</property>
                                 <property name="bottom_attach">2</property>
@@ -963,34 +1041,80 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="network_type_label">
+                              <widget class="GtkOptionMenu" id="network_direction_optionmenu">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip" translatable="yes">Select whether to monitor incoming or outgoing data or both</property>
+                                <child>
+                                  <widget class="GtkMenu" id="menu2">
+                                    <property name="can_focus">False</property>
+                                    <child>
+                                      <widget class="GtkMenuItem" id="all_item">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">All data</property>
+                                        <property name="use_underline">True</property>
+                                      </widget>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkMenuItem" id="in_item">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Incoming data</property>
+                                        <property name="use_underline">True</property>
+                                      </widget>
+                                    </child>
+                                    <child>
+                                      <widget class="GtkMenuItem" id="out_item">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Outgoing data</property>
+                                        <property name="use_underline">True</property>
+                                      </widget>
+                                    </child>
+                                  </widget>
+                                </child>
+                              </widget>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="right_attach">2</property>
+                                <property name="top_attach">1</property>
+                                <property name="bottom_attach">2</property>
+                                <property name="x_options">GTK_FILL</property>
+                                <property name="y_options"/>
+                              </packing>
+                            </child>
+                            <child>
+                              <widget class="GtkLabel" id="network_type_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Connection:</property>
-                              </object>
+                                <property name="mnemonic_widget">network_type_optionmenu</property>
+                              </widget>
                               <packing>
                                 <property name="x_options">GTK_FILL</property>
                                 <property name="y_options"/>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="network_load_tag_label">
+                              <widget class="GtkLabel" id="network_load_tag_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="xalign">0</property>
                                 <property name="label" translatable="yes">Tag:</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="top_attach">2</property>
                                 <property name="bottom_attach">3</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="network_load_tag_entry">
+                              <widget class="GtkEntry" id="network_load_tag_entry">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
-                                <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
+                                <property name="tooltip" translatable="yes">Tag to display along with monitor data
 in the optional text overlay in a curve
 view</property>
                                 <property name="invisible_char">●</property>
@@ -998,7 +1122,7 @@ view</property>
                                 <property name="secondary_icon_activatable">False</property>
                                 <property name="primary_icon_sensitive">True</property>
                                 <property name="secondary_icon_sensitive">True</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
@@ -1006,29 +1130,7 @@ view</property>
                                 <property name="bottom_attach">3</property>
                               </packing>
                             </child>
-                            <child>
-                              <object class="GtkComboBox" id="network_type_combobox">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkComboBox" id="network_direction_combobox">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                              </object>
-                              <packing>
-                                <property name="left_attach">1</property>
-                                <property name="right_attach">2</property>
-                                <property name="top_attach">1</property>
-                                <property name="bottom_attach">2</property>
-                              </packing>
-                            </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
@@ -1036,14 +1138,14 @@ view</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
@@ -1051,18 +1153,18 @@ view</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkExpander" id="expander1">
+                  <widget class="GtkExpander" id="expander1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <child>
-                      <object class="GtkVBox" id="network_vbox2">
+                      <widget class="GtkVBox" id="network_vbox2">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkTreeView" id="network_interfaces_treeview">
+                          <widget class="GtkTreeView" id="network_interfaces_treeview">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
@@ -1073,16 +1175,16 @@ view</property>
                           <placeholder/>
                         </child>
                         <child>
-                          <object class="GtkVButtonBox" id="vbuttonbox1">
+                          <widget class="GtkVButtonBox" id="vbuttonbox1">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
-                              <object class="GtkButton" id="network_interfaces_restore_defaults_button">
+                              <widget class="GtkButton" id="network_interfaces_restore_defaults_button">
                                 <property name="label" translatable="yes">Restore Defaults</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
@@ -1092,68 +1194,72 @@ view</property>
                             <child>
                               <placeholder/>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
                             <property name="position">2</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                     </child>
-                    <child type="label">
-                      <object class="GtkLabel" id="label1">
+                    <child>
+                      <widget class="GtkLabel" id="label1">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Advanced</property>
-                      </object>
+                      </widget>
+                      <packing>
+                        <property name="type">label_item</property>
+                      </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
-              </object>
+              </widget>
               <packing>
                 <property name="position">2</property>
-              </packing>
-            </child>
-            <child type="tab">
-              <object class="GtkLabel" id="network_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Network</property>
-              </object>
-              <packing>
-                <property name="position">2</property>
-                <property name="tab_fill">False</property>
               </packing>
             </child>
             <child>
-              <object class="GtkVBox" id="temperature_vbox">
+              <widget class="GtkLabel" id="network_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Network</property>
+              </widget>
+              <packing>
+                <property name="position">2</property>
+                <property name="tab_fill">False</property>
+                <property name="type">tab</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkVBox" id="temperature_vbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="border_width">12</property>
                 <property name="spacing">12</property>
                 <child>
-                  <object class="GtkVBox" id="temperature_box">
+                  <widget class="GtkVBox" id="temperature_box">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">12</property>
                     <child>
-                      <object class="GtkRadioButton" id="temperature_radiobutton">
+                      <widget class="GtkRadioButton" id="temperature_radiobutton">
                         <property name="label" translatable="yes">_Temperature</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">The temperature of the inside of the system</property>
+                        <property name="tooltip" translatable="yes">The temperature of the inside of the system</property>
                         <property name="use_underline">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">cpu_usage_radiobutton</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
@@ -1161,21 +1267,36 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="temperature_options">
+                      <widget class="GtkHBox" id="temperature_options">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="spacing">12</property>
                         <child>
-                          <object class="GtkVBox" id="temperature_options_vbox">
+                          <widget class="GtkVBox" id="temperature_options_vbox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="spacing">6</property>
                             <child>
-                              <object class="GtkComboBox" id="temperature_combobox">
+                              <widget class="GtkOptionMenu" id="temperature_optionmenu">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                              </object>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip" translatable="yes">Select the sensor to monitor</property>
+                                <child>
+                                  <widget class="GtkMenu" id="menu3">
+                                    <property name="can_focus">False</property>
+                                    <child>
+                                      <widget class="GtkMenuItem" id="no_sensors">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">No sensors detected</property>
+                                        <property name="use_underline">True</property>
+                                      </widget>
+                                    </child>
+                                  </widget>
+                                </child>
+                              </widget>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
@@ -1183,15 +1304,15 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkHBox" id="temperature_tag_hbox">
+                              <widget class="GtkHBox" id="temperature_tag_hbox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <child>
-                                  <object class="GtkLabel" id="temperature_tag_label">
+                                  <widget class="GtkLabel" id="temperature_tag_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">Tag:  </property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
@@ -1199,11 +1320,11 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="temperature_tag_entry">
+                                  <widget class="GtkEntry" id="temperature_tag_entry">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
+                                    <property name="tooltip" translatable="yes">Tag to display along with monitor data
 in the optional text overlay in a curve
 view</property>
                                     <property name="invisible_char">●</property>
@@ -1211,21 +1332,21 @@ view</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="primary_icon_sensitive">True</property>
                                     <property name="secondary_icon_sensitive">True</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
@@ -1233,14 +1354,14 @@ view</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
@@ -1248,22 +1369,22 @@ view</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkVBox" id="fan_speed_box">
+                  <widget class="GtkVBox" id="fan_speed_box">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">12</property>
                     <child>
-                      <object class="GtkRadioButton" id="fan_speed_radiobutton">
+                      <widget class="GtkRadioButton" id="fan_speed_radiobutton">
                         <property name="label" translatable="yes">_Fan speed</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">The speed of the fans</property>
+                        <property name="tooltip" translatable="yes">The speed of the fans</property>
                         <property name="use_underline">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">cpu_usage_radiobutton</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
@@ -1271,20 +1392,35 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="fan_speed_options">
+                      <widget class="GtkHBox" id="fan_speed_options">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="spacing">12</property>
                         <child>
-                          <object class="GtkVBox" id="fan_speed_options_vbox">
+                          <widget class="GtkVBox" id="fan_speed_options_vbox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
-                              <object class="GtkComboBox" id="fan_speed_combobox">
+                              <widget class="GtkOptionMenu" id="fan_speed_optionmenu">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                              </object>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip" translatable="yes">Select the sensor to monitor</property>
+                                <child>
+                                  <widget class="GtkMenu" id="menu4">
+                                    <property name="can_focus">False</property>
+                                    <child>
+                                      <widget class="GtkMenuItem" id="no_sensors1">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">No sensors detected</property>
+                                        <property name="use_underline">True</property>
+                                      </widget>
+                                    </child>
+                                  </widget>
+                                </child>
+                              </widget>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
@@ -1292,15 +1428,15 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkHBox" id="fan_speed_tag_hbox">
+                              <widget class="GtkHBox" id="fan_speed_tag_hbox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <child>
-                                  <object class="GtkLabel" id="fan_speed_tag_label">
+                                  <widget class="GtkLabel" id="fan_speed_tag_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">Tag:  </property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
@@ -1308,11 +1444,11 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="fan_speed_tag_entry">
+                                  <widget class="GtkEntry" id="fan_speed_tag_entry">
                                     <property name="width_request">80</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
+                                    <property name="tooltip" translatable="yes">Tag to display along with monitor data
 in the optional text overlay in a curve
 view</property>
                                     <property name="invisible_char">●</property>
@@ -1320,14 +1456,14 @@ view</property>
                                     <property name="secondary_icon_activatable">False</property>
                                     <property name="primary_icon_sensitive">True</property>
                                     <property name="secondary_icon_sensitive">True</property>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
                                     <property name="position">1</property>
                                   </packing>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
@@ -1335,7 +1471,7 @@ view</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
@@ -1343,83 +1479,74 @@ view</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
-              </object>
+              </widget>
               <packing>
                 <property name="position">3</property>
               </packing>
             </child>
-            <child type="tab">
-              <object class="GtkLabel" id="temperature_label">
+            <child>
+              <widget class="GtkLabel" id="temperature_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Temperature</property>
-              </object>
+              </widget>
               <packing>
                 <property name="position">3</property>
                 <property name="tab_fill">False</property>
+                <property name="type">tab</property>
               </packing>
             </child>
-          </object>
+          </widget>
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
-      </object>
+      </widget>
     </child>
-    <action-widgets>
-      <action-widget response="0">choose_monitor_help_button</action-widget>
-      <action-widget response="-6">cancel_button</action-widget>
-      <action-widget response="-5">ok_button</action-widget>
-    </action-widgets>
-  </object>
-  <object class="GtkAdjustment" id="viewer_size_scale_adjustment">
-    <property name="upper">9</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">1</property>
-  </object>
-  <object class="GtkWindow" id="preferences_window">
+  </widget>
+  <widget class="GtkWindow" id="preferences_window">
     <property name="can_focus">False</property>
     <property name="border_width">12</property>
     <property name="title" translatable="yes">Hardware Monitor Preferences</property>
     <child>
-      <object class="GtkVBox" id="preferences_outer_vbox">
+      <widget class="GtkVBox" id="outer_vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="spacing">12</property>
         <child>
-          <object class="GtkNotebook" id="notebook">
+          <widget class="GtkNotebook" id="notebook">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkVBox" id="devices_outer_vbox">
+              <widget class="GtkVBox" id="devices_outer_vbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="border_width">12</property>
                 <property name="spacing">12</property>
                 <child>
-                  <object class="GtkLabel" id="devices_label">
+                  <widget class="GtkLabel" id="devices_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="xalign">0</property>
                     <property name="label" translatable="yes">&lt;b&gt;Devices&lt;/b&gt;</property>
                     <property name="use_markup">True</property>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
@@ -1427,23 +1554,23 @@ view</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkHBox" id="monitors_hbox">
+                  <widget class="GtkHBox" id="monitors_hbox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkVBox" id="monitors_vbox">
+                      <widget class="GtkVBox" id="monitors_vbox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="spacing">6</property>
                         <child>
-                          <object class="GtkLabel" id="monitors_header">
+                          <widget class="GtkLabel" id="monitors_header">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">_Monitored devices:</property>
                             <property name="use_underline">True</property>
                             <property name="mnemonic_widget">monitor_treeview</property>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
@@ -1451,7 +1578,7 @@ view</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkTable" id="monitors_table">
+                          <widget class="GtkTable" id="monitors_table">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="n_rows">2</property>
@@ -1462,7 +1589,7 @@ view</property>
                               <placeholder/>
                             </child>
                             <child>
-                              <object class="GtkScrolledWindow" id="scrolledwindow">
+                              <widget class="GtkScrolledWindow" id="scrolledwindow">
                                 <property name="width_request">250</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -1470,50 +1597,50 @@ view</property>
                                 <property name="vscrollbar_policy">automatic</property>
                                 <property name="shadow_type">in</property>
                                 <child>
-                                  <object class="GtkTreeView" id="monitor_treeview">
+                                  <widget class="GtkTreeView" id="monitor_treeview">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="headers_visible">False</property>
-                                  </object>
+                                  </widget>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="y_options">GTK_FILL</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkVButtonBox" id="monitor_buttonbox">
+                              <widget class="GtkVButtonBox" id="monitor_buttonbox">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="spacing">6</property>
                                 <property name="layout_style">start</property>
                                 <child>
-                                  <object class="GtkButton" id="add_button">
+                                  <widget class="GtkButton" id="add_button">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <child>
-                                      <object class="GtkHBox" id="add_dummy">
+                                      <widget class="GtkHBox" id="add_dummy">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <child>
-                                          <object class="GtkLabel" id="add_label">
+                                          <widget class="GtkLabel" id="add_label">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="xalign">0</property>
                                             <property name="xpad">12</property>
                                             <property name="label" translatable="yes">_Add</property>
                                             <property name="use_underline">True</property>
-                                          </object>
+                                          </widget>
                                           <packing>
                                             <property name="expand">False</property>
                                             <property name="fill">False</property>
                                             <property name="position">0</property>
                                           </packing>
                                         </child>
-                                      </object>
+                                      </widget>
                                     </child>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
@@ -1521,32 +1648,32 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButton" id="remove_button">
+                                  <widget class="GtkButton" id="remove_button">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <child>
-                                      <object class="GtkHBox" id="remove_dummy">
+                                      <widget class="GtkHBox" id="remove_dummy">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <child>
-                                          <object class="GtkLabel" id="remove_label">
+                                          <widget class="GtkLabel" id="remove_label">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="xalign">0</property>
                                             <property name="xpad">12</property>
                                             <property name="label" translatable="yes">_Remove</property>
                                             <property name="use_underline">True</property>
-                                          </object>
+                                          </widget>
                                           <packing>
                                             <property name="expand">False</property>
                                             <property name="fill">False</property>
                                             <property name="position">0</property>
                                           </packing>
                                         </child>
-                                      </object>
+                                      </widget>
                                     </child>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
@@ -1554,39 +1681,39 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkButton" id="change_button">
+                                  <widget class="GtkButton" id="change_button">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <child>
-                                      <object class="GtkHBox" id="change_dummy">
+                                      <widget class="GtkHBox" id="change_dummy">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <child>
-                                          <object class="GtkLabel" id="change_label">
+                                          <widget class="GtkLabel" id="change_label">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="xalign">0</property>
                                             <property name="xpad">12</property>
                                             <property name="label" translatable="yes">C_hange</property>
                                             <property name="use_underline">True</property>
-                                          </object>
+                                          </widget>
                                           <packing>
                                             <property name="expand">False</property>
                                             <property name="fill">False</property>
                                             <property name="position">0</property>
                                           </packing>
                                         </child>
-                                      </object>
+                                      </widget>
                                     </child>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">False</property>
                                     <property name="position">2</property>
                                   </packing>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
@@ -1595,32 +1722,32 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkVBox" id="monitor_options">
+                              <widget class="GtkVBox" id="monitor_options">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="spacing">12</property>
                                 <child>
-                                  <object class="GtkVBox" id="monitor_curve_options">
+                                  <widget class="GtkVBox" id="monitor_curve_options">
                                     <property name="can_focus">False</property>
                                     <property name="spacing">12</property>
                                     <child>
-                                      <object class="GtkHBox" id="line_hbox">
+                                      <widget class="GtkHBox" id="line_hbox">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="spacing">18</property>
                                         <child>
-                                          <object class="GtkHBox" id="line_color_hbox">
+                                          <widget class="GtkHBox" id="line_color_hbox">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="spacing">12</property>
                                             <child>
-                                              <object class="GtkLabel" id="line_color_label">
+                                              <widget class="GtkLabel" id="line_color_label">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="label" translatable="yes">C_olor:</property>
                                                 <property name="use_underline">True</property>
                                                 <property name="mnemonic_widget">line_colorbutton</property>
-                                              </object>
+                                              </widget>
                                               <packing>
                                                 <property name="expand">False</property>
                                                 <property name="fill">False</property>
@@ -1628,33 +1755,33 @@ view</property>
                                               </packing>
                                             </child>
                                             <child>
-                                              <object class="GtkColorButton" id="line_colorbutton">
+                                              <widget class="GtkColorButton" id="line_colorbutton">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="receives_default">False</property>
                                                 <property name="use_alpha">True</property>
-                                              </object>
+                                              </widget>
                                               <packing>
                                                 <property name="expand">False</property>
                                                 <property name="fill">False</property>
                                                 <property name="position">1</property>
                                               </packing>
                                             </child>
-                                          </object>
+                                          </widget>
                                           <packing>
                                             <property name="expand">True</property>
                                             <property name="fill">True</property>
                                             <property name="position">0</property>
                                           </packing>
                                         </child>
-                                      </object>
+                                      </widget>
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">True</property>
                                     <property name="fill">True</property>
@@ -1662,22 +1789,22 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkVBox" id="monitor_bar_options">
+                                  <widget class="GtkVBox" id="monitor_bar_options">
                                     <property name="can_focus">False</property>
                                     <property name="spacing">12</property>
                                     <child>
-                                      <object class="GtkHBox" id="bar_color_hbox">
+                                      <widget class="GtkHBox" id="bar_color_hbox">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="spacing">12</property>
                                         <child>
-                                          <object class="GtkLabel" id="bar_color_label">
+                                          <widget class="GtkLabel" id="bar_color_label">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="label" translatable="yes">C_olor:</property>
                                             <property name="use_underline">True</property>
                                             <property name="mnemonic_widget">bar_colorbutton</property>
-                                          </object>
+                                          </widget>
                                           <packing>
                                             <property name="expand">False</property>
                                             <property name="fill">False</property>
@@ -1685,26 +1812,26 @@ view</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkColorButton" id="bar_colorbutton">
+                                          <widget class="GtkColorButton" id="bar_colorbutton">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
                                             <property name="use_alpha">True</property>
-                                          </object>
+                                          </widget>
                                           <packing>
                                             <property name="expand">False</property>
                                             <property name="fill">False</property>
                                             <property name="position">1</property>
                                           </packing>
                                         </child>
-                                      </object>
+                                      </widget>
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">True</property>
                                     <property name="fill">True</property>
@@ -1712,22 +1839,22 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkVBox" id="monitor_column_options">
+                                  <widget class="GtkVBox" id="monitor_column_options">
                                     <property name="can_focus">False</property>
                                     <property name="spacing">12</property>
                                     <child>
-                                      <object class="GtkHBox" id="column_color_hbox">
+                                      <widget class="GtkHBox" id="column_color_hbox">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="spacing">12</property>
                                         <child>
-                                          <object class="GtkLabel" id="column_color_label">
+                                          <widget class="GtkLabel" id="column_color_label">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="label" translatable="yes">C_olor:</property>
                                             <property name="use_underline">True</property>
                                             <property name="mnemonic_widget">column_colorbutton</property>
-                                          </object>
+                                          </widget>
                                           <packing>
                                             <property name="expand">False</property>
                                             <property name="fill">False</property>
@@ -1735,26 +1862,26 @@ view</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkColorButton" id="column_colorbutton">
+                                          <widget class="GtkColorButton" id="column_colorbutton">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
                                             <property name="use_alpha">True</property>
-                                          </object>
+                                          </widget>
                                           <packing>
                                             <property name="expand">False</property>
                                             <property name="fill">False</property>
                                             <property name="position">1</property>
                                           </packing>
                                         </child>
-                                      </object>
+                                      </widget>
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">True</property>
                                     <property name="fill">True</property>
@@ -1762,22 +1889,22 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkVBox" id="monitor_flame_options">
+                                  <widget class="GtkVBox" id="monitor_flame_options">
                                     <property name="can_focus">False</property>
                                     <property name="spacing">12</property>
                                     <child>
-                                      <object class="GtkHBox" id="flame_color_hbox">
+                                      <widget class="GtkHBox" id="flame_color_hbox">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="spacing">12</property>
                                         <child>
-                                          <object class="GtkLabel" id="flame_color_label">
+                                          <widget class="GtkLabel" id="flame_color_label">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="label" translatable="yes">C_olor:</property>
                                             <property name="use_underline">True</property>
                                             <property name="mnemonic_widget">flame_colorbutton</property>
-                                          </object>
+                                          </widget>
                                           <packing>
                                             <property name="expand">False</property>
                                             <property name="fill">False</property>
@@ -1785,26 +1912,26 @@ view</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkColorButton" id="flame_colorbutton">
+                                          <widget class="GtkColorButton" id="flame_colorbutton">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
                                             <property name="use_alpha">True</property>
-                                          </object>
+                                          </widget>
                                           <packing>
                                             <property name="expand">False</property>
                                             <property name="fill">False</property>
                                             <property name="position">1</property>
                                           </packing>
                                         </child>
-                                      </object>
+                                      </widget>
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">True</property>
                                     <property name="fill">True</property>
@@ -1812,22 +1939,22 @@ view</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkVBox" id="monitor_vbar_options">
+                                  <widget class="GtkVBox" id="monitor_vbar_options">
                                     <property name="can_focus">False</property>
                                     <property name="spacing">12</property>
                                     <child>
-                                      <object class="GtkHBox" id="vbar_color_hbox">
+                                      <widget class="GtkHBox" id="vbar_color_hbox">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="spacing">12</property>
                                         <child>
-                                          <object class="GtkLabel" id="vbar_color_label">
+                                          <widget class="GtkLabel" id="vbar_color_label">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="label" translatable="yes">C_olor:</property>
                                             <property name="use_underline">True</property>
                                             <property name="mnemonic_widget">bar_colorbutton</property>
-                                          </object>
+                                          </widget>
                                           <packing>
                                             <property name="expand">False</property>
                                             <property name="fill">False</property>
@@ -1835,33 +1962,33 @@ view</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkColorButton" id="vbar_colorbutton">
+                                          <widget class="GtkColorButton" id="vbar_colorbutton">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
                                             <property name="use_alpha">True</property>
-                                          </object>
+                                          </widget>
                                           <packing>
                                             <property name="expand">False</property>
                                             <property name="fill">False</property>
                                             <property name="position">1</property>
                                           </packing>
                                         </child>
-                                      </object>
+                                      </widget>
                                       <packing>
                                         <property name="expand">False</property>
                                         <property name="fill">False</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
-                                  </object>
+                                  </widget>
                                   <packing>
                                     <property name="expand">True</property>
                                     <property name="fill">True</property>
                                     <property name="position">4</property>
                                   </packing>
                                 </child>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="top_attach">1</property>
                                 <property name="bottom_attach">2</property>
@@ -1869,14 +1996,14 @@ view</property>
                                 <property name="y_options"/>
                               </packing>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
@@ -1884,44 +2011,45 @@ view</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
-              </object>
+              </widget>
             </child>
-            <child type="tab">
-              <object class="GtkLabel" id="devices_tab_label">
+            <child>
+              <widget class="GtkLabel" id="devices_tab_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Devices</property>
-              </object>
+              </widget>
               <packing>
                 <property name="tab_fill">False</property>
+                <property name="type">tab</property>
               </packing>
             </child>
             <child>
-              <object class="GtkVBox" id="viewer_vbox">
+              <widget class="GtkVBox" id="viewer_vbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="border_width">12</property>
                 <property name="spacing">18</property>
                 <child>
-                  <object class="GtkVBox" id="viewer_outer_vbox">
+                  <widget class="GtkVBox" id="viewer_outer_vbox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">12</property>
                     <child>
-                      <object class="GtkLabel" id="viewer_label">
+                      <widget class="GtkLabel" id="viewer_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">&lt;b&gt;Viewer&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
@@ -1929,11 +2057,11 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="viewer_hbox">
+                      <widget class="GtkHBox" id="viewer_hbox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkTable" id="radio_table">
+                          <widget class="GtkTable" id="radio_table">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="n_rows">2</property>
@@ -1941,32 +2069,32 @@ view</property>
                             <property name="column_spacing">12</property>
                             <property name="row_spacing">12</property>
                             <child>
-                              <object class="GtkRadioButton" id="curve_radiobutton">
+                              <widget class="GtkRadioButton" id="curve_radiobutton">
                                 <property name="label" translatable="yes">C_urves</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Monitor devices using line graphs</property>
+                                <property name="tooltip" translatable="yes">Monitor devices using line graphs</property>
                                 <property name="use_underline">True</property>
                                 <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="x_options">GTK_FILL</property>
                                 <property name="y_options"/>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="bar_radiobutton">
+                              <widget class="GtkRadioButton" id="bar_radiobutton">
                                 <property name="label" translatable="yes">_Horizontal bars</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Monitor devices using horizontal bars</property>
+                                <property name="tooltip" translatable="yes">Monitor devices using horizontal bars</property>
                                 <property name="use_underline">True</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">curve_radiobutton</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
@@ -1975,16 +2103,16 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="flame_radiobutton">
+                              <widget class="GtkRadioButton" id="flame_radiobutton">
                                 <property name="label" translatable="yes">_Flames</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Monitor devices using fluctuating flames</property>
+                                <property name="tooltip" translatable="yes">Monitor devices using fluctuating flames</property>
                                 <property name="use_underline">True</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">curve_radiobutton</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="left_attach">2</property>
                                 <property name="right_attach">3</property>
@@ -1993,16 +2121,16 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="column_radiobutton">
+                              <widget class="GtkRadioButton" id="column_radiobutton">
                                 <property name="label" translatable="yes">C_olumns</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Monitor devices using solid columns</property>
+                                <property name="tooltip" translatable="yes">Monitor devices using solid columns</property>
                                 <property name="use_underline">True</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">curve_radiobutton</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="top_attach">1</property>
                                 <property name="bottom_attach">2</property>
@@ -2011,16 +2139,16 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="text_radiobutton">
+                              <widget class="GtkRadioButton" id="text_radiobutton">
                                 <property name="label" translatable="yes">_Text</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Monitor devices using text descriptions</property>
+                                <property name="tooltip" translatable="yes">Monitor devices using text descriptions</property>
                                 <property name="use_underline">True</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">curve_radiobutton</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="left_attach">2</property>
                                 <property name="right_attach">3</property>
@@ -2031,16 +2159,16 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkRadioButton" id="vbar_radiobutton">
+                              <widget class="GtkRadioButton" id="vbar_radiobutton">
                                 <property name="label" translatable="yes">_Vertical bars</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Monitor devices using vertical bars</property>
+                                <property name="tooltip" translatable="yes">Monitor devices using vertical bars</property>
                                 <property name="use_underline">True</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">curve_radiobutton</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="right_attach">2</property>
@@ -2050,7 +2178,7 @@ view</property>
                                 <property name="y_options"/>
                               </packing>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
@@ -2058,14 +2186,14 @@ view</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
@@ -2073,17 +2201,17 @@ view</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkVBox" id="size_outer_vbox">
+                  <widget class="GtkVBox" id="size_outer_vbox">
                     <property name="can_focus">False</property>
                     <property name="spacing">12</property>
                     <child>
-                      <object class="GtkLabel" id="size_label">
+                      <widget class="GtkLabel" id="size_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">&lt;b&gt;Size&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
@@ -2091,22 +2219,22 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="size_hbox">
+                      <widget class="GtkHBox" id="size_hbox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkHBox" id="size_scale_hbox">
+                          <widget class="GtkHBox" id="size_scale_hbox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="spacing">12</property>
                             <child>
-                              <object class="GtkLabel" id="size_small_label">
+                              <widget class="GtkLabel" id="size_small_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">&lt;i&gt;Small&lt;/i&gt;</property>
                                 <property name="use_markup">True</property>
                                 <property name="justify">right</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
@@ -2114,14 +2242,14 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkHScale" id="size_scale">
+                              <widget class="GtkHScale" id="size_scale">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="update_policy">discontinuous</property>
-                                <property name="adjustment">viewer_size_scale_adjustment</property>
+                                <property name="adjustment">0 0 9 1 1 0</property>
                                 <property name="digits">0</property>
                                 <property name="draw_value">False</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
@@ -2129,19 +2257,19 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="size_large_label">
+                              <widget class="GtkLabel" id="size_large_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">&lt;i&gt;Large&lt;/i&gt;</property>
                                 <property name="use_markup">True</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
                                 <property name="position">2</property>
                               </packing>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
@@ -2149,14 +2277,14 @@ view</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
@@ -2164,17 +2292,17 @@ view</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkVBox" id="font_outer_vbox">
+                  <widget class="GtkVBox" id="font_outer_vbox">
                     <property name="can_focus">False</property>
                     <property name="spacing">12</property>
                     <child>
-                      <object class="GtkLabel" id="font_label">
+                      <widget class="GtkLabel" id="font_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">&lt;b&gt;Font&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
@@ -2182,23 +2310,23 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="font_hbox">
+                      <widget class="GtkHBox" id="font_hbox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkHBox" id="font_picker_hbox">
+                          <widget class="GtkHBox" id="font_picker_hbox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="spacing">6</property>
                             <child>
-                              <object class="GtkCheckButton" id="font_checkbutton">
+                              <widget class="GtkCheckButton" id="font_checkbutton">
                                 <property name="label" translatable="yes">Use this f_ont:</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
                                 <property name="use_underline">True</property>
                                 <property name="draw_indicator">True</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
@@ -2206,19 +2334,19 @@ view</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkFontButton" id="fontbutton">
+                              <widget class="GtkFontButton" id="fontbutton">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
                                 <property name="title" translatable="yes">Choose a Font</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
@@ -2226,14 +2354,14 @@ view</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
@@ -2241,16 +2369,16 @@ view</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkVBox" id="text_overlay_outer_vbox">
+                  <widget class="GtkVBox" id="text_overlay_outer_vbox">
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkLabel" id="Text Overlay">
+                      <widget class="GtkLabel" id="Text Overlay">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">&lt;b&gt;Text Overlay&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
@@ -2258,16 +2386,16 @@ view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="text_overlay_checkbutton">
+                      <widget class="GtkCheckButton" id="text_overlay_checkbutton">
                         <property name="label" translatable="yes">Enable text overlay of monitor values</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="has_tooltip">True</property>
-                        <property name="tooltip_text" translatable="yes">Output monitor values as
+                        <property name="tooltip" translatable="yes">Output monitor values as
 text onto the curve view</property>
                         <property name="draw_indicator">True</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">False</property>
@@ -2276,16 +2404,16 @@ text onto the curve view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="format_string_hbox">
+                      <widget class="GtkHBox" id="format_string_hbox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkLabel" id="format_string_label">
+                          <widget class="GtkLabel" id="format_string_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">Text overlay format string:</property>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
@@ -2295,7 +2423,7 @@ text onto the curve view</property>
                         <child>
                           <placeholder/>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
@@ -2303,12 +2431,12 @@ text onto the curve view</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="format_string_entry">
+                      <widget class="GtkEntry" id="format_string_entry">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="has_tooltip">True</property>
-                        <property name="tooltip_text" translatable="yes">Description of text to overlay onto curve view:
+                        <property name="tooltip" translatable="yes">Description of text to overlay onto curve view:
 
 %M: Monitor values (full)
 %m: Monitor values (compact - no spaces, shorter units)
@@ -2328,7 +2456,7 @@ M:1.42M D:1.21M U:1.16M</property>
                         <property name="secondary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">True</property>
                         <property name="secondary_icon_sensitive">True</property>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
@@ -2337,16 +2465,16 @@ M:1.42M D:1.21M U:1.16M</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="separator_string_hbox">
+                      <widget class="GtkHBox" id="separator_string_hbox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkLabel" id="separator_label">
+                          <widget class="GtkLabel" id="separator_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">Separator between monitor values:  </property>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
@@ -2354,26 +2482,26 @@ M:1.42M D:1.21M U:1.16M</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="separator_string_entry">
+                          <widget class="GtkEntry" id="separator_string_entry">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="has_tooltip">True</property>
-                            <property name="tooltip_text" translatable="yes">Separator string between
+                            <property name="tooltip" translatable="yes">Separator string between
 individual monitor values</property>
                             <property name="invisible_char">●</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="secondary_icon_activatable">False</property>
                             <property name="primary_icon_sensitive">True</property>
                             <property name="secondary_icon_sensitive">True</property>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
@@ -2382,17 +2510,17 @@ individual monitor values</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="text_overlay_font_hbox">
+                      <widget class="GtkHBox" id="text_overlay_font_hbox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkCheckButton" id="text_overlay_font_checkbutton">
+                          <widget class="GtkCheckButton" id="text_overlay_font_checkbutton">
                             <property name="label" translatable="yes">Use this font:</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="draw_indicator">True</property>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
@@ -2401,12 +2529,12 @@ individual monitor values</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkFontButton" id="text_overlay_fontbutton">
+                          <widget class="GtkFontButton" id="text_overlay_fontbutton">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="title" translatable="yes">Choose a Font</property>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
@@ -2414,11 +2542,11 @@ individual monitor values</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="text_overlay_color_label">
+                          <widget class="GtkLabel" id="text_overlay_color_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Color:</property>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
@@ -2427,19 +2555,19 @@ individual monitor values</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkColorButton" id="text_overlay_colorbutton">
+                          <widget class="GtkColorButton" id="text_overlay_colorbutton">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="color">#000000000000</property>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
                             <property name="position">3</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
@@ -2447,15 +2575,15 @@ individual monitor values</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHBox" id="text_overlay_position_hbox">
+                      <widget class="GtkHBox" id="text_overlay_position_hbox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkLabel" id="text_overlay_position_label">
+                          <widget class="GtkLabel" id="text_overlay_position_label">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Text position:</property>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
@@ -2463,10 +2591,10 @@ individual monitor values</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkComboBox" id="text_overlay_position_combobox">
+                          <widget class="GtkComboBox" id="text_overlay_position_combobox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
@@ -2474,50 +2602,51 @@ individual monitor values</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">6</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">3</property>
                   </packing>
                 </child>
-              </object>
+              </widget>
               <packing>
                 <property name="position">1</property>
-              </packing>
-            </child>
-            <child type="tab">
-              <object class="GtkLabel" id="viewer_tab_label">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Viewer</property>
-              </object>
-              <packing>
-                <property name="position">1</property>
-                <property name="tab_fill">False</property>
               </packing>
             </child>
             <child>
-              <object class="GtkVBox" id="background_outer_vbox">
+              <widget class="GtkLabel" id="viewer_tab_label">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Viewer</property>
+              </widget>
+              <packing>
+                <property name="position">1</property>
+                <property name="tab_fill">False</property>
+                <property name="type">tab</property>
+              </packing>
+            </child>
+            <child>
+              <widget class="GtkVBox" id="background_outer_vbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="border_width">12</property>
                 <property name="spacing">12</property>
                 <child>
-                  <object class="GtkLabel" id="background_label">
+                  <widget class="GtkLabel" id="background_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="xalign">0</property>
                     <property name="label" translatable="yes">&lt;b&gt;Background&lt;/b&gt;</property>
                     <property name="use_markup">True</property>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
@@ -2525,23 +2654,23 @@ individual monitor values</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkHBox" id="background_hbox">
+                  <widget class="GtkHBox" id="background_hbox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkVBox" id="background_vbox">
+                      <widget class="GtkVBox" id="background_vbox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="spacing">6</property>
                         <child>
-                          <object class="GtkRadioButton" id="panel_background_radiobutton">
+                          <widget class="GtkRadioButton" id="panel_background_radiobutton">
                             <property name="label" translatable="yes">Use _panel background</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="use_underline">True</property>
                             <property name="draw_indicator">True</property>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">False</property>
@@ -2549,12 +2678,12 @@ individual monitor values</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkHBox" id="background_color_hbox">
+                          <widget class="GtkHBox" id="background_color_hbox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="spacing">6</property>
                             <child>
-                              <object class="GtkRadioButton" id="background_color_radiobutton">
+                              <widget class="GtkRadioButton" id="background_color_radiobutton">
                                 <property name="label" translatable="yes">Use _this color:</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -2562,7 +2691,7 @@ individual monitor values</property>
                                 <property name="use_underline">True</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">panel_background_radiobutton</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
@@ -2570,25 +2699,25 @@ individual monitor values</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkColorButton" id="background_colorbutton">
+                              <widget class="GtkColorButton" id="background_colorbutton">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                              </object>
+                              </widget>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
-                          </object>
+                          </widget>
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
-                      </object>
+                      </widget>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">False</property>
@@ -2596,31 +2725,32 @@ individual monitor values</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
-                  </object>
+                  </widget>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
-              </object>
+              </widget>
               <packing>
                 <property name="position">2</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>
-            <child type="tab">
-              <object class="GtkLabel" id="background_tab_label">
+            <child>
+              <widget class="GtkLabel" id="background_tab_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Background</property>
-              </object>
+              </widget>
               <packing>
                 <property name="position">2</property>
                 <property name="tab_fill">False</property>
+                <property name="type">tab</property>
               </packing>
             </child>
-          </object>
+          </widget>
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
@@ -2628,13 +2758,13 @@ individual monitor values</property>
           </packing>
         </child>
         <child>
-          <object class="GtkHButtonBox" id="action_buttonbox">
+          <widget class="GtkHButtonBox" id="action_buttonbox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="spacing">12</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkLinkButton" id="preferences_window_help_button">
+              <widget class="GtkLinkButton" id="help_button">
                 <property name="label">gtk-help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -2642,7 +2772,7 @@ individual monitor values</property>
                 <property name="has_tooltip">True</property>
                 <property name="use_stock">True</property>
                 <property name="uri">http://goodies.xfce.org/projects/panel-plugins/xfce4-hardware-monitor-plugin#configuration_of_the_device_you_are_monitoring</property>
-              </object>
+              </widget>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
@@ -2650,28 +2780,28 @@ individual monitor values</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="close_button">
+              <widget class="GtkButton" id="close_button">
                 <property name="label">gtk-close</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="receives_default">False</property>
                 <property name="use_stock">True</property>
-              </object>
+              </widget>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
-          </object>
+          </widget>
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
             <property name="position">1</property>
           </packing>
         </child>
-      </object>
+      </widget>
     </child>
-  </object>
-</interface>
+  </widget>
+</glade-interface>

@@ -25,16 +25,16 @@
 #include <iostream>
 #include <memory>
 
-#include <libglademm/xml.h>
 #include <sigc++/trackable.h>
 #include <gtkmm/box.h>
+#include <gtkmm/builder.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/dialog.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/notebook.h>
-#include <gtkmm/optionmenu.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/treeview.h>
@@ -61,37 +61,74 @@ public:
   Monitor *run(const Glib::ustring &mon_dir);
   
 private:
-  Glib::RefPtr<Gnome::Glade::Xml> ui;
+  Glib::RefPtr<Gtk::Builder> ui;
 
   Gtk::Dialog *window;
   Gtk::Notebook *device_notebook;
   
   Gtk::RadioButton *cpu_usage_radiobutton, *memory_usage_radiobutton,
     *swap_usage_radiobutton, *load_average_radiobutton, *disk_usage_radiobutton,
-    *network_load_radiobutton, *temperature_radiobutton, *fan_speed_radiobutton;
+    *disk_stats_radiobutton, *network_load_radiobutton, *temperature_radiobutton,
+    *fan_speed_radiobutton;
 
   Gtk::Box *cpu_usage_options, *load_average_options;
   Gtk::RadioButton *all_cpus_radiobutton, *one_cpu_radiobutton;
   Gtk::SpinButton *cpu_no_spinbutton;
   Gtk::Entry *cpu_tag, *load_average_tag;
 
-  Gtk::Box *disk_usage_options, *memory_usage_options, *swap_usage_options;
-  Gtk::Entry *mount_dir_entry, *disk_usage_tag, *memory_usage_tag,
+  Gtk::Box *disk_usage_options, *disk_stats_options, *memory_usage_options,
+           *swap_usage_options;
+  Gtk::Entry *mount_dir_entry, *disk_usage_tag, *disk_stats_tag, *memory_usage_tag,
              *swap_usage_tag;
   Gtk::CheckButton *show_free_checkbutton;
 
   Gtk::Box *network_load_options;
-  Gtk::OptionMenu *network_type_optionmenu, *network_direction_optionmenu;
+  Gtk::ComboBox *network_type_combobox, *network_direction_combobox;
   Gtk::TreeView *network_interfaces_treeview;
   Gtk::Button *network_interfaces_restore_defaults_button;
   Gtk::Entry *network_load_tag;
 
   Gtk::Box *temperature_box, *temperature_options, *fan_speed_box,
            *fan_speed_options;
-  Gtk::OptionMenu *temperature_optionmenu, *fan_speed_optionmenu;
+  Gtk::ComboBox *temperature_combobox, *fan_speed_combobox;
   Gtk::Entry *temperature_tag, *fan_speed_tag;
 
   XfcePanelPlugin* panel_applet;
+
+  // For network interface type combobox (basic listing of available types)
+  class NetworkInterfaceTypeCols: public Gtk::TreeModel::ColumnRecord
+  {
+  public:
+    Gtk::TreeModelColumn<Glib::ustring> type;
+
+    NetworkInterfaceTypeCols() { add(type); }
+  };
+
+  Glib::RefPtr<Gtk::ListStore> network_interface_type_store;
+
+  typedef Gtk::ListStore::iterator store_iter;
+
+  // For network direction combobox
+  class NetworkDirectionCols: public Gtk::TreeModel::ColumnRecord
+  {
+  public:
+    Gtk::TreeModelColumn<Glib::ustring> direction;
+
+    NetworkDirectionCols() { add(direction); }
+  };
+
+  Glib::RefPtr<Gtk::ListStore> network_direction_store;
+
+  // For temperature and fan sensors comboboxes
+  class SensorsCols: public Gtk::TreeModel::ColumnRecord
+  {
+  public:
+    Gtk::TreeModelColumn<Glib::ustring> name;
+
+    SensorsCols() { add(name); }
+  };
+
+  Glib::RefPtr<Gtk::ListStore> temp_sensors_store, fan_sensors_store;
 
   // For the advanced settings network interface name treeview
   class NetworkInterfacesNamesCols: public Gtk::TreeModel::ColumnRecord
@@ -109,12 +146,12 @@ private:
   static NetworkInterfacesNamesCols nc;
 
   Glib::RefPtr<Gtk::ListStore> network_interfaces_names_store;
-  typedef Gtk::ListStore::iterator store_iter;
 
   // GUI
   void on_cpu_usage_radiobutton_toggled();
   void on_load_average_radiobutton_toggled();
   void on_disk_usage_radiobutton_toggled();
+  void on_disk_stats_radiobutton_toggled();
   void on_memory_usage_radiobutton_toggled();
   void on_swap_usage_radiobutton_toggled();
   void on_fan_speed_radiobutton_toggled();

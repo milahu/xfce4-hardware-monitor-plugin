@@ -7,8 +7,10 @@ src/choose-monitor-window.cpp
 src/column-view.cpp
 src/curve-view.cpp
 src/flame-view.cpp
-src/ui.glade
+src/gui-helpers.cpp
 src/helpers.cpp
 src/monitor-impls.cpp
 src/preferences-window.cpp
 src/text-view.cpp
+src/ui.glade
+src/ui-libglade.glade

@@ -1345,6 +1345,28 @@ void NetworkLoadMonitor::save_interfaces(XfceRc *settings_w)
                       interface_type_names[wireless_third].c_str());
 }
 
+const Glib::ustring NetworkLoadMonitor::direction_to_string(const Direction direction)
+{
+  Glib::ustring direction_str;
+
+  switch(direction)
+  {
+    case all_data:
+      direction_str = _("All data");
+      break;
+
+    case incoming_data:
+      direction_str = _("Incoming data");
+      break;
+
+    case outgoing_data:
+      direction_str = _("Outgoing data");
+      break;
+  }
+
+  return direction_str;
+}
+
 //
 // implementation of sensors wrapper
 //

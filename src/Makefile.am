@@ -4,7 +4,7 @@
 #
 # XFCE4 modifications copyright:
 #
-# 2013 OmegaPhil (OmegaPhil@startmail.com)
+# 2013, 2016 OmegaPhil (OmegaPhil@startmail.com)
 
 
 # Defining libraries to be built and their installation destination
@@ -20,7 +20,7 @@ libhardwaremonitor_la_SOURCES = \
                       column-view.cpp column-view.hpp \
                       curve-view.cpp curve-view.hpp \
                       flame-view.cpp flame-view.hpp \
-                      gui-helpers.hpp \
+                      gui-helpers.cpp gui-helpers.hpp \
                       helpers.cpp helpers.hpp \
                       i18n.hpp \
                       monitor.hpp \

@@ -25,9 +25,9 @@
 #include <memory>
 #include <vector>
 
-#include <libglademm/xml.h>
 #include <sigc++/trackable.h>
 #include <sigc++/connection.h>
+#include <gtkmm/builder.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/colorbutton.h>
@@ -55,7 +55,7 @@ public:
   void show();
   
 private:
-  Glib::RefPtr<Gnome::Glade::Xml> ui;
+  Glib::RefPtr<Gtk::Builder> ui;
 
   Gtk::Window *window;
   
