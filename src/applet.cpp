@@ -640,9 +640,6 @@ void Applet::add_monitor(Monitor *monitor)
   add_sync_for(monitor);
   monitors.push_back(monitor);
 
-  /* Read and write config locations and the open call are different in XFCE4 -
-   * hence the duplication here */
-
   /* Checking if monitor has a defined settings directory and therefore
    * settings to load */
   if (monitor->get_settings_dir().empty())
@@ -670,32 +667,6 @@ void Applet::add_monitor(Monitor *monitor)
       // Unable to obtain writeable config file - informing user
       std::cerr << _("Unable to obtain writeable config file path in "
         "order to save monitor in add_monitor call!\n");
-    }
-  }
-  else
-  {
-    /* Monitor has a saved settings directory and therefore settings to
-     * load
-     * Search for settings file */
-    gchar* file = xfce_panel_plugin_lookup_rc_file(panel_applet);
- 
-    if (file)
-    {
-      // One exists - loading readonly settings
-      XfceRc* settings_ro = xfce_rc_simple_open(file, true);
-      g_free(file);
-
-      // Load settings for monitor
-      monitor->load(settings_ro);
-      
-      // Close settings file
-      xfce_rc_close(settings_ro);
-    }
-    else
-    {
-      // Unable to obtain read only config file - informing user
-      std::cerr << _("Unable to obtain read-only config file path in "
-        "order to load monitor settings in add_monitor call!\n");
     }
   }
 
@@ -753,32 +724,8 @@ void Applet::replace_monitor(Monitor *prev_mon, Monitor *new_mon)
   *i = new_mon;
   new_mon->set_settings_dir(prev_mon->get_settings_dir());
 
-  /* Loading monitor with previous monitor's settings - XFCE4 needs
-   * different code to read a config file as compared to writing to it
-   * Search for settings file */
-  gchar* file = xfce_panel_plugin_lookup_rc_file(panel_applet);
-
-  if (file)
-  {
-    // One exists - loading readonly settings
-    XfceRc* settings_ro = xfce_rc_simple_open(file, true);
-    g_free(file);
-
-    // Load settings
-    new_mon->load(settings_ro);
-    
-    // Close settings file
-    xfce_rc_close(settings_ro);
-  }
-  else
-  {
-    // Unable to obtain read-only config file - informing user
-    std::cerr << _("Unable to obtain read-only config file path in "
-      "order to load monitor settings in replace_monitor call!\n");
-  }
-
   // Search for a writeable settings file, create one if it doesnt exist
-  file = xfce_panel_plugin_save_location(panel_applet, true);
+  gchar* file = xfce_panel_plugin_save_location(panel_applet, true);
     
   if (file)
   {

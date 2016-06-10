@@ -544,18 +544,6 @@ void LoadAverageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "max", setting.c_str());
 }
 
-void LoadAverageMonitor::load(XfceRc *settings_ro)
-{
-  // Fetching assigned settings group
-  Glib::ustring dir = get_settings_dir();
-
-  // Loading settings - no support for floats, unstringifying
-  xfce_rc_set_group(settings_ro, dir.c_str());
-  Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
-  if (type == "load_average")
-    max_value = atof(xfce_rc_read_entry(settings_ro, "max", "5"));
-}
-
 
 //
 // class MemoryUsageMonitor
@@ -845,47 +833,6 @@ void DiskStatsMonitor::save(XfceRc *settings_w)
   xfce_rc_write_int_entry(settings_w, "disk_stats_stat", int(stat_to_monitor));
   xfce_rc_write_int_entry(settings_w, "max", int(max_value));
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
-}
-
-void DiskStatsMonitor::load(XfceRc *settings_ro)
-{
-  /*
-   * // TODO: This seems to be completely unnecessary - loading/configuration is already done in load_monitors, looks like that should be moved into individual monitor ::load functions?
-  // Fetching assigned settings group
-  Glib::ustring dir = get_settings_dir();
-
-  // Loading settings
-  xfce_rc_set_group(settings_ro, dir.c_str());
-  Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
-  device_name = xfce_rc_read_entry(settings_ro, "disk_stats_device", "");
-  int stat = xfce_rc_read_int_entry(settings_ro, "interface_type",
-                                              int(num_reads_completed));
-
-  // Validating input - an enum does not enforce a range!!
-  if (stat < num_reads_completed || stat >= NUM_STATS)
-  {
-    std::cerr << "DiskStatsMonitor::load has read configuration specifying an "
-                 "invalid statistic: " << stat << "!\n";
-    stat = num_reads_completed;
-  }
-  else
-    inter_type = static_cast<InterfaceType>(inter_type_int);
-
-  Direction inter_direction;
-  if (inter_direction_int < all_data || inter_direction_int >= NUM_DIRECTIONS)
-  {
-    std::cerr << "NetworkLoadMonitor::load has read configuration specifying an "
-                 "invalid direction: " << inter_direction_int << "!\n";
-    inter_direction = all_data;
-  }
-  else
-    inter_direction = static_cast<Direction>(inter_direction_int);
-
-  // Making sure the monitor type is correct to load further configuration??
-  if (type == "network_load" && inter_type == interface_type
-      && inter_direction == direction)
-      max_value = xfce_rc_read_int_entry(settings_ro, "max", 0);
-  */
 }
 
 bool DiskStatsMonitor::stats_available()
@@ -1280,47 +1227,6 @@ void NetworkLoadMonitor::save(XfceRc *settings_w)
     int(direction));
   xfce_rc_write_int_entry(settings_w, "max", int(max_value));
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
-}
-
-void NetworkLoadMonitor::load(XfceRc *settings_ro)
-{
-  // Fetching assigned settings group
-  Glib::ustring dir = get_settings_dir();
-
-  // Loading settings
-  xfce_rc_set_group(settings_ro, dir.c_str());
-  Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
-  int inter_type_int = xfce_rc_read_int_entry(settings_ro, "interface_type",
-                                              int(ethernet_first));
-  int inter_direction_int = xfce_rc_read_int_entry(settings_ro,
-                                                   "interface_direction",
-                                                   int(all_data));
-
-  // Validating input - an enum does not enforce a range!!
-  InterfaceType inter_type;
-  if (inter_type_int < ethernet_first || inter_type_int >= NUM_INTERFACE_TYPES)
-  {
-    std::cerr << "NetworkLoadMonitor::load has read configuration specifying an "
-                 "invalid interface type: " << inter_type_int << "!\n";
-    inter_type = ethernet_first;
-  }
-  else
-    inter_type = static_cast<InterfaceType>(inter_type_int);
-
-  Direction inter_direction;
-  if (inter_direction_int < all_data || inter_direction_int >= NUM_DIRECTIONS)
-  {
-    std::cerr << "NetworkLoadMonitor::load has read configuration specifying an "
-                 "invalid direction: " << inter_direction_int << "!\n";
-    inter_direction = all_data;
-  }
-  else
-    inter_direction = static_cast<Direction>(inter_direction_int);
-
-  // Making sure the monitor type is correct to load further configuration??
-  if (type == "network_load" && inter_type == interface_type
-      && inter_direction == direction)
-      max_value = xfce_rc_read_int_entry(settings_ro, "max", 0);
 }
 
 void NetworkLoadMonitor::possibly_add_sync_with(Monitor *other)
@@ -1964,21 +1870,6 @@ void TemperatureMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "max", setting.c_str());
 }
 
-void TemperatureMonitor::load(XfceRc *settings_ro)
-{
-  // Fetching assigned settings group
-  Glib::ustring dir = get_settings_dir();
-
-  /* Loading settings, making sure the right sensor is loaded. No support
-   * for floats, unstringifying */
-  xfce_rc_set_group(settings_ro, dir.c_str());
-  Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
-  if (type == "temperature" && xfce_rc_read_int_entry(settings_ro,
-    "temperature_no", 0) == sensors_no)
-    max_value = atof(xfce_rc_read_entry(settings_ro, "max", "40"));
-}
-
-
 
 //
 // class FanSpeedMonitor
@@ -2061,16 +1952,3 @@ void FanSpeedMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "max", setting.c_str());
 }
 
-void FanSpeedMonitor::load(XfceRc *settings_ro)
-{
-  // Fetching assigned settings group
-  Glib::ustring dir = get_settings_dir();
-
-  /* Loading settings, making sure the right fan is loaded. No support
-   * for floats, unstringifying */
-  xfce_rc_set_group(settings_ro, dir.c_str());
-  Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
-  int fan_no = xfce_rc_read_int_entry(settings_ro, "fan_no", 0);
-  if (type == "fan_speed" && fan_no == sensors_no)
-    max_value = atof(xfce_rc_read_entry(settings_ro, "max", "1"));
-}

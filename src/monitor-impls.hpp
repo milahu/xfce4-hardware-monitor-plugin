@@ -107,7 +107,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
   virtual void save(XfceRc *settings_w);
-  virtual void load(XfceRc *settings_ro);
 
 private:
   virtual double do_measure();
@@ -190,7 +189,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
   virtual void save(XfceRc *settings_w);
-  virtual void load(XfceRc *settings_ro);
 
   static bool stats_available();
   static std::vector<Glib::ustring> current_device_names();
@@ -256,7 +254,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
   virtual void save(XfceRc *settings_w);
-  virtual void load(XfceRc *settings_ro);
   virtual void possibly_add_sync_with(Monitor *other);
   virtual void remove_sync_with(Monitor *other);
 
@@ -326,7 +323,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
   virtual void save(XfceRc *settings_w);
-  virtual void load(XfceRc *settings_ro);
 
 private:
   virtual double do_measure();
@@ -351,7 +347,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
   virtual void save(XfceRc *settings_w);
-  virtual void load(XfceRc *settings_ro);
 
 private:
   virtual double do_measure();

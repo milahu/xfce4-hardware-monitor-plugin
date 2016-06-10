@@ -96,11 +96,6 @@ public:
   // Save information about the monitor
   virtual void save(XfceRc *settings_w) = 0;
 
-  // Load any internal monitor state
-  virtual void load(XfceRc *settings_ro)
-  {
-  }
-
   /* If other is watching the same thing as this monitor, it might be
    * a good idea to sync maxima with it */
   virtual void possibly_add_sync_with(Monitor *other)
