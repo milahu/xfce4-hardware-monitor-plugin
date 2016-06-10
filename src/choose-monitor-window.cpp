@@ -566,7 +566,31 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
       {
         Glib::ustring mount_dir = mount_dir_entry->get_text();
         bool show_free = show_free_checkbutton->get_active();
-        // TODO: check that mount_dir is valid
+
+        // Making sure that the directory passed is valid
+        if (!Glib::file_test(mount_dir,  Glib::FileTest::FILE_TEST_IS_DIR))
+        {
+          /* Making sure the user is OK with specifying a non-existent directory
+           * (i.e. it may appear later) */
+          Glib::ustring msg = Glib::ustring::
+              compose(_("Specified directory '%1' does not currently exist - do "
+                        "you still want to proceed?"), mount_dir);
+
+          /* See helpers.hpp - tried to host a generic warning dialog
+           * implementation there but got endless include bullshit */
+          Gtk::MessageDialog d(msg, false, Gtk::MESSAGE_WARNING,
+                               Gtk::BUTTONS_YES_NO);
+          d.set_modal();
+          d.set_title(_("Disk Usage Monitor"));
+          d.set_icon(window->get_icon());
+          if (d.run() != Gtk::RESPONSE_YES)
+          {
+            mount_dir_entry->grab_focus();
+            response = Gtk::RESPONSE_HELP;
+            continue;
+          }
+        }
+
         mon = new DiskUsageMonitor(mount_dir, show_free,
                                    disk_usage_tag->get_text());
       }
@@ -584,7 +608,8 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
          * Making sure the device exists (since the user can put anything in
          * here) */
         if (!Glib::file_test("/dev/" + device_name,
-                             Glib::FileTest::FILE_TEST_EXISTS))
+                             Glib::FileTest::FILE_TEST_EXISTS) ||
+            device_name == "")
         {
           /* Making sure the user is OK with specifying a non-existent device
            * (i.e. it may appear later) */
@@ -614,6 +639,24 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
       {
         int selected_type = network_type_combobox->get_active_row_number();
         NetworkLoadMonitor::InterfaceType interface_type = static_cast<NetworkLoadMonitor::InterfaceType>(selected_type);
+
+        /* Making sure that an interface was selected (traffic direction doesn't
+         * need validation since it defaults to all) */
+        if (selected_type == -1)
+        {
+          /* See helpers.hpp - tried to host a generic warning dialog
+           * implementation there but got endless include bullshit */
+          Gtk::MessageDialog d(_("Please specify a connection to monitor,"
+                                 " or select a different monitor type in general."),
+                               false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK);
+          d.set_modal();
+          d.set_title(_("Network Load Monitor"));
+          d.set_icon(window->get_icon());
+          d.run();
+          network_type_combobox->grab_focus();
+          response = Gtk::RESPONSE_HELP;
+          continue;
+        }
 
         NetworkLoadMonitor::Direction dir;
         switch (network_direction_combobox->get_active_row_number())
