@@ -80,6 +80,8 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
   ui->get_widget("mount_dir_entry", mount_dir_entry);
   ui->get_widget("show_free_checkbutton", show_free_checkbutton);
   ui->get_widget("disk_usage_tag_entry", disk_usage_tag);
+  ui->get_widget("disk_stats_device_combobox", disk_stats_device_combobox);
+  ui->get_widget("disk_stats_stat_combobox", disk_stats_stat_combobox);
   ui->get_widget("disk_stats_tag_entry", disk_stats_tag);
   ui->get_widget("memory_tag_entry", memory_usage_tag);
   ui->get_widget("swap_tag_entry", swap_usage_tag);
@@ -157,6 +159,35 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
 #if !HAVE_LIBSENSORS            // No sensors support, no options for it
   device_notebook->get_nth_page(3)->hide();
 #endif
+
+  // Setup disk statistics device name combobox
+  static DiskStatsDeviceNameCols dsdnc;
+  disk_stats_device_name_store = Gtk::ListStore::create(dsdnc);
+  disk_stats_device_combobox->set_model(disk_stats_device_name_store);
+  disk_stats_device_combobox->pack_start(dsdnc.device_name);
+
+  std::vector<Glib::ustring> device_names = DiskStatsMonitor::current_device_names();
+  for (std::vector<Glib::ustring>::iterator it = device_names.begin();
+       it != device_names.end(); ++it)
+  {
+      store_iter iter = disk_stats_device_name_store->append();
+      (*iter)[dsdnc.device_name] = *it;
+  }
+
+  // Setup disk statistics stat combobox
+  static DiskStatsStatCols dssc;
+  disk_stats_stat_store = Gtk::ListStore::create(dssc);
+  disk_stats_stat_combobox->set_model(disk_stats_stat_store);
+  disk_stats_stat_combobox->pack_start(dssc.stat);
+
+  for (int i = 0; i < DiskStatsMonitor::NUM_STATS; ++i)
+  {
+      DiskStatsMonitor::Stat stat =
+          static_cast<DiskStatsMonitor::Stat>(i);
+      store_iter iter = disk_stats_stat_store->append();
+      (*iter)[dssc.stat] = DiskStatsMonitor::
+          stat_to_string(stat, false);
+  }
 
   // Setup network interface type combobox
   static NetworkInterfaceTypeCols nitc;
@@ -303,6 +334,12 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         disk_usage_radiobutton->set_active();
         disk_usage_tag->set_text(tag);
       }
+      else if (type == "disk_statistics")
+      {
+        device_notebook->set_current_page(1);
+        disk_stats_radiobutton->set_active();
+        disk_stats_tag->set_text(tag);
+      }
       else if (type == "swap_usage")
       {
         device_notebook->set_current_page(1);
@@ -324,7 +361,6 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
       else
       {
         device_notebook->set_current_page(0);
-        // FIXME: use schema?
         cpu_usage_radiobutton->set_active();
         cpu_tag->set_text(tag);
       }
@@ -349,6 +385,44 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
           "mount_dir", "");
         mount_dir_entry->set_text(mount_dir);
       }
+      if (xfce_rc_has_entry(settings_ro, "show_free"))
+      {
+        bool show_free  = xfce_rc_read_bool_entry(settings_ro,
+          "show_free", false);
+        show_free_checkbutton->set_active(show_free);
+      }
+
+      // Fill in disk stats info
+      if (xfce_rc_has_entry(settings_ro, "disk_stats_device"))
+      {
+        Glib::ustring device_name = xfce_rc_read_entry(settings_ro,
+          "disk_stats_device", "");
+
+        // Locating device in the model
+        static DiskStatsDeviceNameCols dsdnc;
+        Gtk::TreeNodeChildren children = disk_stats_device_name_store->children();
+        bool device_found = false;
+        for (Gtk::TreeIter it = children.begin(); it < children.end(); ++it)
+        {
+          if (it->get_value(dsdnc.device_name) == device_name)
+          {
+            device_found = true;
+            disk_stats_device_combobox->set_active(it);
+            break;
+          }
+        }
+
+        // Add as user-defined text if the device isn't currently available
+        if (!device_found)
+          disk_stats_device_combobox->get_entry()->set_text(device_name);
+
+        // Selecting the correct statistic
+        int stat = xfce_rc_read_int_entry(settings_ro, "disk_stats_stat", 0);
+        if (stat < 0 || stat >= DiskStatsMonitor::NUM_STATS)
+          stat = 0;
+        disk_stats_stat_combobox->set_active(stat);
+      }
+
       if (xfce_rc_has_entry(settings_ro, "show_free"))
       {
         bool show_free  = xfce_rc_read_bool_entry(settings_ro,
@@ -425,7 +499,6 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
     {
       // No monitor present so an addition - defaults
       device_notebook->set_current_page(0);
-      // FIXME: use schema?
       cpu_usage_radiobutton->set_active();
     }
 
@@ -464,9 +537,9 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
   }
 
   if (cpu_usage_radiobutton->get_active())
-    cpu_usage_radiobutton->toggled(); // send a signal
+    cpu_usage_radiobutton->toggled();  // Send a signal
 
-  // then ask the user
+  // Then ask the user
   int response;
   
   do {
@@ -476,23 +549,66 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
       Monitor *mon = 0;
 
       if (cpu_usage_radiobutton->get_active())
+      {
         if (one_cpu_radiobutton->get_active())
           mon = new CpuUsageMonitor(int(cpu_no_spinbutton->get_value()) - 1,
                                     cpu_tag->get_text());
         else
           mon = new CpuUsageMonitor(cpu_tag->get_text());
+      }
       else if (memory_usage_radiobutton->get_active())
         mon = new MemoryUsageMonitor(memory_usage_tag->get_text());
       else if (swap_usage_radiobutton->get_active())
         mon = new SwapUsageMonitor(swap_usage_tag->get_text());
       else if (load_average_radiobutton->get_active())
         mon = new LoadAverageMonitor(load_average_tag->get_text());
-      else if (disk_usage_radiobutton->get_active()) {
+      else if (disk_usage_radiobutton->get_active())
+      {
         Glib::ustring mount_dir = mount_dir_entry->get_text();
         bool show_free = show_free_checkbutton->get_active();
-        // FIXME: check that mount_dir is valid
+        // TODO: check that mount_dir is valid
         mon = new DiskUsageMonitor(mount_dir, show_free,
                                    disk_usage_tag->get_text());
+      }
+      else if (disk_stats_radiobutton->get_active())
+      {
+        Glib::ustring device_name =
+            disk_stats_device_combobox->get_entry_text();
+        DiskStatsMonitor::Stat stat =
+            static_cast<DiskStatsMonitor::Stat>(
+              disk_stats_stat_combobox->get_active_row_number());
+
+        /* Originally this validation code was in the changed signal handler but
+         * that fired on every keystroke, then in the focus_out handler but
+         * subsequent grab focus calls didn't work in it...
+         * Making sure the device exists (since the user can put anything in
+         * here) */
+        if (!Glib::file_test("/dev/" + device_name,
+                             Glib::FileTest::FILE_TEST_EXISTS))
+        {
+          /* Making sure the user is OK with specifying a non-existent device
+           * (i.e. it may appear later) */
+          Glib::ustring msg = Glib::ustring::
+              compose(_("Specified device '%1' does not currently exist - do you"
+                           " still want to proceed?"), device_name);
+
+          /* See helpers.hpp - tried to host a generic warning dialog
+           * implementation there but got endless include bullshit */
+          Gtk::MessageDialog d(msg, false, Gtk::MESSAGE_WARNING,
+                               Gtk::BUTTONS_YES_NO);
+          d.set_modal();
+          d.set_title(_("Disk Stats Monitor"));
+          d.set_icon(window->get_icon());
+          if (d.run() != Gtk::RESPONSE_YES)
+          {
+            disk_stats_device_combobox->get_entry()->grab_focus();
+            response = Gtk::RESPONSE_HELP;
+            continue;
+          }
+        }
+
+        mon = new DiskStatsMonitor(device_name, stat,
+                                   disk_stats_tag->get_text());
       }
       else if (network_load_radiobutton->get_active())
       {
@@ -500,18 +616,19 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         NetworkLoadMonitor::InterfaceType interface_type = static_cast<NetworkLoadMonitor::InterfaceType>(selected_type);
 
         NetworkLoadMonitor::Direction dir;
-        switch (network_direction_combobox->get_active_row_number()) {
-        case NetworkLoadMonitor::incoming_data:
-          dir = NetworkLoadMonitor::incoming_data;
-          break;
+        switch (network_direction_combobox->get_active_row_number())
+        {
+          case NetworkLoadMonitor::incoming_data:
+            dir = NetworkLoadMonitor::incoming_data;
+            break;
 
-        case NetworkLoadMonitor::outgoing_data:
-          dir = NetworkLoadMonitor::outgoing_data;
-          break;
+          case NetworkLoadMonitor::outgoing_data:
+            dir = NetworkLoadMonitor::outgoing_data;
+            break;
 
-        default:
-          dir = NetworkLoadMonitor::all_data;
-          break;
+          default:
+            dir = NetworkLoadMonitor::all_data;
+            break;
         }
 
         mon = new NetworkLoadMonitor(interface_type, dir,

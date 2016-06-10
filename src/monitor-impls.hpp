@@ -24,6 +24,7 @@
 
 #include <config.h>
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -156,6 +157,65 @@ private:
 
   std::string mount_dir;
   bool show_free;
+};
+
+class DiskStatsMonitor: public Monitor
+{
+public:
+
+  /* Based on kernel Documentation/iostats.txt - available since kernel v2.5.69
+   * If you change this, remember to update DiskStatsMonitor::stat_to_string */
+  enum Stat {
+    num_reads_completed,        // # of reads completed
+    num_reads_merged,           // # of reads merged
+    num_sectors_read,           // # of sectors read
+    num_ms_reading,             // # of milliseconds spent reading
+    num_writes_completed,       // # of writes completed
+    num_writes_merged,          // # of writes merged
+    num_sectors_written,        // # of sectors written
+    num_ms_writing,             // # of milliseconds spent writing
+    num_ios_in_progress,        // # of I/Os currently in progress
+    num_ms_doing_ios,           // # of milliseconds spent doing I/Os
+    num_ms_doing_ios_weighted,  // weighted # of milliseconds spent doing I/Os
+    NUM_STATS
+  };
+
+  DiskStatsMonitor(const Glib::ustring &device_name, const Stat &stat_to_monitor,
+                   const Glib::ustring &tag_string);
+
+  virtual double max();
+  virtual bool fixed_max();
+  virtual Glib::ustring format_value(double val, bool compact= false);
+  virtual Glib::ustring get_name();
+  virtual Glib::ustring get_short_name();
+  virtual int update_interval();
+  virtual void save(XfceRc *settings_w);
+  virtual void load(XfceRc *settings_ro);
+
+  static bool stats_available();
+  static std::vector<Glib::ustring> current_device_names();
+  static Glib::ustring stat_to_string(
+      const DiskStatsMonitor::Stat &stat, const bool short_ver);
+
+private:
+
+  static const Glib::ustring& diskstats_path;
+
+  /* Determines whether the statistic is to be treated as a straight number or
+   * diffed from its previous value and therefore expressed as change/time */
+  bool convert_to_rate();
+
+  virtual double do_measure();
+
+  /* Reads the diskstats file and returns a vector of each device, containing a
+   * vector of reported stats. Note that unordered_map is C++11 */
+  static std::map<Glib::ustring, std::vector<unsigned long int>> parse_disk_stats();
+
+  guint64 max_value;
+
+  Glib::ustring device_name;
+  Stat stat_to_monitor;
+  double previous_value;
 };
 
 class NetworkLoadMonitor: public Monitor

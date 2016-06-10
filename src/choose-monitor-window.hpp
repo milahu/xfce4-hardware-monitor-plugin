@@ -82,6 +82,8 @@ private:
              *swap_usage_tag;
   Gtk::CheckButton *show_free_checkbutton;
 
+  Gtk::ComboBox *disk_stats_device_combobox, *disk_stats_stat_combobox;
+
   Gtk::Box *network_load_options;
   Gtk::ComboBox *network_type_combobox, *network_direction_combobox;
   Gtk::TreeView *network_interfaces_treeview;
@@ -95,6 +97,30 @@ private:
 
   XfcePanelPlugin* panel_applet;
 
+  // For disk statistics device name combobox
+  class DiskStatsDeviceNameCols: public Gtk::TreeModel::ColumnRecord
+  {
+  public:
+    Gtk::TreeModelColumn<Glib::ustring> device_name;
+
+    DiskStatsDeviceNameCols() { add(device_name); }
+  };
+
+  Glib::RefPtr<Gtk::ListStore> disk_stats_device_name_store;
+
+  typedef Gtk::ListStore::iterator store_iter;
+
+  // For disk statistics stat combobox
+  class DiskStatsStatCols: public Gtk::TreeModel::ColumnRecord
+  {
+  public:
+    Gtk::TreeModelColumn<Glib::ustring> stat;
+
+    DiskStatsStatCols() { add(stat); }
+  };
+
+  Glib::RefPtr<Gtk::ListStore> disk_stats_stat_store;
+
   // For network interface type combobox (basic listing of available types)
   class NetworkInterfaceTypeCols: public Gtk::TreeModel::ColumnRecord
   {
@@ -105,8 +131,6 @@ private:
   };
 
   Glib::RefPtr<Gtk::ListStore> network_interface_type_store;
-
-  typedef Gtk::ListStore::iterator store_iter;
 
   // For network direction combobox
   class NetworkDirectionCols: public Gtk::TreeModel::ColumnRecord

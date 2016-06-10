@@ -58,7 +58,7 @@ XDT_CHECK_PACKAGE([LIBXFCE4PANEL], [libxfce4panel-1.0], [4.8.0])
 XDT_CHECK_PACKAGE([LIBXFCE4UI], [libxfce4ui-1], [4.8.0])
 
 dnl Checks for libraries
-PKG_CHECK_MODULES([DEPS], [gtkmm-2.4 >= 2.6.0 \
+PKG_CHECK_MODULES([DEPS], [gtkmm-2.4 >= 2.24.0 \
                         libgnomecanvasmm-2.6 >= 2.6.0 \
                         libgtop-2.0 >= 2.6.0])
 

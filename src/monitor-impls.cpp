@@ -19,16 +19,14 @@
  * USA.
  */
 
-#include <string>
-#include <iostream>
-#include <iomanip>
-#include <ostream>
-#include <sys/time.h>       // for high-precision timing for the network load
-#include <vector>
 #include <algorithm>
-#include <cstdio>
-#include <cassert>
-#include <cstdlib>
+#include <iomanip>  // Needed for Precision helper
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include <glibmm/fileutils.h>
+#include <glibmm/regex.h>
 
 #include <glibtop.h>
 #include <glibtop/cpu.h>
@@ -38,6 +36,8 @@
 #include <glibtop/fsusage.h>
 #include <glibtop/netload.h>
 #include <glibtop/netlist.h>
+
+#include <sys/time.h>       // for high-precision timing for the network load
 
 #include "monitor-impls.hpp"
 #include "ucompose.hpp"
@@ -108,6 +108,19 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
 
         // Creating disk usage monitor
         monitors.push_back(new DiskUsageMonitor(mount_dir, show_free, tag));
+      }
+      else if (type == "disk_statistics")
+      {
+        Glib::ustring device_name = xfce_rc_read_entry(settings_ro,
+          "disk_stats_device", "");
+
+        DiskStatsMonitor::Stat stat =
+            static_cast<DiskStatsMonitor::Stat>(xfce_rc_read_int_entry(
+                                                settings_ro,                                                                                                                                       "disk_stats_stat",
+                                               DiskStatsMonitor::num_reads_completed));
+
+        // Creating disk statistics monitor
+        monitors.push_back(new DiskStatsMonitor(device_name, stat, tag));
       }
       else if (type == "network_load")
       {
@@ -709,6 +722,391 @@ void DiskUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
+//
+// class DiskStatsMonitor
+//
+// Static initialisation
+const Glib::ustring& DiskStatsMonitor::diskstats_path = "/proc/diskstats";
+
+// No stats allow for negative values, so using that to detect no previous value
+DiskStatsMonitor::DiskStatsMonitor(const Glib::ustring &device_name,
+                                   const Stat &stat_to_monitor,
+                                   const Glib::ustring &tag_string)
+  : Monitor(tag_string), device_name(device_name),
+    stat_to_monitor(stat_to_monitor), previous_value(-1)
+{
+}
+
+double DiskStatsMonitor::do_measure()
+{
+  // Making sure stats file is available
+  if (!stats_available())
+  {
+    std::cerr << Glib::ustring::compose(_("The file '%1' is not available - "
+                                          "unable to obtain %2 for device '%3'!"
+                                          "\n"), diskstats_path,
+                                         stat_to_string(stat_to_monitor, false),
+                                         device_name);
+    return 0;
+  }
+
+  /* Returning 0 if device is not available - this is not an error since the
+   * device may be hotpluggable */
+  std::map<Glib::ustring, std::vector<unsigned long int>> disk_stats =
+      parse_disk_stats();
+  std::map<Glib::ustring, std::vector<unsigned long int>>::iterator it =
+      disk_stats.find(device_name);
+  if (it == disk_stats.end())
+  {
+    // Debug code
+    /*std::cerr << Glib::ustring::compose(_("Unable to find device '%1' to obtain "
+                                          "%2 from!\n"), device_name,
+                                        stat_to_string(stat_to_monitor, false));*/
+
+    return 0;
+  }
+
+  // Debug code
+  /*std::cerr << Glib::ustring::compose("Device '%1' stat %2: %3\n", device_name,
+                                      stat_to_string(stat_to_monitor, false),
+                                      it->second[stat_to_monitor]);*/
+
+  double val;
+  if (convert_to_rate())
+  {
+    /* Stats that need to be diffed to make a rate of change
+     * Dealing with the first value to be processed */
+    if (previous_value == -1)
+      previous_value = it->second[stat_to_monitor];
+
+    // Returning desired stat
+    val = it->second[stat_to_monitor] - previous_value;
+    previous_value = it->second[stat_to_monitor];
+  }
+  else
+  {
+    /* Stats that don't need to be returned as a rate of change (per second
+     * currently) */
+    val = it->second[stat_to_monitor];
+  }
+
+  /* Note - max_value is no longer used to determine the graph max for
+   * Curves - the actual maxima stored in the ValueHistories are used */
+  if (val != 0)     // Reduce scale gradually
+    max_value = guint64(max_value * max_decay);
+
+  if (val > max_value)
+    max_value = guint64(val * 1.05);
+
+  return val;
+}
+
+double DiskStatsMonitor::max()
+{
+  return max_value;
+}
+
+bool DiskStatsMonitor::fixed_max()
+{
+  return false;
+}
+
+Glib::ustring DiskStatsMonitor::format_value(double val, bool compact)
+{
+  // Currently measurement is every second
+  Glib::ustring unit = (convert_to_rate() && !compact) ? "/s" : "";
+  return Glib::ustring::compose("%1%2", val, unit);
+}
+
+Glib::ustring DiskStatsMonitor::get_name()
+{
+  return device_name + " - " + stat_to_string(stat_to_monitor, false);
+}
+
+Glib::ustring DiskStatsMonitor::get_short_name()
+{
+  return device_name + "-" + stat_to_string(stat_to_monitor, true);
+}
+
+int DiskStatsMonitor::update_interval()
+{
+  return 1000;
+}
+
+void DiskStatsMonitor::save(XfceRc *settings_w)
+{
+  // Fetching assigned settings group
+  Glib::ustring dir = get_settings_dir();
+
+  // Saving settings
+  xfce_rc_set_group(settings_w, dir.c_str());
+  xfce_rc_write_entry(settings_w, "type", "disk_statistics");
+  xfce_rc_write_entry(settings_w, "disk_stats_device", device_name.c_str());
+  xfce_rc_write_int_entry(settings_w, "disk_stats_stat", int(stat_to_monitor));
+  xfce_rc_write_int_entry(settings_w, "max", int(max_value));
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+}
+
+void DiskStatsMonitor::load(XfceRc *settings_ro)
+{
+  /*
+   * // TODO: This seems to be completely unnecessary - loading/configuration is already done in load_monitors, looks like that should be moved into individual monitor ::load functions?
+  // Fetching assigned settings group
+  Glib::ustring dir = get_settings_dir();
+
+  // Loading settings
+  xfce_rc_set_group(settings_ro, dir.c_str());
+  Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", "");
+  device_name = xfce_rc_read_entry(settings_ro, "disk_stats_device", "");
+  int stat = xfce_rc_read_int_entry(settings_ro, "interface_type",
+                                              int(num_reads_completed));
+
+  // Validating input - an enum does not enforce a range!!
+  if (stat < num_reads_completed || stat >= NUM_STATS)
+  {
+    std::cerr << "DiskStatsMonitor::load has read configuration specifying an "
+                 "invalid statistic: " << stat << "!\n";
+    stat = num_reads_completed;
+  }
+  else
+    inter_type = static_cast<InterfaceType>(inter_type_int);
+
+  Direction inter_direction;
+  if (inter_direction_int < all_data || inter_direction_int >= NUM_DIRECTIONS)
+  {
+    std::cerr << "NetworkLoadMonitor::load has read configuration specifying an "
+                 "invalid direction: " << inter_direction_int << "!\n";
+    inter_direction = all_data;
+  }
+  else
+    inter_direction = static_cast<Direction>(inter_direction_int);
+
+  // Making sure the monitor type is correct to load further configuration??
+  if (type == "network_load" && inter_type == interface_type
+      && inter_direction == direction)
+      max_value = xfce_rc_read_int_entry(settings_ro, "max", 0);
+  */
+}
+
+bool DiskStatsMonitor::stats_available()
+{
+  // Make sure file exists
+  return Glib::file_test(diskstats_path, Glib::FileTest::FILE_TEST_EXISTS);
+
+  /* The contents of the file will be validated as it is processed, so not
+   * duplicating this here */
+}
+
+std::map<Glib::ustring, std::vector<unsigned long int>>
+DiskStatsMonitor::parse_disk_stats()
+{
+  Glib::ustring device_stats;
+
+  // Fetching contents of diskstats file
+  try
+  {
+    device_stats = Glib::file_get_contents("/proc/diskstats");
+  }
+  catch (Glib::FileError const &e)
+  {
+    std::cerr << Glib::ustring::compose(_("Unable to parse disk stats from '%1' "
+                                          "due to error '%2'\n"),
+                                        "/proc/diskstats", e.what());
+    return std::map<Glib::ustring, std::vector<unsigned long int>>();
+  }
+
+  /* Preparing regex to use in splitting out stats
+   * Example line:
+   *    8      16 sdb 16710337 4656786 7458292624 49395796 15866670 4083490 5442473656 53095516 0 24513196 102484768 */
+  Glib::RefPtr<Glib::Regex> split_stats_regex = Glib::Regex::create(
+        "^\\s+(\\d+)\\s+(\\d+)\\s([\\w-]+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s"
+        "(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)$",
+        Glib::REGEX_OPTIMIZE);
+
+  // Splitting out stats into devices
+  std::map<Glib::ustring, std::vector<unsigned long int>> parsed_stats;
+  std::stringstream device_stats_stream(device_stats);
+  Glib::ustring device_name, single_dev_stats;
+  Glib::MatchInfo match_info;
+  for (std::string single_device_stats;
+       std::getline(device_stats_stream, single_device_stats);)
+  {
+    // Glib::Regex can't cope with std::string so this extra step is needed...
+    single_dev_stats = single_device_stats;
+
+    // Splitting out device stats into individual fields
+    if (!split_stats_regex->match(single_dev_stats, match_info))
+    {
+      // Unable to parse the device stats - warning user and moving on
+      std::cerr << Glib::ustring::compose("Unable to parse device stats line "
+                                            "from '%1' - regex match failure:\n"
+                                            "\n%2\n", "/proc/diskstats",
+                                            single_device_stats);
+      continue;
+    }
+
+    /* Device stats start from the 4th field onwards, also messing about to
+     * convert to correct data type
+     * Source data is stored in kernel source include/linux/genhd.h dis_stats
+     * struct, printing out to file is done in block/genhd.c:diskstats_show,
+     * some are actually unsigned ints */
+    std::vector<unsigned long int> device_parsed_stats;
+    device_name = match_info.fetch(3);
+
+    /* Debug code
+    std::cout << "Parsing device '" << device_name << "' stats...\nMatch count:"
+              << match_info.get_match_count() << "\n";
+    std::cout << "1: '" << match_info.fetch(1) << "', 2: '" << match_info.fetch(2) << "'\n";
+    std::cout << "single_device_stats: '" << single_device_stats << "'\n";
+    */
+
+    for (int i = 4; i<match_info.get_match_count(); ++i)
+    {
+      unsigned long int stat = 0;
+
+      /* Stringstreams are not trivially reusable! Hence creating a new one
+       * each time... */
+      std::stringstream convert;
+      convert.str(match_info.fetch(i));
+      if (!(convert >> stat))
+      {
+          std::cerr << Glib::ustring::compose("Unable to convert device stat %1 "
+                                              "to int from '%2' - "
+                                              "defaulting to 0\n", i,
+                                              convert.str());
+      }
+      device_parsed_stats.push_back(stat);
+
+      // Debug code
+      //std::cout << "Stat number " << i << " value: " << stat << "\n";
+    }
+    parsed_stats[device_name] = device_parsed_stats;
+  }
+
+  return parsed_stats;
+}
+
+std::vector<Glib::ustring> DiskStatsMonitor::current_device_names()
+{
+  // Fetching current disk stats
+  std::map<Glib::ustring, std::vector<unsigned long int>> parsed_stats =
+      parse_disk_stats();
+
+  // Generating sorted list of available devices
+  std::vector<Glib::ustring> devices_list;
+  for (std::map<Glib::ustring, std::vector<unsigned long int>>::iterator it
+       = parsed_stats.begin(); it != parsed_stats.end(); ++it)
+  {
+    devices_list.push_back(it->first);
+  }
+  std::sort(devices_list.begin(), devices_list.end());
+
+  return devices_list;
+}
+
+Glib::ustring DiskStatsMonitor::stat_to_string(const DiskStatsMonitor::Stat &stat,
+                                               const bool short_ver)
+{
+  Glib::ustring stat_str;
+
+  switch(stat)
+  {
+    case num_reads_completed:
+      if (short_ver)
+        stat_str = _("Num rd compl");
+      else
+        stat_str = _("Number of reads completed");
+      break;
+
+    case num_reads_merged:
+      if (short_ver)
+        stat_str = _("Num rd merg");
+      else
+        stat_str = _("Number of reads merged");
+      break;
+
+    case num_sectors_read:
+      if (short_ver)
+        stat_str = _("Num sect rd");
+      else
+        stat_str = _("Number of sectors read");
+      break;
+
+    case num_ms_reading:
+      if (short_ver)
+        stat_str = _("Num ms rd");
+      else
+        stat_str = _("Number of milliseconds spent reading");
+      break;
+
+    case num_writes_completed:
+      if (short_ver)
+        stat_str = _("Num wr compl");
+      else
+        stat_str = _("Number of writes completed");
+      break;
+
+    case num_writes_merged:
+      if (short_ver)
+        stat_str = _("Num wr merg");
+      else
+        stat_str = _("Number of writes merged");
+      break;
+
+    case num_sectors_written:
+      if (short_ver)
+        stat_str = _("Num sect wr");
+      else
+        stat_str = _("Number of sectors written");
+      break;
+
+    case num_ms_writing:
+      if (short_ver)
+        stat_str = _("Num ms wrt");
+      else
+        stat_str = _("Number of milliseconds spent writing");
+      break;
+
+    case num_ios_in_progress:
+      if (short_ver)
+        stat_str = _("Num I/Os");
+      else
+        stat_str = _("Number of I/Os in progress");
+      break;
+
+    case num_ms_doing_ios:
+      if (short_ver)
+        stat_str = _("Num ms I/Os");
+      else
+        stat_str = _("Number of milliseconds spent doing I/Os");
+      break;
+
+    case num_ms_doing_ios_weighted:
+      if (short_ver)
+        stat_str = _("Num ms I/Os wt");
+      else
+        stat_str = _("Weighted number of milliseconds spent doing I/Os");
+      break;
+  }
+
+  return stat_str;
+}
+
+bool DiskStatsMonitor::convert_to_rate()
+{
+  switch (stat_to_monitor)
+  {
+    /* Stats that don't need to be returned as a rate of change (per second
+     * currently) */
+    case num_ios_in_progress:
+      return false;
+
+    // Stats that need to be diffed to make a rate of change
+    default:
+      return true;
+  }
+
+}
 
 //
 // class NetworkLoadMonitor
