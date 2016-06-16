@@ -20,8 +20,10 @@
  */
 
 #include <algorithm>
+#include <cmath>  // For fabs
 #include <iomanip>  // Needed for Precision helper
 #include <iostream>
+#include <limits>  // Used for sentinel value in Generic Monitor
 #include <string>
 #include <vector>
 
@@ -187,6 +189,7 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
           "interface_direction", NetworkLoadMonitor::all_data);
 
         // Converting direction setting into dedicated type
+        // TODO: I think I need to standardise my enum loading/dealing with code
         NetworkLoadMonitor::Direction dir;
 
         if (inter_direction == NetworkLoadMonitor::incoming_data)
@@ -218,6 +221,36 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
         monitors.push_back(new FanSpeedMonitor(fan_no, tag));
       }
 
+      else if (type == "generic")
+      {
+        // Fetching settings
+        Glib::ustring file_path = xfce_rc_read_entry(settings_ro, "file_path",
+                                                 ""),
+            regex_string = xfce_rc_read_entry(settings_ro, "regex", ""),
+            data_source_name_long = xfce_rc_read_entry(settings_ro,
+                                                   "data_source_name_long",  ""),
+            data_source_name_short = xfce_rc_read_entry(settings_ro,
+                                                    "data_source_name_short", ""),
+            units_long = xfce_rc_read_entry(settings_ro, "units_long",  ""),
+            units_short = xfce_rc_read_entry(settings_ro, "units_short", "");
+        bool value_from_contents = xfce_rc_read_bool_entry(settings_ro,
+                                                           "value_from_contents",
+                                                           false),
+            follow_change = xfce_rc_read_bool_entry(settings_ro, "follow_change",
+                                                    false);
+        GenericMonitor::ValueChangeDirection dir =
+            static_cast<GenericMonitor::ValueChangeDirection>(
+              xfce_rc_read_int_entry(settings_ro, "value_change_direction",
+                                     GenericMonitor::positive));
+
+        // Creating generic monitor
+        monitors.push_back(new GenericMonitor(file_path, value_from_contents,
+                                              regex_string, follow_change, dir,
+                                              data_source_name_long,
+                                              data_source_name_short, units_long,
+                                              units_short, tag));
+      }
+
       // Saving the monitor's settings root
       monitors.back()->set_settings_dir(settings_monitors[i]);
     }
@@ -226,7 +259,7 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
     g_strfreev(settings_monitors);
   }
 
-  // Always start with a CpuUsageMonitor - FIXME: use schema?
+  // Always start with a CpuUsageMonitor
   if (monitors.empty())
     monitors.push_back(new CpuUsageMonitor(""));
 
@@ -728,7 +761,7 @@ DiskStatsMonitor::DiskStatsMonitor(const Glib::ustring &device_name,
 double DiskStatsMonitor::do_measure()
 {
   // Making sure stats file is available
-  if (!stats_available())
+  if (!Glib::file_test(diskstats_path, Glib::FileTest::FILE_TEST_EXISTS))
   {
     std::cerr << Glib::ustring::compose(_("The file '%1' is not available - "
                                           "unable to obtain %2 for device '%3'!"
@@ -833,15 +866,6 @@ void DiskStatsMonitor::save(XfceRc *settings_w)
   xfce_rc_write_int_entry(settings_w, "disk_stats_stat", int(stat_to_monitor));
   xfce_rc_write_int_entry(settings_w, "max", int(max_value));
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
-}
-
-bool DiskStatsMonitor::stats_available()
-{
-  // Make sure file exists
-  return Glib::file_test(diskstats_path, Glib::FileTest::FILE_TEST_EXISTS);
-
-  /* The contents of the file will be validated as it is processed, so not
-   * duplicating this here */
 }
 
 std::map<Glib::ustring, std::vector<unsigned long int>>
@@ -1950,5 +1974,219 @@ void FanSpeedMonitor::save(XfceRc *settings_w)
   // No support for floats - stringifying
   Glib::ustring setting = String::ucompose("%1", max_value);
   xfce_rc_write_entry(settings_w, "max", setting.c_str());
+}
+
+
+//
+// class GenericMonitor
+//
+
+GenericMonitor::GenericMonitor(const Glib::ustring &file_path,
+                               const bool value_from_contents,
+                               const Glib::ustring &regex_string,
+                               const bool follow_change,
+                               const ValueChangeDirection dir,
+                               const Glib::ustring &data_source_name_long,
+                               const Glib::ustring &data_source_name_short,
+                               const Glib::ustring &units_long,
+                               const Glib::ustring &units_short,
+                               const Glib::ustring &tag_string)
+  : Monitor(tag_string), max_value(0),
+    previous_value(std::numeric_limits<double>::min()),
+    file_path(file_path), value_from_contents(value_from_contents),
+    follow_change(follow_change), dir(dir),
+    data_source_name_long(data_source_name_long),
+    data_source_name_short(data_source_name_short), units_long(units_long),
+    units_short(units_short)
+{
+  // Compiling regex if provided (at this stage its already been validated)
+  if (regex_string != "")
+    regex = Glib::Regex::create(regex_string);
+}
+
+double GenericMonitor::do_measure()
+{
+  // Making sure stats file is available
+  if (!Glib::file_test(file_path, Glib::FileTest::FILE_TEST_EXISTS))
+  {
+    std::cerr << Glib::ustring::compose(_("The file '%1' for the Generic Monitor"
+                                          " data source '%2' is not available!\n"),
+                                        file_path, data_source_name_long);
+    return 0;
+  }
+
+  // Attempting to read contents of provided file
+  Glib::ustring file_contents;
+  try
+  {
+    file_contents = Glib::file_get_contents(file_path);
+  }
+  catch (Glib::FileError const &e)
+  {
+    std::cerr << Glib::ustring::compose(_("Unable read the contents of '%1' for "
+                                          "the Generic Monitor data source '%2' "
+                                          "due to error '%3'\n"),
+                                        file_path, data_source_name_long,
+                                        e.what());
+    return 0;
+  }
+
+  // Removing trailing newline if present
+  if (file_contents.substr(file_contents.length() - 1,
+                           file_contents.length() - 1) == "\n")
+      file_contents = file_contents.substr(0, file_contents.length() - 1);
+
+  // Obtaining number
+  double val;
+  std::stringstream data;
+  if (value_from_contents)
+  {
+    // Obtain number from the entire contents of the file
+    data.str(file_contents);
+    if (!(data >> val))
+    {
+      std::cerr << Glib::ustring::compose(_("Unable to convert data '%1' from file "
+                                            "'%2' associated with Generic Monitor "
+                                            "data source '%3' into a number to "
+                                            "process! Defaulting to 0\n"),
+                                          file_contents, file_path,
+                                          data_source_name_long);
+      return 0;
+    }
+  }
+  else
+  {
+    /* Obtain number via a regex - the regex has already been validated with one
+     * matching group */
+    Glib::MatchInfo match_info;
+    if (!regex->match(file_contents, match_info))
+    {
+      // Unable to extract the number - warning user
+      std::cerr << Glib::ustring::compose(_("Unable extract number from file "
+                                          "contents '%1' from '%2' associated "
+                                          "with Generic Monitor data source '%3'"
+                                          " using the regex '%4'! Defaulting to "
+                                          "0\n"), file_contents, file_path,
+                                          data_source_name_long,
+                                          regex->get_pattern());
+      return 0;
+    }
+
+    // Fetching matching group results and attempting to convert to number
+    data.str(match_info.fetch(0));
+    if (!(data >> val))
+    {
+      std::cerr << Glib::ustring::compose(_("Unable to convert data '%1' from file "
+                                            "'%2' associated with Generic Monitor "
+                                            "data source '%3' into a number to "
+                                            "process! Defaulting to 0\n"),
+                                          file_contents, file_path,
+                                          data_source_name_long);
+      return 0;
+    }
+  }
+
+  double return_value;
+  if (follow_change)
+  {
+    /* User has requested to diff the data to make a rate of change
+     * Dealing with the first value to be processed */
+    if (previous_value == std::numeric_limits<double>::min())
+      previous_value = val;
+
+    /* Returning desired stat, based on whether the user wants only positive
+     * changes, negative changes, or both reported (these are intended for views
+     * that don't have a negative axis) */
+    switch (dir)
+    {
+      case positive:
+        return_value = val - previous_value;
+        if (return_value <0)
+          return_value = 0;
+        break;
+
+      case negative:
+        return_value = previous_value - val;
+        if (return_value <0)
+          return_value = 0;
+        break;
+
+      case both:
+        return_value = fabs(val - previous_value);
+    }
+    previous_value = val;
+  }
+  else
+    return_value = val;
+
+  // TODO: How do negative values affect this?
+  /* Note - max_value is no longer used to determine the graph max for
+   * Curves - the actual maxima stored in the ValueHistories are used */
+  if (val != 0)     // Reduce scale gradually
+    max_value = guint64(max_value * max_decay);
+
+  if (val > max_value)
+    max_value = guint64(val * 1.05);
+
+  // Debug code
+  /*std::cerr << Glib::ustring::compose("Generic Monitor '%1' data: %2, previous "
+                                      "data: %3\n", data_source_name_long, val,
+                                      previous_value);*/
+
+  return return_value;
+}
+
+double GenericMonitor::max()
+{
+  return max_value;
+}
+
+bool GenericMonitor::fixed_max()
+{
+  return false;
+}
+
+Glib::ustring GenericMonitor::format_value(double val, bool compact)
+{
+  return Glib::ustring::compose("%1%2", val,
+                                (compact) ? units_short : units_long);
+}
+
+Glib::ustring GenericMonitor::get_name()
+{
+  return data_source_name_long;
+}
+
+
+Glib::ustring GenericMonitor::get_short_name()
+{
+  return data_source_name_short;
+}
+
+int GenericMonitor::update_interval()
+{
+  return 1000;
+}
+
+void GenericMonitor::save(XfceRc *settings_w)
+{
+  // Fetching assigned settings group
+  Glib::ustring directory = get_settings_dir();
+
+  // Saving settings
+  xfce_rc_set_group(settings_w, directory.c_str());
+  xfce_rc_write_entry(settings_w, "type", "generic");
+  xfce_rc_write_entry(settings_w, "file_path", file_path.c_str());
+  xfce_rc_write_bool_entry(settings_w, "value_from_contents", value_from_contents);
+  xfce_rc_write_entry(settings_w, "regex", regex->get_pattern().c_str());
+  xfce_rc_write_bool_entry(settings_w, "follow_change", follow_change);
+  xfce_rc_write_int_entry(settings_w, "value_change_direction", dir);
+  xfce_rc_write_entry(settings_w, "data_source_name_long",
+                      data_source_name_long.c_str());
+  xfce_rc_write_entry(settings_w, "data_source_name_short",
+                      data_source_name_short.c_str());
+  xfce_rc_write_entry(settings_w, "units_long", units_long.c_str());
+  xfce_rc_write_entry(settings_w, "units_short", units_short.c_str());
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 

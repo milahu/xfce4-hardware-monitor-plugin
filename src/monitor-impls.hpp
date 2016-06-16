@@ -29,6 +29,7 @@
 #include <vector>
 
 #include <glib/gtypes.h>
+#include <glibmm/regex.h>
 
 #if HAVE_LIBSENSORS
 #include <sensors/sensors.h>
@@ -184,13 +185,12 @@ public:
 
   virtual double max();
   virtual bool fixed_max();
-  virtual Glib::ustring format_value(double val, bool compact= false);
+  virtual Glib::ustring format_value(double val, bool compact=false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual int update_interval();
   virtual void save(XfceRc *settings_w);
 
-  static bool stats_available();
   static std::vector<Glib::ustring> current_device_names();
   static Glib::ustring stat_to_string(
       const DiskStatsMonitor::Stat &stat, const bool short_ver);
@@ -354,6 +354,50 @@ private:
   double max_value;
   int chip_no, feature_no, sensors_no;
   std::string description;
+};
+
+
+class GenericMonitor: public Monitor
+{
+public:
+
+  // Used for the 'follow change in value' implementation setting
+  enum ValueChangeDirection {
+     positive,
+     negative,
+     both,
+     NUM_DIRECTIONS
+  };
+
+  GenericMonitor(const Glib::ustring &file_path,
+                 const bool value_from_contents,
+                 const Glib::ustring &regex_string,
+                 const bool follow_change,
+                 const ValueChangeDirection dir,
+                 const Glib::ustring &data_source_name_long,
+                 const Glib::ustring &data_source_name_short,
+                 const Glib::ustring &units_long,
+                 const Glib::ustring &units_short,
+                 const Glib::ustring &tag_string);
+
+  virtual double max();
+  virtual bool fixed_max();
+  virtual Glib::ustring format_value(double val, bool compact=false);
+  virtual Glib::ustring get_name();
+  virtual Glib::ustring get_short_name();
+  virtual int update_interval();
+  virtual void save(XfceRc *settings_w);
+
+private:
+  virtual double do_measure();
+
+  double max_value, previous_value;
+
+  Glib::ustring file_path, data_source_name_long,
+                data_source_name_short, units_long, units_short, tag;
+  bool value_from_contents, follow_change;
+  ValueChangeDirection dir;
+  Glib::RefPtr<Glib::Regex> regex;
 };
 
 

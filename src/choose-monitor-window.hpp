@@ -69,7 +69,7 @@ private:
   Gtk::RadioButton *cpu_usage_radiobutton, *memory_usage_radiobutton,
     *swap_usage_radiobutton, *load_average_radiobutton, *disk_usage_radiobutton,
     *disk_stats_radiobutton, *network_load_radiobutton, *temperature_radiobutton,
-    *fan_speed_radiobutton;
+    *fan_speed_radiobutton, *generic_radiobutton;
 
   Gtk::Box *cpu_usage_options, *load_average_options;
   Gtk::RadioButton *all_cpus_radiobutton, *one_cpu_radiobutton;
@@ -94,6 +94,19 @@ private:
            *fan_speed_options;
   Gtk::ComboBox *temperature_combobox, *fan_speed_combobox;
   Gtk::Entry *temperature_tag, *fan_speed_tag;
+
+  Gtk::Box  *generic_box, *generic_options, *generic_change_in_value_hbox,
+            *generic_number_regex_hbox;
+  Gtk::Entry *generic_file_path_entry, *generic_regex_entry,
+             *generic_data_source_name_long_entry,
+             *generic_data_source_name_short_entry, *generic_units_long_entry,
+             *generic_units_short_entry, *generic_tag;
+  Gtk::CheckButton *generic_change_in_value_checkbutton;
+  Gtk::RadioButton *generic_read_all_contents_radiobutton,
+                   *generic_extract_via_regex_radiobutton,
+                   *generic_change_in_value_positive_radiobutton,
+                   *generic_change_in_value_negative_radiobutton,
+                   *generic_change_in_value_both_radiobutton;
 
   XfcePanelPlugin* panel_applet;
 
@@ -176,14 +189,17 @@ private:
   void on_load_average_radiobutton_toggled();
   void on_disk_usage_radiobutton_toggled();
   void on_disk_stats_radiobutton_toggled();
-  void on_memory_usage_radiobutton_toggled();
   void on_swap_usage_radiobutton_toggled();
-  void on_fan_speed_radiobutton_toggled();
-  void on_network_load_radiobutton_toggled();
+  void on_memory_usage_radiobutton_toggled();
   void on_network_interfaces_restore_defaults_button_clicked();
-  void on_temperature_radiobutton_toggled();
   void on_network_interface_name_edited(const Glib::ustring& path,
                                         const Glib::ustring& new_text);
+  void on_network_load_radiobutton_toggled();
+  void on_temperature_radiobutton_toggled();
+  void on_fan_speed_radiobutton_toggled();
+  void on_generic_radiobutton_toggled();
+  void on_generic_extract_via_regex_radiobutton_toggled();
+  void on_generic_change_in_value_checkbutton_toggled();
   bool on_closed(GdkEventAny *);
 };
 

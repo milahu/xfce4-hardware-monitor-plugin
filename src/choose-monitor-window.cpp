@@ -62,6 +62,7 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
   ui->get_widget("network_load_radiobutton", network_load_radiobutton);
   ui->get_widget("temperature_radiobutton", temperature_radiobutton);
   ui->get_widget("fan_speed_radiobutton", fan_speed_radiobutton);
+  ui->get_widget("generic_radiobutton", generic_radiobutton);
 
   ui->get_widget("cpu_usage_options", cpu_usage_options);
   ui->get_widget("load_average_options", load_average_options);
@@ -113,6 +114,32 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
   ui->get_widget("fan_speed_combobox", fan_speed_combobox);
   ui->get_widget("fan_speed_tag_entry", fan_speed_tag);
 
+  ui->get_widget("generic_box", generic_box);
+  ui->get_widget("generic_options", generic_options);
+  ui->get_widget("generic_file_path_entry", generic_file_path_entry);
+  ui->get_widget("generic_number_regex_hbox", generic_number_regex_hbox);
+  ui->get_widget("generic_read_all_contents_radiobutton",
+                 generic_read_all_contents_radiobutton);
+  ui->get_widget("generic_extract_via_regex_radiobutton",
+                 generic_extract_via_regex_radiobutton);
+  ui->get_widget("generic_regex_entry", generic_regex_entry);
+  ui->get_widget("generic_change_in_value_checkbutton",
+                 generic_change_in_value_checkbutton);
+  ui->get_widget("generic_change_in_value_hbox", generic_change_in_value_hbox);
+  ui->get_widget("generic_change_in_value_positive_radiobutton",
+                 generic_change_in_value_positive_radiobutton);
+  ui->get_widget("generic_change_in_value_negative_radiobutton",
+                 generic_change_in_value_negative_radiobutton);
+  ui->get_widget("generic_change_in_value_both_radiobutton",
+                 generic_change_in_value_both_radiobutton);
+  ui->get_widget("generic_data_source_name_long_entry",
+                 generic_data_source_name_long_entry);
+  ui->get_widget("generic_data_source_name_short_entry",
+                 generic_data_source_name_short_entry);
+  ui->get_widget("generic_units_long_entry", generic_units_long_entry);
+  ui->get_widget("generic_units_short_entry", generic_units_short_entry);
+  ui->get_widget("generic_tag_entry", generic_tag);
+
   cpu_usage_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_cpu_usage_radiobutton_toggled));
@@ -152,6 +179,18 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
   fan_speed_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_fan_speed_radiobutton_toggled));
+
+  generic_radiobutton->signal_toggled()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_generic_radiobutton_toggled));
+
+  generic_extract_via_regex_radiobutton->signal_toggled()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_generic_extract_via_regex_radiobutton_toggled));
+
+  generic_change_in_value_checkbutton->signal_toggled()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_generic_change_in_value_checkbutton_toggled));
 
   // Note 1 off to avoid counting from zero in the interface
   cpu_no_spinbutton->set_range(1, CpuUsageMonitor::max_no_cpus);
@@ -358,6 +397,15 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         temperature_radiobutton->set_active();
         temperature_tag->set_text(tag);
       }
+
+      // TODO: When I start supporting it, why no fan stuff here?
+
+      else if (type == "generic")
+      {
+        device_notebook->set_current_page(4);
+        generic_radiobutton->set_active();
+        generic_tag->set_text(tag);
+      }
       else
       {
         device_notebook->set_current_page(0);
@@ -488,10 +536,61 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
           network_direction_combobox->set_active(0);
       }
 
-      int temperature_no = xfce_rc_read_int_entry(settings_ro,
-          "temperature_no", 0);
+      // Fill in temperature info
+      if (xfce_rc_has_entry(settings_ro, "temperature_no"))
+      {
+        int temperature_no = xfce_rc_read_int_entry(settings_ro,
+                                                    "temperature_no", 0);
+        temperature_combobox->set_active(temperature_no);
+      }
 
-      temperature_combobox->set_active(temperature_no);
+      // Fill in generic info
+      if (xfce_rc_has_entry(settings_ro, "file_path"))
+      {
+        Glib::ustring file_path = xfce_rc_read_entry(settings_ro, "file_path",
+                                                 ""),
+            regex_string = xfce_rc_read_entry(settings_ro, "regex", ""),
+            data_source_name_long = xfce_rc_read_entry(settings_ro,
+                                                   "data_source_name_long",  ""),
+            data_source_name_short = xfce_rc_read_entry(settings_ro,
+                                                    "data_source_name_short", ""),
+            units_long = xfce_rc_read_entry(settings_ro, "units_long",  ""),
+            units_short = xfce_rc_read_entry(settings_ro, "units_short", "");
+        bool value_from_contents = xfce_rc_read_bool_entry(settings_ro,
+                                                           "value_from_contents",
+                                                           false),
+            follow_change = xfce_rc_read_bool_entry(settings_ro, "follow_change",
+                                                    false);
+        int direction = xfce_rc_read_int_entry(settings_ro,
+                                               "value_change_direction",
+                                               GenericMonitor::positive);
+
+        generic_file_path_entry->set_text(file_path);
+
+        if (!value_from_contents)
+          generic_extract_via_regex_radiobutton->set_active();
+
+        generic_regex_entry->set_text(regex_string);
+        generic_change_in_value_checkbutton->set_active(follow_change);
+
+        switch (direction)
+        {
+        case GenericMonitor::positive:
+          generic_change_in_value_positive_radiobutton->activate();
+          break;
+        case GenericMonitor::negative:
+          generic_change_in_value_negative_radiobutton->activate();
+          break;
+        case GenericMonitor::both:
+          generic_change_in_value_both_radiobutton->activate();
+          break;
+        }
+
+        generic_data_source_name_long_entry->set_text(data_source_name_long);
+        generic_data_source_name_short_entry->set_text(data_source_name_short);
+        generic_units_long_entry->set_text(units_long);
+        generic_units_short_entry->set_text(units_short);
+      }
 
       xfce_rc_close(settings_ro);
     }
@@ -683,6 +782,141 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
       else if (fan_speed_radiobutton->get_active())
         mon = new FanSpeedMonitor(fan_speed_combobox->get_active_row_number(),
                                   fan_speed_tag->get_text());
+      else if (generic_radiobutton->get_active())
+      {
+        Glib::ustring file_path = generic_file_path_entry->get_text(),
+            regex_string = generic_regex_entry->get_text(),
+            data_source_name_long = generic_data_source_name_long_entry->get_text(),
+            data_source_name_short = generic_data_source_name_short_entry->get_text(),
+            units_long = generic_units_long_entry->get_text(),
+            units_short = generic_units_short_entry->get_text();
+        bool value_from_contents = generic_read_all_contents_radiobutton->get_active(),
+            follow_change = generic_change_in_value_checkbutton->get_active();
+        GenericMonitor::ValueChangeDirection dir;
+        if (generic_change_in_value_positive_radiobutton->get_active())
+          dir = GenericMonitor::positive;
+        else if (generic_change_in_value_negative_radiobutton->get_active())
+          dir = GenericMonitor::negative;
+        else if (generic_change_in_value_both_radiobutton->get_active())
+          dir = GenericMonitor::both;
+
+        // Making sure that the path passed is valid
+        if (!Glib::file_test(file_path, Glib::FileTest::FILE_TEST_EXISTS))
+        {
+          /* Making sure the user is OK with specifying a non-existent file
+           * (i.e. it may appear later) */
+          Glib::ustring msg = Glib::ustring::
+              compose(_("Specified file '%1' does not currently exist - do "
+                        "you still want to proceed?"), file_path);
+
+          /* See helpers.hpp - tried to host a generic warning dialog
+           * implementation there but got endless include bullshit */
+          Gtk::MessageDialog d(msg, false, Gtk::MESSAGE_WARNING,
+                               Gtk::BUTTONS_YES_NO);
+          d.set_modal();
+          d.set_title(_("Generic Monitor"));
+          d.set_icon(window->get_icon());
+          if (d.run() != Gtk::RESPONSE_YES)
+          {
+            generic_file_path_entry->grab_focus();
+            response = Gtk::RESPONSE_HELP;
+            continue;
+          }
+        }
+
+        // Validating regex if necessary
+        if (!value_from_contents)
+        {
+          if (regex_string == "")
+          {
+            Glib::ustring msg = _("When 'number from regex' is specified, you "
+                                  "must provide a regex to use.");
+
+            /* See helpers.hpp - tried to host a generic warning dialog
+             * implementation there but got endless include bullshit */
+            Gtk::MessageDialog d(msg, false, Gtk::MESSAGE_WARNING,
+                                 Gtk::BUTTONS_OK);
+            d.set_modal();
+            d.set_title(_("Generic Monitor"));
+            d.set_icon(window->get_icon());
+            d.run();
+            generic_regex_entry->grab_focus();
+            response = Gtk::RESPONSE_HELP;
+            continue;
+          }
+
+          Glib::RefPtr<Glib::Regex> regex;
+          try
+          {
+            regex = Glib::Regex::create(regex_string);
+          }
+          catch (Glib::Error &e)
+          {
+            /* Regex validation failed - informing the user - error message
+             * already includes the regex */
+            Glib::ustring msg = Glib::ustring::compose(
+                  _("The regex provided is not a valid:\n\n%1"), e.what());
+
+            /* See helpers.hpp - tried to host a generic warning dialog
+             * implementation there but got endless include bullshit */
+            Gtk::MessageDialog d(msg, false, Gtk::MESSAGE_WARNING,
+                                 Gtk::BUTTONS_OK);
+            d.set_modal();
+            d.set_title(_("Generic Monitor"));
+            d.set_icon(window->get_icon());
+            d.run();
+            generic_regex_entry->grab_focus();
+            response = Gtk::RESPONSE_HELP;
+            continue;
+          }
+
+          // Making sure there is at least one capture group
+          if (regex->get_capture_count() == 0)
+          {
+            Glib::ustring msg = _("Please ensure the regex provided has one "
+                                  "capture group to use to extract the number.");
+
+            /* See helpers.hpp - tried to host a generic warning dialog
+             * implementation there but got endless include bullshit */
+            Gtk::MessageDialog d(msg, false, Gtk::MESSAGE_WARNING,
+                                 Gtk::BUTTONS_OK);
+            d.set_modal();
+            d.set_title(_("Generic Monitor"));
+            d.set_icon(window->get_icon());
+            d.run();
+            generic_regex_entry->grab_focus();
+            response = Gtk::RESPONSE_HELP;
+            continue;
+          }
+        }
+
+        // Ensuring mandatory fields have been filled in
+        if (data_source_name_long == "" || data_source_name_short == "")
+        {
+          Glib::ustring msg = _("Data source name (long and short forms) must be"
+                                " specified to create this monitor.");
+
+          /* See helpers.hpp - tried to host a generic warning dialog
+           * implementation there but got endless include bullshit */
+          Gtk::MessageDialog d(msg, false, Gtk::MESSAGE_WARNING,
+                               Gtk::BUTTONS_OK);
+          d.set_modal();
+          d.set_title(_("Generic Monitor"));
+          d.set_icon(window->get_icon());
+          d.run();
+          if (data_source_name_long == "")
+            generic_data_source_name_long_entry->grab_focus();
+          else
+            generic_data_source_name_short_entry->grab_focus();
+          response = Gtk::RESPONSE_HELP;
+          continue;
+        }
+
+        mon = new GenericMonitor(file_path, value_from_contents, regex_string,
+                                 follow_change, dir, data_source_name_long,
+                                 data_source_name_short, units_long, units_short,
+                                 generic_tag->get_text());
+      }
 
       return mon;
     }
@@ -719,22 +953,16 @@ void ChooseMonitorWindow::on_disk_stats_radiobutton_toggled()
     = disk_stats_radiobutton->get_active();
 }
 
-void ChooseMonitorWindow::on_memory_usage_radiobutton_toggled()
-{
-  memory_usage_options->property_sensitive()
-    = memory_usage_radiobutton->get_active();
-}
-
 void ChooseMonitorWindow::on_swap_usage_radiobutton_toggled()
 {
   swap_usage_options->property_sensitive()
     = swap_usage_radiobutton->get_active();
 }
 
-void ChooseMonitorWindow::on_fan_speed_radiobutton_toggled()
+void ChooseMonitorWindow::on_memory_usage_radiobutton_toggled()
 {
-  fan_speed_options->property_sensitive()
-    = fan_speed_radiobutton->get_active();
+  memory_usage_options->property_sensitive()
+    = memory_usage_radiobutton->get_active();
 }
 
 /* Triggered when user edits a network interface name after revealing the
@@ -850,6 +1078,30 @@ void ChooseMonitorWindow::on_temperature_radiobutton_toggled()
 {
   temperature_options->property_sensitive()
     = temperature_radiobutton->get_active();
+}
+
+void ChooseMonitorWindow::on_fan_speed_radiobutton_toggled()
+{
+  fan_speed_options->property_sensitive()
+    = fan_speed_radiobutton->get_active();
+}
+
+void ChooseMonitorWindow::on_generic_radiobutton_toggled()
+{
+  generic_options->property_sensitive()
+    = generic_radiobutton->get_active();
+}
+
+void ChooseMonitorWindow::on_generic_extract_via_regex_radiobutton_toggled()
+{
+  generic_number_regex_hbox->property_sensitive()
+    = generic_extract_via_regex_radiobutton->get_active();
+}
+
+void ChooseMonitorWindow::on_generic_change_in_value_checkbutton_toggled()
+{
+  generic_change_in_value_hbox->property_sensitive()
+    = generic_change_in_value_checkbutton->get_active();
 }
 
 bool ChooseMonitorWindow::on_closed(GdkEventAny *)
