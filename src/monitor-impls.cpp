@@ -837,6 +837,9 @@ double DiskStatsMonitor::do_measure()
   if (val > max_value)
     max_value = guint64(val * 1.05);
 
+  // Debug code
+  //std::cerr << "Returning value: " << val << "\n";
+
   return val;
 }
 
