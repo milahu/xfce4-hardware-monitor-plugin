@@ -2137,7 +2137,6 @@ double GenericMonitor::do_measure()
   else
     return_value = val;
 
-  // TODO: How do negative values affect this?
   /* Note - max_value is no longer used to determine the graph max for
    * Curves - the actual maxima stored in the ValueHistories are used */
   if (val != 0)     // Reduce scale gradually
