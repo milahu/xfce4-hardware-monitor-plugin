@@ -199,11 +199,11 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
   device_notebook->get_nth_page(3)->hide();
 #endif
 
-  // Setup disk statistics device name combobox
+  /* Setup disk statistics device name combobox - no column packing needed here
+   * since this seems to be done automatically when a text entry is included */
   static DiskStatsDeviceNameCols dsdnc;
   disk_stats_device_name_store = Gtk::ListStore::create(dsdnc);
   disk_stats_device_combobox->set_model(disk_stats_device_name_store);
-  disk_stats_device_combobox->pack_start(dsdnc.device_name);
 
   std::vector<Glib::ustring> device_names = DiskStatsMonitor::current_device_names();
   for (std::vector<Glib::ustring>::iterator it = device_names.begin();
