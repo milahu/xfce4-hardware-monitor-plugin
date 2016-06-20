@@ -126,7 +126,7 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
       }
       else if (type == "network_load")
       {
-        NetworkLoadMonitor::InterfaceType inter_type(NetworkLoadMonitor::ethernet_first);
+        NetworkLoadMonitor::InterfaceType inter_type;
 
         /* Deprecated config check (<=v1.4.6) - is the interface defined by a
          * count? */
@@ -180,27 +180,33 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
         else
         {
             // Up to date configuration - interface_type will be available
-            inter_type = static_cast<NetworkLoadMonitor::InterfaceType>(xfce_rc_read_int_entry(settings_ro,                                                                                                                                       "interface_type",
-                                               NetworkLoadMonitor::ethernet_first));
+            inter_type =
+                static_cast<NetworkLoadMonitor::InterfaceType>(
+                  xfce_rc_read_int_entry(settings_ro, "interface_type",
+                                         NetworkLoadMonitor::ethernet_first));
         }
 
         // Fetching interface 'direction' setting
-        int inter_direction = xfce_rc_read_int_entry(settings_ro,
-          "interface_direction", NetworkLoadMonitor::all_data);
+        NetworkLoadMonitor::Direction inter_direction =
+            static_cast<NetworkLoadMonitor::Direction>(
+              xfce_rc_read_int_entry(settings_ro, "interface_direction",
+                                     NetworkLoadMonitor::all_data));
 
-        // Converting direction setting into dedicated type
-        // TODO: I think I need to standardise my enum loading/dealing with code
-        NetworkLoadMonitor::Direction dir;
-
-        if (inter_direction == NetworkLoadMonitor::incoming_data)
-          dir = NetworkLoadMonitor::incoming_data;
-        else if (inter_direction == NetworkLoadMonitor::outgoing_data)
-          dir = NetworkLoadMonitor::outgoing_data;
-        else
-          dir = NetworkLoadMonitor::all_data;
+        // Validating direction
+        if (inter_direction < NetworkLoadMonitor::all_data ||
+            inter_direction >= NetworkLoadMonitor::NUM_DIRECTIONS)
+        {
+          std::cerr << Glib::ustring::compose(
+                         _("Network monitor for interface '%1' is being loaded "
+                           "with an invalid direction (%2) - resetting to all "
+                           "data!\n"),
+            NetworkLoadMonitor::interface_type_to_string(inter_type, false),
+                         inter_direction);
+          inter_direction = NetworkLoadMonitor::all_data;
+        }
 
         // Creating network load monitor
-        monitors.push_back(new NetworkLoadMonitor(inter_type, dir,
+        monitors.push_back(new NetworkLoadMonitor(inter_type, inter_direction,
                                                   tag, panel_plugin));
       }
       else if (type == "temperature")
@@ -242,6 +248,18 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
             static_cast<GenericMonitor::ValueChangeDirection>(
               xfce_rc_read_int_entry(settings_ro, "value_change_direction",
                                      GenericMonitor::positive));
+
+        // Validating direction
+        if (dir < GenericMonitor::positive ||
+            dir >= GenericMonitor::NUM_DIRECTIONS)
+        {
+          std::cerr << Glib::ustring::compose(
+                         _("Generic Monitor %1 associated with file '%2' is "
+                           "being loaded with an invalid value change direction "
+                           "(%3) - resetting to positive!\n"),
+                         data_source_name_long, file_path, dir);
+          dir = GenericMonitor::positive;
+        }
 
         // Creating generic monitor
         monitors.push_back(new GenericMonitor(file_path, value_from_contents,

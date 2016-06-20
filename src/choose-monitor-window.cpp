@@ -464,10 +464,20 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         if (!device_found)
           disk_stats_device_combobox->get_entry()->set_text(device_name);
 
-        // Selecting the correct statistic
-        int stat = xfce_rc_read_int_entry(settings_ro, "disk_stats_stat", 0);
+        // Validating statistic
+        DiskStatsMonitor::Stat stat = static_cast<DiskStatsMonitor::Stat>(
+              xfce_rc_read_int_entry(settings_ro, "disk_stats_stat",
+                                     DiskStatsMonitor::num_reads_completed));
         if (stat < 0 || stat >= DiskStatsMonitor::NUM_STATS)
-          stat = 0;
+        {
+          std::cerr << Glib::ustring::compose(
+                         _("Disk Stats monitor is being loaded with an invalid "
+                           "statistic (%1) - resetting to number of reads "
+                           "completed!\n"), stat);
+          stat = DiskStatsMonitor::num_reads_completed;
+        }
+
+        // Selecting the correct statistic
         disk_stats_stat_combobox->set_active(stat);
       }
 
@@ -483,9 +493,22 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
       {
         /* By the time this code is reached, deprecated configuration will be
          * updated so no need to convert stuff etc */
-        NetworkLoadMonitor::InterfaceType interface_type = static_cast<NetworkLoadMonitor::InterfaceType>(xfce_rc_read_int_entry(
-                    settings_ro, "interface_type",
+        NetworkLoadMonitor::InterfaceType interface_type =
+            static_cast<NetworkLoadMonitor::InterfaceType>(
+              xfce_rc_read_int_entry(settings_ro, "interface_type",
                     NetworkLoadMonitor::ethernet_first));
+
+        // Validating interface type
+        if (interface_type < NetworkLoadMonitor::ethernet_first ||
+            interface_type >= NetworkLoadMonitor::NUM_INTERFACE_TYPES)
+        {
+          std::cerr << Glib::ustring::compose(
+                         _("Network monitor is being loaded with an invalid "
+                           "interface type (%1) - resetting to the first ethernet"
+                           " connection!\n"), interface_type);
+          interface_type = NetworkLoadMonitor::ethernet_first;
+        }
+
         switch (interface_type)
         {
           case NetworkLoadMonitor::ethernet_first:
@@ -525,15 +548,38 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
             break;
         }
 
-        int direction = xfce_rc_read_int_entry(settings_ro,
-          "interface_direction", NetworkLoadMonitor::all_data);
+        NetworkLoadMonitor::Direction direction =
+            static_cast<NetworkLoadMonitor::Direction>(
+              xfce_rc_read_int_entry(settings_ro, "interface_direction",
+                                     NetworkLoadMonitor::all_data));
 
-        if (direction == NetworkLoadMonitor::incoming_data)
-          network_direction_combobox->set_active(1);
-        else if (direction == NetworkLoadMonitor::outgoing_data)
-          network_direction_combobox->set_active(2);
-        else if (direction == NetworkLoadMonitor::all_data)
-          network_direction_combobox->set_active(0);
+        // Validating direction
+        if (direction < NetworkLoadMonitor::all_data ||
+            direction >= NetworkLoadMonitor::NUM_DIRECTIONS)
+        {
+          std::cerr << Glib::ustring::compose(
+                         _("Network monitor for interface '%1' is being loaded "
+                           "with an invalid direction (%2) - resetting to all "
+                           "data!\n"),
+            NetworkLoadMonitor::interface_type_to_string(interface_type, false),
+                         direction);
+          direction = NetworkLoadMonitor::all_data;
+        }
+
+        switch (direction)
+        {
+          case NetworkLoadMonitor::all_data:
+            network_direction_combobox->set_active(0);
+            break;
+
+          case NetworkLoadMonitor::incoming_data:
+            network_direction_combobox->set_active(1);
+            break;
+
+          case NetworkLoadMonitor::outgoing_data:
+            network_direction_combobox->set_active(2);
+            break;
+        }
       }
 
       // Fill in temperature info
@@ -737,7 +783,8 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
       else if (network_load_radiobutton->get_active())
       {
         int selected_type = network_type_combobox->get_active_row_number();
-        NetworkLoadMonitor::InterfaceType interface_type = static_cast<NetworkLoadMonitor::InterfaceType>(selected_type);
+        NetworkLoadMonitor::InterfaceType interface_type =
+            static_cast<NetworkLoadMonitor::InterfaceType>(selected_type);
 
         /* Making sure that an interface was selected (traffic direction doesn't
          * need validation since it defaults to all) */

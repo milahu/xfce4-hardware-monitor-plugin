@@ -207,11 +207,12 @@ Applet::Applet(XfcePanelPlugin *plugin)
     viewer_text_overlay_color = xfce_rc_read_int_entry(settings_ro,
       "viewer_text_overlay_color", viewer_text_overlay_color);
 
-    // Extra care needed for this since enums don't enforce a range...
-    int text_overlay_position = xfce_rc_read_int_entry(settings_ro,
-      "viewer_text_overlay_position", int(CurveView::top_left));
-    set_viewer_text_overlay_position(
-          static_cast<CurveView::TextOverlayPosition>(text_overlay_position));
+    // Enum is validated in set_viewer_text_overlay_position
+    CurveView::TextOverlayPosition text_overlay_position =
+        static_cast<CurveView::TextOverlayPosition>(
+          xfce_rc_read_int_entry(settings_ro, "viewer_text_overlay_position",
+                                 CurveView::top_left));
+    set_viewer_text_overlay_position(text_overlay_position);
   }
   
   // Loading icon
