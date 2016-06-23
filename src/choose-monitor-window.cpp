@@ -36,9 +36,9 @@
 // Static intialisation
 ChooseMonitorWindow::NetworkInterfacesNamesCols ChooseMonitorWindow::nc;
 
-ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local,
+ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
                                          Gtk::Window &parent)
-  : panel_applet(panel_applet_local)
+  : xfce_plugin(xfce_plugin)
 {
   // Now we are forced to use top-level widgets this is much more over the top...
   std::vector<Glib::ustring> objects(2);
@@ -341,7 +341,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
 {
   // Set up monitor
   // Search for settings file
-  gchar* file = xfce_panel_plugin_lookup_rc_file(panel_applet);
+  gchar* file = xfce_panel_plugin_lookup_rc_file(xfce_plugin);
   if (file)
   {
     // Loading settings
@@ -677,7 +677,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         (*iter)[nc.interface_type] = NetworkLoadMonitor::
             interface_type_to_string(interface_type, false);
         (*iter)[nc.interface_name] = NetworkLoadMonitor::
-            get_interface_name(interface_type, panel_applet);
+            get_interface_name(interface_type, xfce_plugin);
     }
   }
 
@@ -821,7 +821,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         }
 
         mon = new NetworkLoadMonitor(interface_type, dir,
-                                     network_load_tag->get_text(), panel_applet);
+                                     network_load_tag->get_text(), xfce_plugin);
       }
       else if (temperature_radiobutton->get_active())
         mon = new TemperatureMonitor(temperature_combobox->get_active_row_number(),
@@ -1055,7 +1055,7 @@ void ChooseMonitorWindow::on_network_interface_name_edited(
 
   // Setting and saving the real value
   NetworkLoadMonitor::set_interface_name(inter_type, new_text);
-  gchar* file = xfce_panel_plugin_save_location(panel_applet, true);
+  gchar* file = xfce_panel_plugin_save_location(xfce_plugin, true);
   if (file)
   {
     XfceRc* settings_w = xfce_rc_simple_open(file, false);
@@ -1098,7 +1098,7 @@ void ChooseMonitorWindow::on_network_interfaces_restore_defaults_button_clicked(
   }
 
   // Updating storage vector and saving
-  gchar* file = xfce_panel_plugin_save_location(panel_applet, true);
+  gchar* file = xfce_panel_plugin_save_location(xfce_plugin, true);
   if (file)
   {
     XfceRc* settings_w = xfce_rc_simple_open(file, false);

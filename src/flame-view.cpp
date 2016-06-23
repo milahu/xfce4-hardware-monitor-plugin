@@ -28,7 +28,7 @@
 #include "pixbuf-drawing.hpp"
 
 #include "flame-view.hpp"
-#include "applet.hpp"
+#include "plugin.hpp"
 #include "monitor.hpp"
 
 
@@ -42,7 +42,7 @@ public:
   Flame(Monitor *monitor, unsigned int color);
 
   void update(Gnome::Canvas::Canvas &canvas,
-        Applet *applet, int width, int height, int no, int total);
+        Plugin *plugin, int width, int height, int no, int total);
 
   void burn();
   
@@ -66,7 +66,7 @@ Flame::Flame(Monitor *m, unsigned int c)
 {}
 
 void Flame::update(Gnome::Canvas::Canvas &canvas,
-       Applet *applet, int width, int height, int no, int total)
+       Plugin *plugin, int width, int height, int no, int total)
 {
   // Then make sure layer is correctly setup
   if (flame.get() == 0)
@@ -257,7 +257,7 @@ void FlameView::do_update()
   
   for (flame_iterator i = flames.begin(), end = flames.end(); i != end; ++i) {
     Flame &flame = **i;
-    flame.update(*canvas, applet, width(), height(), no++, total);
+    flame.update(*canvas, plugin, width(), height(), no++, total);
   }
 }
 
@@ -271,7 +271,7 @@ void FlameView::do_attach(Monitor *monitor)
   Glib::ustring dir = monitor->get_settings_dir();
 
   // Search for settings file
-  gchar* file = xfce_panel_plugin_lookup_rc_file(applet->panel_applet);
+  gchar* file = xfce_panel_plugin_lookup_rc_file(plugin->xfce_plugin);
 
   if (file)
   {
@@ -284,7 +284,7 @@ void FlameView::do_attach(Monitor *monitor)
     if (xfce_rc_has_entry(settings_ro, "color"))
     {
       color = xfce_rc_read_int_entry(settings_ro, "color",
-        applet->get_fg_color());
+        plugin->get_fg_color());
       color_missing = false;
     }
 
@@ -297,10 +297,10 @@ void FlameView::do_attach(Monitor *monitor)
   if (color_missing)
   {
     // Setting color
-    color = applet->get_fg_color();
+    color = plugin->get_fg_color();
 
     // Search for a writeable settings file, create one if it doesnt exist
-    file = xfce_panel_plugin_save_location(applet->panel_applet, true);
+    file = xfce_panel_plugin_save_location(plugin->xfce_plugin, true);
 
     if (file)
     {

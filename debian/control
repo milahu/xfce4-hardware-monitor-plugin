@@ -12,7 +12,7 @@ Homepage: http://git.xfce.org/panel-plugins/xfce4-hardware-monitor-plugin/
 Package: xfce4-hardware-monitor-plugin
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Monitor applet for the XFCE4 panel
- Hardware Monitor is a monitor applet for the XFCE4 panel. It supports
+Description: Monitor plugin for the XFCE4 panel
+ Hardware Monitor is a monitor plugin for the XFCE4 panel. It supports
  a variety of monitoring capabilities (CPU usage, network throughput
  etc.) and different kinds of viewers (curves, bars, text, flames).

@@ -1,5 +1,5 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: hardware-monitor-applet
+Upstream-Name: xfce4-hardware-monitor-plugin
 Upstream-Contact: OmegaPhil <OmegaPhil@startmail.com>
 Source: http://git.xfce.org/panel-plugins/xfce4-hardware-monitor-plugin/
 

@@ -1115,10 +1115,10 @@ bool NetworkLoadMonitor::interface_names_configured = false;
 
 NetworkLoadMonitor::NetworkLoadMonitor(InterfaceType &inter_type, Direction dir,
                                        const Glib::ustring &tag_string,
-                                       XfcePanelPlugin* panel_applet)
+                                       XfcePanelPlugin* xfce_plugin)
   : Monitor(tag_string), max_value(1), byte_count(0), time_stamp_secs(0),
     time_stamp_usecs(0),interface_type(inter_type), direction(dir),
-    pnl_applet(panel_applet)
+    xfce_plugin(xfce_plugin)
 {
 }
 
@@ -1128,7 +1128,7 @@ double NetworkLoadMonitor::do_measure()
 
   /* Obtaining interface name - this can change after monitor is instantiated
    * hence fetching each time */
-  Glib::ustring interface = get_interface_name(interface_type, pnl_applet);
+  Glib::ustring interface = get_interface_name(interface_type, xfce_plugin);
 
   glibtop_get_netload(&netload, interface.c_str());
   guint64 val, measured_bytes;
@@ -1290,7 +1290,7 @@ void NetworkLoadMonitor::remove_sync_with(Monitor *other)
     sync_monitors.erase(i);
 }
 
-void NetworkLoadMonitor::configure_interface_names(XfcePanelPlugin *panel_applet)
+void NetworkLoadMonitor::configure_interface_names(XfcePanelPlugin *xfce_plugin)
 {
   if (interface_names_configured)
     return;
@@ -1300,7 +1300,7 @@ void NetworkLoadMonitor::configure_interface_names(XfcePanelPlugin *panel_applet
       write_settings_serial_link = false, write_settings_wireless_first = false,
       write_settings_wireless_second = false, write_settings_wireless_third = false;
 
-  gchar* file = xfce_panel_plugin_lookup_rc_file(panel_applet);
+  gchar* file = xfce_panel_plugin_lookup_rc_file(xfce_plugin);
   if (file)
   {
     XfceRc* settings_ro = xfce_rc_simple_open(file, true);
@@ -1424,7 +1424,7 @@ void NetworkLoadMonitor::configure_interface_names(XfcePanelPlugin *panel_applet
         || write_settings_wireless_second || write_settings_wireless_third)
     {
       // Search for a writeable settings file, create one if it doesnt exist
-      gchar* file = xfce_panel_plugin_save_location(panel_applet, true);
+      gchar* file = xfce_panel_plugin_save_location(xfce_plugin, true);
 
       if (file)
       {
@@ -1516,10 +1516,10 @@ void NetworkLoadMonitor::configure_interface_names(XfcePanelPlugin *panel_applet
 }
 
 Glib::ustring NetworkLoadMonitor::get_interface_name(InterfaceType type,
-                                                     XfcePanelPlugin *panel_applet)
+                                                     XfcePanelPlugin *xfce_plugin)
 {
   // Load saved interface names if not done yet and enforcing defaults
-  configure_interface_names(panel_applet);
+  configure_interface_names(xfce_plugin);
 
   // Debug code
  /* std::cout << "get_interface_name called for " << interface_type_to_string(type,

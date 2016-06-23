@@ -45,16 +45,16 @@ extern "C"
 #include <libxfce4panel/libxfce4panel.h>
 }
 
-class Applet;
+class Plugin;
 class Monitor;
 
 class ChooseMonitorWindow: public sigc::trackable
 {
 public:
 
-  /* panel_applet is required here as the user can edit NetworkLoadMonitor
+  /* xfce_plugin is required here as the user can edit NetworkLoadMonitor
    * interface names through a settings dialog, and this needs special saving */
-  ChooseMonitorWindow(XfcePanelPlugin* panel_applet_local, Gtk::Window &parent);
+  ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin, Gtk::Window &parent);
   ~ChooseMonitorWindow();
 
   // given a monitor directory (may be ""), return a new monitor or 0
@@ -108,7 +108,7 @@ private:
                    *generic_change_in_value_negative_radiobutton,
                    *generic_change_in_value_both_radiobutton;
 
-  XfcePanelPlugin* panel_applet;
+  XfcePanelPlugin* xfce_plugin;
 
   // For disk statistics device name combobox
   class DiskStatsDeviceNameCols: public Gtk::TreeModel::ColumnRecord

@@ -1,7 +1,6 @@
 # List of source files containing translatable strings.
 # Please keep this file sorted alphabetically.
 xfce4-hardware-monitor-plugin.desktop.in
-src/applet.cpp
 src/bar-view.cpp
 src/choose-monitor-window.cpp
 src/column-view.cpp
@@ -10,6 +9,7 @@ src/flame-view.cpp
 src/gui-helpers.cpp
 src/helpers.cpp
 src/monitor-impls.cpp
+src/plugin.cpp
 src/preferences-window.cpp
 src/text-view.cpp
 src/ui.glade

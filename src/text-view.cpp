@@ -30,7 +30,7 @@
 
 #include "text-view.hpp"
 #include "monitor.hpp"
-#include "applet.hpp"
+#include "plugin.hpp"
 #include "ucompose.hpp"
 #include "i18n.hpp"
 
@@ -92,7 +92,7 @@ TextView::TextView()
 void TextView::do_display()
 {
   background_box.add(table);
-  applet->get_container().add(background_box);
+  plugin->get_container().add(background_box);
 
   table.show();
   background_box.show();
@@ -102,7 +102,7 @@ void TextView::do_update()
 {
   // Update
   for (text_iterator i = texts.begin(), end = texts.end(); i != end; ++i)
-    (*i)->update(applet->get_viewer_font());
+    (*i)->update(plugin->get_viewer_font());
 }
 
 void TextView::do_attach(Monitor *monitor)

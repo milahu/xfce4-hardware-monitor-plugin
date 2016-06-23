@@ -128,7 +128,7 @@ typedef monitor_seq::iterator monitor_iter;
 
 /* Forward declaration for load_monitors - including the panel header at the top
  * causes glibmm/object.h to complain that X11/Xlib.h has been included ahead
- * of it?? Why is the include tolerated in applet.hpp then? */
+ * of it?? Why is the include tolerated in plugin.hpp then? */
 typedef struct _XfcePanelPlugin        XfcePanelPlugin;
 
 monitor_seq load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin);

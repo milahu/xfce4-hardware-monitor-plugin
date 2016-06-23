@@ -24,7 +24,7 @@
 #include <libgnomecanvasmm/pixbuf.h>
 
 #include "column-view.hpp"
-#include "applet.hpp"
+#include "plugin.hpp"
 #include "monitor.hpp"
 #include "value-history.hpp"
 
@@ -42,7 +42,7 @@ public:
 
   void update(unsigned int max_samples); // gather info from monitor
   void draw(Gnome::Canvas::Canvas &canvas, // redraw columns on canvas
-      Applet *applet, int width, int height);
+      Plugin *plugin, int width, int height);
 
   Monitor *monitor;
   
@@ -70,7 +70,7 @@ void ColumnGraph::update(unsigned int max_samples)
 }
 
 void ColumnGraph::draw(Gnome::Canvas::Canvas &canvas,
-           Applet *applet, int width, int height)
+           Plugin *plugin, int width, int height)
 {
   if (remaining_draws <= 0)
     return;
@@ -185,7 +185,7 @@ void ColumnView::do_attach(Monitor *monitor)
   Glib::ustring dir = monitor->get_settings_dir();
 
   // Search for settings file
-  gchar* file = xfce_panel_plugin_lookup_rc_file(applet->panel_applet);
+  gchar* file = xfce_panel_plugin_lookup_rc_file(plugin->xfce_plugin);
 
   if (file)
   {
@@ -198,7 +198,7 @@ void ColumnView::do_attach(Monitor *monitor)
     if (xfce_rc_has_entry(settings_ro, "color"))
     {
       color = xfce_rc_read_int_entry(settings_ro, "color",
-        applet->get_fg_color());
+        plugin->get_fg_color());
       color_missing = false;
     }
 
@@ -211,10 +211,10 @@ void ColumnView::do_attach(Monitor *monitor)
   if (color_missing)
   {
     // Setting color
-    color = applet->get_fg_color();
+    color = plugin->get_fg_color();
 
     // Search for a writeable settings file, create one if it doesnt exist
-    file = xfce_panel_plugin_save_location(applet->panel_applet, true);
+    file = xfce_panel_plugin_save_location(plugin->xfce_plugin, true);
 
     if (file)
     {
@@ -256,5 +256,5 @@ void ColumnView::do_detach(Monitor *monitor)
 void ColumnView::do_draw_loop()
 {
   for (column_iterator i = columns.begin(), end = columns.end(); i != end; ++i)
-    (*i)->draw(*canvas, applet, width(), height());
+    (*i)->draw(*canvas, plugin, width(), height());
 }

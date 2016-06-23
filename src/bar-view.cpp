@@ -26,7 +26,7 @@
 #include <libgnomecanvasmm/rect.h>
 
 #include "bar-view.hpp"
-#include "applet.hpp"
+#include "plugin.hpp"
 #include "monitor.hpp"
 
 
@@ -42,7 +42,7 @@ public:
 
   void update();
   void draw(Gnome::Canvas::Canvas &canvas,
-      Applet *applet, int width, int height, int no, int total,
+      Plugin *plugin, int width, int height, int no, int total,
       double time_offset);
 
   Monitor *monitor;
@@ -99,7 +99,7 @@ unsigned int outlineified(unsigned int color)
 }
 
 void Bar::draw(Gnome::Canvas::Canvas &canvas,
-         Applet *applet, int width, int height, int no, int total,
+         Plugin *plugin, int width, int height, int no, int total,
          double time_offset)
 { 
   unsigned int outline_color = outlineified(fill_color);
@@ -225,7 +225,7 @@ void BarView::do_attach(Monitor *monitor)
   Glib::ustring dir = monitor->get_settings_dir();
 
   // Search for settings file
-  gchar* file = xfce_panel_plugin_lookup_rc_file(applet->panel_applet);
+  gchar* file = xfce_panel_plugin_lookup_rc_file(plugin->xfce_plugin);
 
   if (file)
   {
@@ -238,7 +238,7 @@ void BarView::do_attach(Monitor *monitor)
     if (xfce_rc_has_entry(settings_ro, "fill_color"))
     {
       fill_color = xfce_rc_read_int_entry(settings_ro, "fill_color",
-        applet->get_fg_color());
+        plugin->get_fg_color());
       color_missing = false;
     }
 
@@ -251,10 +251,10 @@ void BarView::do_attach(Monitor *monitor)
   if (color_missing)
   {
     // Setting color
-    fill_color = applet->get_fg_color();
+    fill_color = plugin->get_fg_color();
 
     // Search for a writeable settings file, create one if it doesnt exist
-    file = xfce_panel_plugin_save_location(applet->panel_applet, true);
+    file = xfce_panel_plugin_save_location(plugin->xfce_plugin, true);
 
     if (file)
     {
@@ -301,7 +301,7 @@ void BarView::do_draw_loop()
   int no = 0;
   
   for (bar_iterator i = bars.begin(), end = bars.end(); i != end; ++i)
-    (*i)->draw(*canvas, applet, width(), height(), no++, total, time_offset);
+    (*i)->draw(*canvas, plugin, width(), height(), no++, total, time_offset);
 
   ++draws_since_update;
 }

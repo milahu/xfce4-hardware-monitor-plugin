@@ -4,7 +4,7 @@
 Hardware Monitor
 ----------------
 
-Hardware Monitor is a monitor applet for the XFCE4 panel (originally
+Hardware Monitor is a monitor plugin for the XFCE4 panel (originally
 the GNOME panel). It supports a variety of monitoring capabilities
 (CPU usage, network throughput etc.) and different kinds of viewers
 (curves, bars, columns, text, flames).
@@ -57,13 +57,13 @@ Compiling from source
 
 Note that when you compile from source, the file
 hardware-monitor.desktop must end up a place where the panel can find
-it. Else you will not be able to find the applet in the right-click
+it. Else you will not be able to find the plugin in the right-click
 panel menu. This place is usually /usr/share/xfce4/panel/plugins/. If you
 run configure with 
 
   ./configure --prefix=/usr
 
-and install the applet, it will work.
+and install the plugin, it will work.
 
 To set up the build environment for the usual ./configure && make &&
 make install, run the provided autogen.sh script first - autoconf, libtool

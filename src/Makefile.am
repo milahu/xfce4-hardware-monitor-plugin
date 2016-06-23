@@ -13,7 +13,6 @@ plugin_LTLIBRARIES = libhardwaremonitor.la
 
 # List of source files needed to build the library
 libhardwaremonitor_la_SOURCES = \
-                      applet.cpp applet.hpp \
                       bar-view.cpp bar-view.hpp \
                       choose-monitor-window.cpp choose-monitor-window.hpp \
                       canvas-view.cpp canvas-view.hpp \
@@ -25,6 +24,7 @@ libhardwaremonitor_la_SOURCES = \
                       i18n.hpp \
                       monitor.hpp \
                       monitor-impls.cpp monitor-impls.hpp \
+                      plugin.cpp plugin.hpp \
                       preferences-window.cpp preferences-window.hpp \
                       pixbuf-drawing.hpp \
                       register_plugin.c \

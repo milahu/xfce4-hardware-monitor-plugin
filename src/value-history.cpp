@@ -24,13 +24,13 @@
 
 #include "value-history.hpp"
 #include "monitor.hpp"
-#include "applet.hpp"
+#include "plugin.hpp"
 
 
 ValueHistory::ValueHistory(Monitor *mon)
   : monitor(mon), max_value(0), waits_remaining(0)
 {
-  wait_iterations = monitor->update_interval() / Applet::update_interval;
+  wait_iterations = monitor->update_interval() / Plugin::update_interval;
 }
 
 double ValueHistory::get_max_value()

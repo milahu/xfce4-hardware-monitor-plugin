@@ -44,12 +44,12 @@
 #include "monitor.hpp"
 
 
-class Applet;
+class Plugin;
 
 class PreferencesWindow: public sigc::trackable
 {
 public:
-  PreferencesWindow(Applet &applet, monitor_seq monitors);
+  PreferencesWindow(Plugin &plugin, monitor_seq monitors);
   ~PreferencesWindow();
 
   void show();
@@ -168,7 +168,7 @@ private:
   void save_text_overlay_format_string(const Glib::ustring format_string);
   void save_text_overlay_separator(const Glib::ustring separator);
 
-  Applet &applet;
+  Plugin &plugin;
 };
 
 #endif

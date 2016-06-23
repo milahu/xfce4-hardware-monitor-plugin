@@ -26,7 +26,7 @@
 #include <libgnomecanvasmm/pixbuf.h>
 
 #include "canvas-view.hpp"
-#include "applet.hpp"
+#include "plugin.hpp"
 
 
 int const CanvasView::draw_interval = 100;
@@ -46,7 +46,7 @@ void CanvasView::do_display()
 {
   // canvas creation magic
   canvas.reset(new Gnome::Canvas::CanvasAA);
-  applet->get_container().add(*canvas);
+  plugin->get_container().add(*canvas);
 
   draw_timer = Glib::signal_timeout()
     .connect(sigc::mem_fun(*this, &CanvasView::draw_loop), draw_interval);
@@ -60,12 +60,12 @@ void CanvasView::do_update()
   // Debug code
   //std::cout << "In CanvasView::do_update!\n";
 
-  // Size is maintained in applet
-  size = applet->get_viewer_size();
+  // Size is maintained in plugin
+  size = plugin->get_viewer_size();
 
   /* Ensure that the widget's requested size is being honoured on every
    * call */
-  applet->set_viewer_size(size);
+  plugin->set_viewer_size(size);
 
   // Ensure the canvas is shown
   resize_canvas();
@@ -97,26 +97,26 @@ void CanvasView::do_unset_background()
 
 int CanvasView::width() const
 {
-  /* Remember that applet->get_size returns the thickness of the panel
+  /* Remember that plugin->get_size returns the thickness of the panel
    * (i.e. height in the normal orientation or width in the vertical
    * orientation) */
 
   // Debug code
-  //std::cout << "CanvasView::width: " << ((applet->horizontal()) ? size : applet->get_size()) << "\n";
+  //std::cout << "CanvasView::width: " << ((plugin->horizontal()) ? size : plugin->get_size()) << "\n";
 
-  if (applet->horizontal())
+  if (plugin->horizontal())
     return size;
   else
-    return applet->get_size();
+    return plugin->get_size();
 }
 
 int CanvasView::height() const
 {
   // Debug code
-  //std::cout << "CanvasView::height: " << ((applet->horizontal()) ? applet->get_size() : size) << "\n";
+  //std::cout << "CanvasView::height: " << ((plugin->horizontal()) ? plugin->get_size() : size) << "\n";
 
-  if (applet->horizontal())
-    return applet->get_size();
+  if (plugin->horizontal())
+    return plugin->get_size();
   else
     return size;
 }

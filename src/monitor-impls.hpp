@@ -245,7 +245,7 @@ public:
 
   NetworkLoadMonitor(InterfaceType &interface_type,
                      Direction direction, const Glib::ustring &tag_string,
-                     XfcePanelPlugin *panel_applet);
+                     XfcePanelPlugin *xfce_plugin);
 
   virtual double max();
   virtual bool fixed_max();
@@ -260,9 +260,9 @@ public:
   /* Allow to maintain list of interface names separate to individual monitor
    * objects
    * configure_interface_names needs to read and possibly write the configuration
-   * file hence takes an applet pointer */
+   * file hence takes an XFCE4 plugin pointer */
   static Glib::ustring get_interface_name(InterfaceType type,
-                                          XfcePanelPlugin *panel_applet);
+                                          XfcePanelPlugin *xfce_plugin);
   static Glib::ustring get_default_interface_name(InterfaceType type);
   static void set_interface_name(InterfaceType type,
                                  const Glib::ustring interface_name);
@@ -283,10 +283,10 @@ private:
 
   // Can't initialise a static vector properly so trying this
   static std::vector<Glib::ustring> initialise_default_interface_names();
-  static void configure_interface_names(XfcePanelPlugin *panel_applet);
+  static void configure_interface_names(XfcePanelPlugin *xfce_plugin);
 
-  XfcePanelPlugin *pnl_applet;  // Needed to allow do_measure to call
-                                // get_interface_name(*panel_applet)
+  XfcePanelPlugin *xfce_plugin;  // Needed to allow do_measure to call
+                                 // get_interface_name(xfce_plugin)
 
   guint64 max_value;    // maximum measured capacity of line
   long int time_difference; // no. of msecs. between the last two calls

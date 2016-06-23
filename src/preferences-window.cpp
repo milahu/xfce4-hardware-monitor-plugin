@@ -31,7 +31,7 @@
 #include "preferences-window.hpp"
 #include "choose-monitor-window.hpp"
 #include "gui-helpers.hpp"
-#include "applet.hpp"
+#include "plugin.hpp"
 #include "monitor.hpp"
 #include "curve-view.hpp"
 #include "i18n.hpp"
@@ -45,8 +45,8 @@ void PreferencesWindow::connect_monitor_colorbutton(Gtk::ColorButton
       colorbutton));
 }
 
-PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
-  : applet(applet_)
+PreferencesWindow::PreferencesWindow(Plugin &plugin_, monitor_seq monitors)
+  : plugin(plugin_)
 {
   // Now we are forced to use top-level widgets this is much more over the top...
   std::vector<Glib::ustring> objects(2);
@@ -56,7 +56,7 @@ PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
 
   ui->get_widget("preferences_window", window);
   window->set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
-  window->set_icon(applet.get_icon());
+  window->set_icon(plugin.get_icon());
   
 
   // Connect the Viewer tab widgets
@@ -225,20 +225,20 @@ PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
   link_button->set_relief(Gtk::RELIEF_NORMAL);
 
   // Fill in values
-  viewer_type_listener(applet.get_viewer_type(), true);
-  background_color_listener(applet.get_background_color());
-  use_background_color_listener(applet.get_use_background_color());
-  size_listener(applet.get_viewer_size());
-  font_listener(font_checkbutton, fontbutton, applet.get_viewer_font());
-  if (applet.get_viewer_text_overlay_enabled())
+  viewer_type_listener(plugin.get_viewer_type(), true);
+  background_color_listener(plugin.get_background_color());
+  use_background_color_listener(plugin.get_use_background_color());
+  size_listener(plugin.get_viewer_size());
+  font_listener(font_checkbutton, fontbutton, plugin.get_viewer_font());
+  if (plugin.get_viewer_text_overlay_enabled())
     text_overlay_checkbutton->set_active();
   text_overlay_format_string_entry->
-      set_text(applet.get_viewer_text_overlay_format_string());
+      set_text(plugin.get_viewer_text_overlay_format_string());
   text_overlay_separator_entry->
-      set_text(applet.get_viewer_text_overlay_separator());
+      set_text(plugin.get_viewer_text_overlay_separator());
   font_listener(text_overlay_font_checkbutton, text_overlay_fontbutton,
-                applet.get_viewer_text_overlay_font());
-  text_overlay_color_listener(applet.get_viewer_text_overlay_color());
+                plugin.get_viewer_text_overlay_font());
+  text_overlay_color_listener(plugin.get_viewer_text_overlay_color());
 
   for (monitor_iter i = monitors.begin(), end = monitors.end();
        i != end; ++i)
@@ -250,7 +250,7 @@ PreferencesWindow::PreferencesWindow(Applet &applet_, monitor_seq monitors)
 
   // Populating text overlay position combobox and selecting the correct position
   CurveView::TextOverlayPosition current_pos, position =
-      applet.get_viewer_text_overlay_position();
+      plugin.get_viewer_text_overlay_position();
   store_iter i;
   for (int r = 0; r < CurveView::NUM_TEXT_OVERLAY_POSITIONS; ++r)
   {
@@ -364,7 +364,7 @@ void PreferencesWindow::viewer_type_listener(const Glib::ustring viewer_type,
 
   /* Actually changing the viewer type - background color use etc is set
    * separately */
-  applet.viewer_type_listener(viewer_type);
+  plugin.viewer_type_listener(viewer_type);
 }
 
 void PreferencesWindow::background_color_listener(unsigned int background_color)
@@ -377,7 +377,7 @@ void PreferencesWindow::background_color_listener(unsigned int background_color)
   update_colorbutton_if_different(background_colorbutton, r, g, b, a);
 
   // Actually updating the background color
-  applet.background_color_listener(background_color);
+  plugin.background_color_listener(background_color);
 }
 
 void PreferencesWindow::use_background_color_listener(bool use_background_color)
@@ -388,7 +388,7 @@ void PreferencesWindow::use_background_color_listener(bool use_background_color)
     panel_background_radiobutton->set_active();
 
   // Actually updating the background color usage state
-  applet.use_background_color_listener(use_background_color);
+  plugin.use_background_color_listener(use_background_color);
 }
 
 void PreferencesWindow::size_listener(int viewer_size)
@@ -397,7 +397,7 @@ void PreferencesWindow::size_listener(int viewer_size)
     size_scale->set_value(pixels_to_size_scale(viewer_size));
 
   // Actually change the size...
-  applet.set_viewer_size(viewer_size);
+  plugin.set_viewer_size(viewer_size);
 }
 
 // This works with more than one font button now
@@ -442,7 +442,7 @@ void PreferencesWindow::text_overlay_color_listener(unsigned int color)
   update_colorbutton_if_different(text_overlay_colorbutton, r, g, b, a);
 
   // Actually updating the text overlay color
-  applet.set_viewer_text_overlay_color(color);
+  plugin.set_viewer_text_overlay_color(color);
 }
 
 
@@ -480,7 +480,7 @@ void PreferencesWindow::sync_conf_with_colorbutton(Glib::ustring settings_dir,
 {
 
   // Search for a writeable settings file, create one if it doesnt exist
-  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+  gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
     
   if (file)
   {
@@ -519,7 +519,7 @@ void PreferencesWindow::on_background_colorbutton_set()
            background_colorbutton);
 
   // Actually apply the color change
-  applet.background_color_listener(
+  plugin.background_color_listener(
     get_colorbutton_int(background_colorbutton));
 }
 
@@ -531,7 +531,7 @@ void PreferencesWindow::on_background_color_radiobutton_toggled()
   use_background_color_listener(on);
 
   // Search for a writeable settings file, create one if it doesnt exist
-  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+  gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
     
   if (file)
   {
@@ -564,7 +564,7 @@ void PreferencesWindow::on_curve_radiobutton_toggled()
   if (active)
   {
     // Search for a writeable settings file, create one if it doesnt exist
-    gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+    gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
       
     if (file)
     {
@@ -601,7 +601,7 @@ void PreferencesWindow::on_bar_radiobutton_toggled()
   if (active)
   {
     // Search for a writeable settings file, create one if it doesnt exist
-    gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+    gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
       
     if (file)
     {
@@ -638,7 +638,7 @@ void PreferencesWindow::on_vbar_radiobutton_toggled()
   if (active)
   {
     // Search for a writeable settings file, create one if it doesnt exist
-    gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+    gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
       
     if (file)
     {
@@ -675,7 +675,7 @@ void PreferencesWindow::on_column_radiobutton_toggled()
   if (active)
   {
     // Search for a writeable settings file, create one if it doesnt exist
-    gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+    gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
       
     if (file)
     {
@@ -712,7 +712,7 @@ void PreferencesWindow::on_text_radiobutton_toggled()
   if (active)
   {
     // Search for a writeable settings file, create one if it doesnt exist
-    gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+    gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
       
     if (file)
     {
@@ -749,7 +749,7 @@ void PreferencesWindow::on_flame_radiobutton_toggled()
   if (active)
   {
     // Search for a writeable settings file, create one if it doesnt exist
-    gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+    gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
       
     if (file)
     {
@@ -790,7 +790,7 @@ void PreferencesWindow::on_size_scale_changed()
 
   /* Saving pixel value of scale
    * Search for a writeable settings file, create one if it doesnt exist */
-  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+  gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
     
   if (file)
   {
@@ -902,7 +902,7 @@ void PreferencesWindow::on_text_overlay_colorbutton_set()
            text_overlay_colorbutton);
 
   // Actually apply the color change
-  applet.set_viewer_text_overlay_color(
+  plugin.set_viewer_text_overlay_color(
     get_colorbutton_int(text_overlay_colorbutton));
 }
 
@@ -910,11 +910,11 @@ void PreferencesWindow::on_text_overlay_position_combobox_changed()
 {
   int position = text_overlay_position_combobox->get_active_row_number();
 
-  applet.set_viewer_text_overlay_position(
+  plugin.set_viewer_text_overlay_position(
         static_cast<CurveView::TextOverlayPosition>(position));
 
   // Search for a writeable settings file, create one if it doesnt exist */
-  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+  gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
 
   if (file)
   {
@@ -946,7 +946,7 @@ void PreferencesWindow::on_add_button_clicked()
   Monitor *monitor = run_choose_monitor_window(Glib::ustring());
 
   if (monitor) {
-    applet.add_monitor(monitor);
+    plugin.add_monitor(monitor);
     add_to_monitors_list(monitor);
   }
 }
@@ -960,7 +960,7 @@ void PreferencesWindow::on_remove_button_clicked()
   if (i) {
     Monitor *mon = (*i)[mc.monitor];
     monitor_store->erase(i);
-    applet.remove_monitor(mon);
+    plugin.remove_monitor(mon);
   }
 }
 
@@ -976,7 +976,7 @@ void PreferencesWindow::on_change_button_clicked()
       = run_choose_monitor_window(prev_monitor->get_settings_dir());
 
     if (new_monitor) {
-      applet.replace_monitor(prev_monitor, new_monitor);
+      plugin.replace_monitor(prev_monitor, new_monitor);
 
       (*i)[mc.name] = new_monitor->get_name();
       (*i)[mc.monitor] = new_monitor;
@@ -1008,7 +1008,7 @@ void PreferencesWindow::on_selection_changed()
     Glib::ustring mon_dir = (*(*i)[mc.monitor]).get_settings_dir();
 
     // Search for settings file
-    gchar* file = xfce_panel_plugin_lookup_rc_file(applet.panel_applet);
+    gchar* file = xfce_panel_plugin_lookup_rc_file(plugin.xfce_plugin);
 
     if (file)
     {
@@ -1061,7 +1061,7 @@ bool PreferencesWindow::on_closed(GdkEventAny *)
 
 Monitor *PreferencesWindow::run_choose_monitor_window(const Glib::ustring &str)
 {
-  ChooseMonitorWindow chooser(applet.panel_applet, *window);
+  ChooseMonitorWindow chooser(plugin.xfce_plugin, *window);
 
   return chooser.run(str);
 }
@@ -1108,10 +1108,10 @@ int PreferencesWindow::pixels_to_size_scale(int pixels)
 
 void PreferencesWindow::save_font_details(Glib::ustring font_details)
 {
-  applet.set_viewer_font(font_details);
+  plugin.set_viewer_font(font_details);
 
   // Search for a writeable settings file, create one if it doesnt exist */
-  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+  gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
 
   if (file)
   {
@@ -1138,10 +1138,10 @@ void PreferencesWindow::save_font_details(Glib::ustring font_details)
 
 void PreferencesWindow::save_text_overlay_font_details(Glib::ustring font_details)
 {
-  applet.set_viewer_text_overlay_font(font_details);
+  plugin.set_viewer_text_overlay_font(font_details);
 
   // Search for a writeable settings file, create one if it doesnt exist */
-  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+  gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
 
   if (file)
   {
@@ -1169,10 +1169,10 @@ void PreferencesWindow::save_text_overlay_font_details(Glib::ustring font_detail
 
 void PreferencesWindow::save_text_overlay_enabled(bool enabled)
 {
-  applet.set_viewer_text_overlay_enabled(enabled);
+  plugin.set_viewer_text_overlay_enabled(enabled);
 
   // Search for a writeable settings file, create one if it doesnt exist */
-  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+  gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
 
   if (file)
   {
@@ -1199,10 +1199,10 @@ void PreferencesWindow::save_text_overlay_enabled(bool enabled)
 
 void PreferencesWindow::save_text_overlay_format_string(const Glib::ustring format_string)
 {
-  applet.set_viewer_text_overlay_format_string(format_string);
+  plugin.set_viewer_text_overlay_format_string(format_string);
 
   // Search for a writeable settings file, create one if it doesnt exist */
-  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+  gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
 
   if (file)
   {
@@ -1231,10 +1231,10 @@ void PreferencesWindow::save_text_overlay_format_string(const Glib::ustring form
 
 void PreferencesWindow::save_text_overlay_separator(const Glib::ustring separator)
 {
-  applet.set_viewer_text_overlay_separator(separator);
+  plugin.set_viewer_text_overlay_separator(separator);
 
   // Search for a writeable settings file, create one if it doesnt exist */
-  gchar* file = xfce_panel_plugin_save_location(applet.panel_applet, true);
+  gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
 
   if (file)
   {

@@ -1,7 +1,7 @@
 <Project>
 	<name xml:lang="en">xfce4-hardware-monitor-plugin</name>
 	<shortdesc xml:lang="en">Port of the venerable GNOME Hardware Monitor applet - display various stats graphically or with text</shortdesc>
-	<homepage rdf:resource="http://www.fnxweb.com/hardware-monitor-applet"/>
+        <homepage rdf:resource="http://goodies.xfce.org/projects/panel-plugins/xfce4-hardware-monitor-plugin"/>
 	<maintainer>
 		<foaf:Person>
 			<foaf:name>OmegaPhil</foaf:name>

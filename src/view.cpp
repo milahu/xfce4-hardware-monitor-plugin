@@ -30,9 +30,9 @@ View::View::~View()
 {
 }
 
-void View::display(Applet &a)
+void View::display(Plugin &a)
 {
-  applet = &a;
+  plugin = &a;
   do_display();
 }
 

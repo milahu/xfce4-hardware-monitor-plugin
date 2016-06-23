@@ -20,10 +20,10 @@
 #include <libxfce4panel/xfce-panel-plugin.h>
 
 /* It looks like plugin registration MUST happen in a pure C file - doing
- * this in a C linkage block in applet.cpp is not good enough. Because
+ * this in a C linkage block in plugin.cpp is not good enough. Because
  * of this, AC_PROG_CC must be present in configure.ac as well */
-extern void applet_construct(XfcePanelPlugin* plugin);
+extern void plugin_construct(XfcePanelPlugin* xfce_plugin);
 
-/* 'Registering' the applet - in reality this substitutes into a load
+/* 'Registering' the plugin - in reality this substitutes into a load
  * of functions including a main */
-XFCE_PANEL_PLUGIN_REGISTER(applet_construct)
+XFCE_PANEL_PLUGIN_REGISTER(plugin_construct)

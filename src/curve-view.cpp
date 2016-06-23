@@ -25,7 +25,7 @@
 #include <libgnomecanvasmm/point.h>
 
 #include "curve-view.hpp"
-#include "applet.hpp"
+#include "plugin.hpp"
 #include "helpers.hpp"
 #include "monitor.hpp"
 #include "ucompose.hpp"
@@ -184,7 +184,7 @@ void CurveView::do_attach(Monitor *monitor)
   Glib::ustring dir = monitor->get_settings_dir();
 
   // Search for settings file
-  gchar* file = xfce_panel_plugin_lookup_rc_file(applet->panel_applet);
+  gchar* file = xfce_panel_plugin_lookup_rc_file(plugin->xfce_plugin);
 
   if (file)
   {
@@ -197,7 +197,7 @@ void CurveView::do_attach(Monitor *monitor)
     if (xfce_rc_has_entry(settings_ro, "color"))
     {
       color = xfce_rc_read_int_entry(settings_ro, "color",
-        applet->get_fg_color());
+        plugin->get_fg_color());
       color_missing = false;
     }
 
@@ -210,10 +210,10 @@ void CurveView::do_attach(Monitor *monitor)
   if (color_missing)
   {
     // Setting color
-    color = applet->get_fg_color();
+    color = plugin->get_fg_color();
 
     // Search for a writeable settings file, create one if it doesnt exist
-    file = xfce_panel_plugin_save_location(applet->panel_applet, true);
+    file = xfce_panel_plugin_save_location(plugin->xfce_plugin, true);
 
     if (file)
     {
@@ -257,10 +257,10 @@ void CurveView::do_draw_loop()
   double max = 0;
   Glib::ustring max_formatted, max_formatted_compact, monitor_data,
       monitor_data_compact, text_overlay_format_string, tag_string,
-      separator_string = applet->get_viewer_text_overlay_separator();
+      separator_string = plugin->get_viewer_text_overlay_separator();
   bool graph_max_needed = false, graph_max_compact_needed = false,
       monitor_data_needed = false, monitor_data_compact_needed = false,
-      text_overlay_enabled = applet->get_viewer_text_overlay_enabled();
+      text_overlay_enabled = plugin->get_viewer_text_overlay_enabled();
 
   // Obtain maximum value of all curves in the view
   for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
@@ -270,7 +270,7 @@ void CurveView::do_draw_loop()
   // If the text overlay is enabled, detecting all information required to output
   if (text_overlay_enabled)
   {
-    text_overlay_format_string = applet->get_viewer_text_overlay_format_string();
+    text_overlay_format_string = plugin->get_viewer_text_overlay_format_string();
 
     /* Glib::ustring::npos is the strange way C++ flags as a failure to find a
      * string */
@@ -375,19 +375,19 @@ void CurveView::do_draw_loop()
     /* Setting/fixing changed font and colour - doing it here since the CurveView
      * updates so frequently that its not worth also setting it directly from the
      * UI etc */
-    Glib::ustring font_details = applet->get_viewer_text_overlay_font();
+    Glib::ustring font_details = plugin->get_viewer_text_overlay_font();
     if (font_details.empty())
       font_details = "Sans 8";
     if (text_overlay->property_font() != font_details)
       text_overlay->property_font() = font_details;
 
-    unsigned int color = applet->get_viewer_text_overlay_color();
+    unsigned int color = plugin->get_viewer_text_overlay_color();
     if (text_overlay->property_fill_color_rgba() != color)
       text_overlay->property_fill_color_rgba() = color;
 
     // Positioning text
     int x, y;
-    text_overlay_calc_position(x, y, applet->get_viewer_text_overlay_position());
+    text_overlay_calc_position(x, y, plugin->get_viewer_text_overlay_position());
     if (text_overlay->property_x() != x)
       text_overlay->property_x() = x;
     if (text_overlay->property_y() != y)
@@ -436,33 +436,33 @@ void CurveView::text_overlay_calc_position(int& x, int& y,
       break;
 
     case top_center:
-      x = (applet->get_width() - text_overlay->property_text_width()) / 2;
+      x = (plugin->get_width() - text_overlay->property_text_width()) / 2;
       y = 0;
       break;
 
     case top_right:
-      x = applet->get_width() - text_overlay->property_text_width();
+      x = plugin->get_width() - text_overlay->property_text_width();
       y = 0;
       break;
 
     case center:
-      x = (applet->get_width() - text_overlay->property_text_width()) / 2;
-      y = (applet->get_height() - text_overlay->property_text_height()) / 2;
+      x = (plugin->get_width() - text_overlay->property_text_width()) / 2;
+      y = (plugin->get_height() - text_overlay->property_text_height()) / 2;
       break;
 
     case bottom_left:
       x = 0;
-      y = applet->get_height() - text_overlay->property_text_height();
+      y = plugin->get_height() - text_overlay->property_text_height();
       break;
 
     case bottom_center:
-      x = (applet->get_width() - text_overlay->property_text_width()) / 2;
-      y = applet->get_height() - text_overlay->property_text_height();
+      x = (plugin->get_width() - text_overlay->property_text_width()) / 2;
+      y = plugin->get_height() - text_overlay->property_text_height();
       break;
 
     case bottom_right:
-      x = applet->get_width() - text_overlay->property_text_width();
-      y = applet->get_height() - text_overlay->property_text_height();
+      x = plugin->get_width() - text_overlay->property_text_width();
+      y = plugin->get_height() - text_overlay->property_text_height();
       break;
 
     default:

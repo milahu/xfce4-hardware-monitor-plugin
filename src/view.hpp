@@ -31,17 +31,17 @@
 
 #include "helpers.hpp"
 
-class Applet;
+class Plugin;
 class Monitor;
 
-// something that can show something in an applet widget
+// Something that can show something in an plugin widget
 class View: noncopyable
 {
 public:
   View(bool keeps_history);
   virtual ~View();
 
-  void display(Applet &applet);
+  void display(Plugin &plugin);
   void update();
   void attach(Monitor *monitor);
   void detach(Monitor *monitor);
@@ -52,7 +52,7 @@ public:
   bool const keeps_history;
 
 protected:
-  Applet *applet;   // store pointer for reference
+  Plugin *plugin;   // store pointer for reference
 
 private:
   // for derived classes to override
