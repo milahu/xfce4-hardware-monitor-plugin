@@ -770,7 +770,7 @@ DiskStatsMonitor::DiskStatsMonitor(const Glib::ustring &device_name,
                                    const Stat &stat_to_monitor,
                                    const Glib::ustring &tag_string)
   : Monitor(tag_string), device_name(device_name),
-    stat_to_monitor(stat_to_monitor), previous_value(-1)
+    stat_to_monitor(stat_to_monitor), previous_value(-1), max_value(1)
 {
 }
 

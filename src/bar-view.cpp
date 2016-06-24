@@ -131,6 +131,10 @@ void Bar::draw(Gnome::Canvas::Canvas &canvas,
   if (max <= 0)
     max = 0.0000001;
 
+  // Debug code
+  /*std::cerr << Glib::ustring::compose("Old value: %1, new value: %2, max value: "
+                                      "%3\n", old_value, new_value, max);*/
+
   double box_frac = total_no_boxes * value / max;
   if (box_frac > total_no_boxes)
     box_frac = total_no_boxes;
