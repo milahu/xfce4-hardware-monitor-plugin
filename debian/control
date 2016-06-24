@@ -3,8 +3,8 @@ Section: xfce
 Priority: optional
 Maintainer: OmegaPhil <OmegaPhil@startmail.com>
 Build-Depends: debhelper (>= 9), libsensors4-dev,
- libglademm-2.4-dev, libgnomecanvasmm-2.6-dev, libgtop2-dev (>= 2.0.5),
- libgtkmm-2.4-dev (>= 2.12.0), xfce4-panel-dev (>= 4.8.0),
+ libgnomecanvasmm-2.6-dev, libgtop2-dev (>= 2.0.5),
+ libgtkmm-2.4-dev (>= 2.24.0), xfce4-panel-dev (>= 4.8.0),
  libxfce4ui-1-dev (>= 4.8.0), intltool, dh-autoreconf
 Standards-Version: 3.9.6
 Homepage: http://git.xfce.org/panel-plugins/xfce4-hardware-monitor-plugin/
