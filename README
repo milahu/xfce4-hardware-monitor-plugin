@@ -9,7 +9,7 @@ the GNOME panel). It supports a variety of monitoring capabilities
 (CPU usage, network throughput etc.) and different kinds of viewers
 (curves, bars, columns, text, flames).
 
-It is licensed under the GNU GPL.
+It is licensed under the GNU GPL v3 or later.
 
 
 Breaking changes
