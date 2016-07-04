@@ -789,9 +789,9 @@ double DiskStatsMonitor::do_measure()
 
   /* Returning 0 if device is not available - this is not an error since the
    * device may be hotpluggable */
-  std::map<Glib::ustring, std::vector<unsigned long int>> disk_stats =
+  std::map<Glib::ustring, std::vector<unsigned long int> > disk_stats =
       parse_disk_stats();
-  std::map<Glib::ustring, std::vector<unsigned long int>>::iterator it =
+  std::map<Glib::ustring, std::vector<unsigned long int> >::iterator it =
       disk_stats.find(device_name);
   if (it == disk_stats.end())
   {
@@ -887,7 +887,7 @@ void DiskStatsMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
-std::map<Glib::ustring, std::vector<unsigned long int>>
+std::map<Glib::ustring, std::vector<unsigned long int> >
 DiskStatsMonitor::parse_disk_stats()
 {
   Glib::ustring device_stats;
@@ -902,7 +902,7 @@ DiskStatsMonitor::parse_disk_stats()
     std::cerr << Glib::ustring::compose(_("Unable to parse disk stats from '%1' "
                                           "due to error '%2'\n"),
                                         "/proc/diskstats", e.what());
-    return std::map<Glib::ustring, std::vector<unsigned long int>>();
+    return std::map<Glib::ustring, std::vector<unsigned long int> >();
   }
 
   /* Preparing regex to use in splitting out stats
@@ -914,7 +914,7 @@ DiskStatsMonitor::parse_disk_stats()
         Glib::REGEX_OPTIMIZE);
 
   // Splitting out stats into devices
-  std::map<Glib::ustring, std::vector<unsigned long int>> parsed_stats;
+  std::map<Glib::ustring, std::vector<unsigned long int> > parsed_stats;
   std::stringstream device_stats_stream(device_stats);
   Glib::ustring device_name, single_dev_stats;
   Glib::MatchInfo match_info;
@@ -979,12 +979,12 @@ DiskStatsMonitor::parse_disk_stats()
 std::vector<Glib::ustring> DiskStatsMonitor::current_device_names()
 {
   // Fetching current disk stats
-  std::map<Glib::ustring, std::vector<unsigned long int>> parsed_stats =
+  std::map<Glib::ustring, std::vector<unsigned long int> > parsed_stats =
       parse_disk_stats();
 
   // Generating sorted list of available devices
   std::vector<Glib::ustring> devices_list;
-  for (std::map<Glib::ustring, std::vector<unsigned long int>>::iterator it
+  for (std::map<Glib::ustring, std::vector<unsigned long int> >::iterator it
        = parsed_stats.begin(); it != parsed_stats.end(); ++it)
   {
     devices_list.push_back(it->first);

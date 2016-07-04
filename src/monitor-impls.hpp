@@ -205,7 +205,7 @@ private:
 
   /* Reads the diskstats file and returns a vector of each device, containing a
    * vector of reported stats. Note that unordered_map is C++11 */
-  static std::map<Glib::ustring, std::vector<unsigned long int>> parse_disk_stats();
+  static std::map<Glib::ustring, std::vector<unsigned long int> > parse_disk_stats();
 
   guint64 max_value;
 
