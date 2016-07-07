@@ -777,7 +777,7 @@ DiskStatsMonitor::DiskStatsMonitor(const Glib::ustring &device_name,
 double DiskStatsMonitor::do_measure()
 {
   // Making sure stats file is available
-  if (!Glib::file_test(diskstats_path, Glib::FileTest::FILE_TEST_EXISTS))
+  if (!Glib::file_test(diskstats_path, Glib::FILE_TEST_EXISTS))
   {
     std::cerr << Glib::ustring::compose(_("The file '%1' is not available - "
                                           "unable to obtain %2 for device '%3'!"
@@ -2026,7 +2026,7 @@ GenericMonitor::GenericMonitor(const Glib::ustring &file_path,
 double GenericMonitor::do_measure()
 {
   // Making sure stats file is available
-  if (!Glib::file_test(file_path, Glib::FileTest::FILE_TEST_EXISTS))
+  if (!Glib::file_test(file_path, Glib::FILE_TEST_EXISTS))
   {
     std::cerr << Glib::ustring::compose(_("The file '%1' for the Generic Monitor"
                                           " data source '%2' is not available!\n"),

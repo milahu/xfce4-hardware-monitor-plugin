@@ -711,7 +711,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         bool show_free = show_free_checkbutton->get_active();
 
         // Making sure that the directory passed is valid
-        if (!Glib::file_test(mount_dir,  Glib::FileTest::FILE_TEST_IS_DIR))
+        if (!Glib::file_test(mount_dir,  Glib::FILE_TEST_IS_DIR))
         {
           /* Making sure the user is OK with specifying a non-existent directory
            * (i.e. it may appear later) */
@@ -750,8 +750,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
          * subsequent grab focus calls didn't work in it...
          * Making sure the device exists (since the user can put anything in
          * here) */
-        if (!Glib::file_test("/dev/" + device_name,
-                             Glib::FileTest::FILE_TEST_EXISTS) ||
+        if (!Glib::file_test("/dev/" + device_name, Glib::FILE_TEST_EXISTS) ||
             device_name == "")
         {
           /* Making sure the user is OK with specifying a non-existent device
@@ -846,7 +845,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
           dir = GenericMonitor::both;
 
         // Making sure that the path passed is valid
-        if (!Glib::file_test(file_path, Glib::FileTest::FILE_TEST_EXISTS))
+        if (!Glib::file_test(file_path, Glib::FILE_TEST_EXISTS))
         {
           /* Making sure the user is OK with specifying a non-existent file
            * (i.e. it may appear later) */
