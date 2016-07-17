@@ -1,7 +1,7 @@
 /* Pixbuf-drawing helpers.
  *
  * Copyright (c) 2002, 03, 04 Ole Laursen.
- * Copyright (c) 2013 OmegaPhil (OmegaPhil@startmail.com)
+ * Copyright (c) 2013, 2016 OmegaPhil (OmegaPhil@startmail.com)
  *
  * This program is free software; you can redistribute it and/or 
  * modify it under the terms of the GNU General Public License as 

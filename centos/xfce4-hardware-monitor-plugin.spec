@@ -7,7 +7,7 @@
 
 Summary: XFCE Plugin for hardware monitoring
 Name: xfce4-hardware-monitor-plugin
-Version: 1.4.7
+Version: 1.5.0
 Release: 1%{?dist}
 License: GPLv3+
 Group: User Interface/Desktops
@@ -16,11 +16,11 @@ URL: http://goodies.xfce.org/projects/panel-plugins/xfce4-hardware-monitor-plugi
 Source: http://git.xfce.org/panel-plugins/xfce4-hardware-monitor-plugin/snapshot/xfce4-hardware-monitor-plugin-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
-BuildRequires: gtkmm24-devel >= 2.24, libglademm24-devel >= 2.6, libgnomecanvasmm26-devel >= 2.6
+BuildRequires: gtkmm24-devel >= 2.24, libgnomecanvasmm26-devel >= 2.6
 BuildRequires: libgtop2-devel >= 2.28, libxfce4ui-devel >= 4.4
 BuildRequires: xfce4-panel-devel >= 4.4, intltool
 
-Requires: gtkmm24 >= 2.24, libglademm24 >= 2.6, libgnomecanvasmm26 >= 2.6
+Requires: gtkmm24 >= 2.24, libgnomecanvasmm26 >= 2.6
 Requires: libgtop2 >= 2.28, libxfce4ui >= 4.4, xfce4-panel >= 4.4
 
 %description
@@ -55,6 +55,19 @@ pleasantly with the rest of your XFCE desktop.
 %{_datadir}/xfce4/panel/plugins/xfce4-hardware-monitor-plugin.desktop
 
 %changelog
+* Sun Jul 17 2016  OmegaPhil <OmegaPhil@startmail.com>
+
+        Release 1.5.0
+
+        - UI is no longer maintained by libglade - have ported to GTKBuilder,
+        dropping the libglade dependency.
+        - Dependency on libgtkmm upped to v2.24.
+        - Disk Stats Monitor created - allows you to visualise disk/device stats
+        from '/proc/diskstats' where available.
+        - Generic Monitor created - allows you to read and report numbers from
+        simple or complicated file contents (latter via regex extraction).
+
+
 * Sun Aug 23 2015  OmegaPhil <OmegaPhil@startmail.com>
 
         Release 1.4.7
