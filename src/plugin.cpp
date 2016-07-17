@@ -828,7 +828,7 @@ void Plugin::on_about_activated()
     about->set_version(VERSION);
     // %1 is the copyright symbol
     about->set_copyright(String::ucompose(_("Copyright %1 2003 Ole "
-      "Laursen\nCopyright %1 2013-2015 OmegaPhil"), "\xc2\xa9"));
+      "Laursen\nCopyright %1 2013-2016 OmegaPhil"), "\xc2\xa9"));
     about->set_authors(authors);
     if (!documenters.empty())
       about->set_documenters(documenters);
