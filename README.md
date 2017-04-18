@@ -1,7 +1,8 @@
 XFCE4 Hardware Monitor Downloads
 ================================
 
-This branch contains Debian archives (<v1.4.6, made by [checkinstall](http://asic-linux.com.mx/~izto/checkinstall/)).
+This branch contains Debian archives (<v1.4.6, made by [checkinstall](http://asic-linux.com.mx/~izto/checkinstall/)) targetted at the Devuan Testing environment I use locally (but should work with Debian
+Testing).
 
 Please report any problems on the [issue tracker](https://bugzilla.xfce.org/buglist.cgi?component=General&list_id=19900&product=Xfce4-hardware-monitor-plugin).
 
