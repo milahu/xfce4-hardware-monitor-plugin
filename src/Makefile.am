@@ -52,7 +52,13 @@ libhardwaremonitor_la_LIBADD = \
                         $(DEPS_LIBS) $(SENSORS_LIBS)
 
 
-AM_CXXFLAGS = $(DEPS_CFLAGS) $(SENSORS_CFLAGS)
+# Recently (>=2017) dependent libraries seem to require building with
+# the C++11 standard (see https://bugzilla.xfce.org/show_bug.cgi?id=13717)
+# - this results in errors with GCC 5 and below when building with
+# default configuration - 4.9.2 is bundled with Debian Jessie (2015),
+# presumably when 2020 comes around I can consider addition of the std
+# flag deprecated
+AM_CXXFLAGS = $(DEPS_CFLAGS) $(SENSORS_CFLAGS) --std=c++11
 
 glade_DATA = ui.glade
 gladedir = $(datadir)/$(PACKAGE_NAME)/glade
