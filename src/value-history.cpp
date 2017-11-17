@@ -41,10 +41,18 @@ double ValueHistory::get_max_value()
 void ValueHistory::update(unsigned int max_samples, bool &new_value)
 {
   --waits_remaining;
+
+  // Debug code
+  /*std::cout << "ValueHistory::update: Called (monitor "
+            << monitor->get_short_name() << ")\n";*/
     
   if (waits_remaining <= 0) {
     new_value = true;
     monitor->measure();
+
+    // Debug code
+    /*std::cout << "ValueHistory::update: Measurement made (monitor "
+              << monitor->get_short_name() << ")\n";*/
 
     // Fetching new measurement
     double measurement = monitor->value();
