@@ -1506,7 +1506,7 @@ void NetworkLoadMonitor::configure_interface_names(XfcePanelPlugin *xfce_plugin)
     // Unable to obtain read-only config file - informing user
     std::cerr << _("Unable to obtain read-only config file path in order to "
                    "configure interface names in NetworkLoadMonitor::"
-                   "configure_interface_names!");
+                   "configure_interface_names!\n");
     return;
   }
 
