@@ -235,11 +235,13 @@ void BarView::do_attach(Monitor *monitor)
     XfceRc* settings_ro = xfce_rc_simple_open(file, true);
     g_free(file);
 
-    // Loading color
+    /* Loading color - note that all other visualisations use 'color' and not
+     * 'fill_color' - prior to this it was not possible to change the colour
+     * of a Bar, as no UI widgets set 'fill_color' */
     xfce_rc_set_group(settings_ro, dir.c_str());
-    if (xfce_rc_has_entry(settings_ro, "fill_color"))
+    if (xfce_rc_has_entry(settings_ro, "color"))
     {
-      fill_color = xfce_rc_read_int_entry(settings_ro, "fill_color",
+      fill_color = xfce_rc_read_int_entry(settings_ro, "color",
         plugin->get_fg_color());
       color_missing = false;
     }
@@ -266,7 +268,7 @@ void BarView::do_attach(Monitor *monitor)
 
       // Saving color
       xfce_rc_set_group(settings_w, dir.c_str());
-      xfce_rc_write_int_entry(settings_w, "fill_color", int(fill_color));
+      xfce_rc_write_int_entry(settings_w, "color", int(fill_color));
 
       // Close settings file
       xfce_rc_close(settings_w);
