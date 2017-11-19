@@ -39,9 +39,19 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
   : xfce_plugin(xfce_plugin)
 {
   // Now we are forced to use top-level widgets this is much more over the top...
-  std::vector<Glib::ustring> objects(2);
+  std::vector<Glib::ustring> objects(12);
   objects[0] = "choose_monitor_window";
   objects[1] = "cpu_no_adjustment";
+  objects[2] = "cpu_usage_refresh_delay_adjustment";
+  objects[3] = "disk_stats_refresh_delay_adjustment";
+  objects[4] = "disk_usage_refresh_delay_adjustment";
+  objects[5] = "fan_delay_adjustment";
+  objects[6] = "generic_delay_adjustment";
+  objects[7] = "load_average_refresh_delay_adjustment";
+  objects[8] = "memory_refresh_delay_adjustment";
+  objects[9] = "network_load_delay_adjustment";
+  objects[10] = "swap_refresh_delay_adjustment";
+  objects[11] = "temperature_delay_adjustment";
   ui = get_builder_xml(objects);
 
   ui->get_widget("choose_monitor_window", window);
@@ -52,43 +62,69 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
   ui->get_widget("device_notebook", device_notebook);
 
   ui->get_widget("cpu_usage_radiobutton", cpu_usage_radiobutton);
-  ui->get_widget("memory_usage_radiobutton", memory_usage_radiobutton);
-  ui->get_widget("swap_usage_radiobutton", swap_usage_radiobutton);
-  ui->get_widget("load_average_radiobutton", load_average_radiobutton);
-  ui->get_widget("disk_usage_radiobutton", disk_usage_radiobutton);
-  ui->get_widget("disk_stats_radiobutton", disk_stats_radiobutton);
-  ui->get_widget("network_load_radiobutton", network_load_radiobutton);
-  ui->get_widget("temperature_radiobutton", temperature_radiobutton);
-  ui->get_widget("fan_speed_radiobutton", fan_speed_radiobutton);
-  ui->get_widget("generic_radiobutton", generic_radiobutton);
-
   ui->get_widget("cpu_usage_options", cpu_usage_options);
-  ui->get_widget("load_average_options", load_average_options);
-  ui->get_widget("disk_usage_options", disk_usage_options);
-  ui->get_widget("disk_stats_options", disk_stats_options);
-  ui->get_widget("memory_usage_options", memory_usage_options);
-  ui->get_widget("swap_usage_options", swap_usage_options);
-  ui->get_widget("network_load_options", network_load_options);
-
   ui->get_widget("all_cpus_radiobutton", all_cpus_radiobutton);
   ui->get_widget("one_cpu_radiobutton", one_cpu_radiobutton);
   ui->get_widget("cpu_no_spinbutton", cpu_no_spinbutton);
   ui->get_widget("cpu_usage_tag_entry", cpu_tag);
-  ui->get_widget("load_average_tag_entry", load_average_tag);
+  ui->get_widget("cpu_usage_refresh_delay_spinbutton",
+                 cpu_usage_refresh_delay_spinbutton);
+  ui->get_widget("cpu_usage_refresh_delay_default_button",
+                 cpu_usage_refresh_delay_default_button);
 
+  ui->get_widget("load_average_radiobutton", load_average_radiobutton);
+  ui->get_widget("load_average_options", load_average_options);
+  ui->get_widget("load_average_tag_entry", load_average_tag);
+  ui->get_widget("load_average_refresh_delay_spinbutton",
+                 load_average_refresh_delay_spinbutton);
+  ui->get_widget("load_average_refresh_delay_default_button",
+                 load_average_refresh_delay_default_button);
+
+  ui->get_widget("disk_usage_radiobutton", disk_usage_radiobutton);
+  ui->get_widget("disk_usage_options", disk_usage_options);
   ui->get_widget("mount_dir_entry", mount_dir_entry);
   ui->get_widget("show_free_checkbutton", show_free_checkbutton);
   ui->get_widget("disk_usage_tag_entry", disk_usage_tag);
+  ui->get_widget("disk_usage_refresh_delay_spinbutton",
+                 disk_usage_refresh_delay_spinbutton);
+  ui->get_widget("disk_usage_refresh_delay_default_button",
+                 disk_usage_refresh_delay_default_button);
+
+  ui->get_widget("disk_stats_radiobutton", disk_stats_radiobutton);
+  ui->get_widget("disk_stats_options", disk_stats_options);
   ui->get_widget("disk_stats_device_combobox", disk_stats_device_combobox);
   ui->get_widget("disk_stats_stat_combobox", disk_stats_stat_combobox);
   ui->get_widget("disk_stats_tag_entry", disk_stats_tag);
-  ui->get_widget("memory_tag_entry", memory_usage_tag);
-  ui->get_widget("swap_tag_entry", swap_usage_tag);
+  ui->get_widget("disk_stats_refresh_delay_spinbutton",
+                 disk_stats_refresh_delay_spinbutton);
+  ui->get_widget("disk_stats_refresh_delay_default_button",
+                 disk_stats_refresh_delay_default_button);
 
+  ui->get_widget("swap_usage_radiobutton", swap_usage_radiobutton);
+  ui->get_widget("swap_usage_options", swap_usage_options);
+  ui->get_widget("swap_tag_entry", swap_usage_tag);
+  ui->get_widget("swap_refresh_delay_spinbutton", swap_refresh_delay_spinbutton);
+  ui->get_widget("swap_refresh_delay_default_button",
+                 swap_refresh_delay_default_button);
+
+  ui->get_widget("memory_usage_radiobutton", memory_usage_radiobutton);
+  ui->get_widget("memory_usage_options", memory_usage_options);
+  ui->get_widget("memory_tag_entry", memory_usage_tag);
+  ui->get_widget("memory_refresh_delay_spinbutton",
+                 memory_refresh_delay_spinbutton);
+  ui->get_widget("memory_refresh_delay_default_button",
+                 memory_refresh_delay_default_button);
+
+  ui->get_widget("network_load_radiobutton", network_load_radiobutton);
+  ui->get_widget("network_load_options", network_load_options);
   ui->get_widget("network_type_combobox", network_type_combobox);
   ui->get_widget("network_direction_combobox", network_direction_combobox);
   ui->get_widget("network_interfaces_treeview", network_interfaces_treeview);
   ui->get_widget("network_load_tag_entry", network_load_tag);
+  ui->get_widget("network_load_refresh_delay_spinbutton",
+                 network_load_refresh_delay_spinbutton);
+  ui->get_widget("network_load_refresh_delay_default_button",
+                 network_load_refresh_delay_default_button);
 
   /* Need special code here to set the desired stock icon as GTK Builder doesn't
    * support setting a stock icon but custom text, and as soon as you change the
@@ -102,16 +138,27 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
                                           Gtk::ICON_SIZE_BUTTON));
   network_interfaces_restore_defaults_button->set_image(*stock_image);
 
+  ui->get_widget("temperature_radiobutton", temperature_radiobutton);
   ui->get_widget("temperature_box", temperature_box);
   ui->get_widget("temperature_options", temperature_options);
   ui->get_widget("temperature_combobox", temperature_combobox);
   ui->get_widget("temperature_tag_entry", temperature_tag);
+  ui->get_widget("temperature_refresh_delay_spinbutton",
+                 temperature_refresh_delay_spinbutton);
+  ui->get_widget("temperature_refresh_delay_default_button",
+                 temperature_refresh_delay_default_button);
 
+  ui->get_widget("fan_speed_radiobutton", fan_speed_radiobutton);
   ui->get_widget("fan_speed_box", fan_speed_box);
   ui->get_widget("fan_speed_options", fan_speed_options);
   ui->get_widget("fan_speed_combobox", fan_speed_combobox);
   ui->get_widget("fan_speed_tag_entry", fan_speed_tag);
+  ui->get_widget("fan_speed_refresh_delay_spinbutton",
+                 fan_speed_refresh_delay_spinbutton);
+  ui->get_widget("fan_speed_refresh_delay_default_button",
+                 fan_speed_refresh_delay_default_button);
 
+  ui->get_widget("generic_radiobutton", generic_radiobutton);
   ui->get_widget("generic_box", generic_box);
   ui->get_widget("generic_options", generic_options);
   ui->get_widget("generic_file_path_entry", generic_file_path_entry);
@@ -137,65 +184,103 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
   ui->get_widget("generic_units_long_entry", generic_units_long_entry);
   ui->get_widget("generic_units_short_entry", generic_units_short_entry);
   ui->get_widget("generic_tag_entry", generic_tag);
+  ui->get_widget("generic_refresh_delay_spinbutton",
+                 generic_refresh_delay_spinbutton);
+  ui->get_widget("generic_refresh_delay_default_button",
+                 generic_refresh_delay_default_button);
 
   cpu_usage_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_cpu_usage_radiobutton_toggled));
+  cpu_usage_refresh_delay_default_button->signal_clicked()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_cpu_usage_refresh_delay_default_button_clicked));
 
   load_average_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_load_average_radiobutton_toggled));
+  load_average_refresh_delay_default_button->signal_clicked()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_load_average_refresh_delay_default_button_clicked));
 
   disk_usage_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_disk_usage_radiobutton_toggled));
+  disk_usage_refresh_delay_default_button->signal_clicked()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_disk_usage_refresh_delay_default_button_clicked));
 
   disk_stats_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_disk_stats_radiobutton_toggled));
-
-  memory_usage_radiobutton->signal_toggled()
+  disk_stats_refresh_delay_default_button->signal_clicked()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
-                        on_memory_usage_radiobutton_toggled));
+                        on_disk_stats_refresh_delay_default_button_clicked));
 
   swap_usage_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_swap_usage_radiobutton_toggled));
+  swap_refresh_delay_default_button->signal_clicked()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_swap_refresh_delay_default_button_clicked));
+
+  memory_usage_radiobutton->signal_toggled()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_memory_usage_radiobutton_toggled));
+  memory_refresh_delay_default_button->signal_clicked()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_memory_refresh_delay_default_button_clicked));
 
   network_load_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_network_load_radiobutton_toggled));
-
   network_interfaces_restore_defaults_button->signal_clicked()
       .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_network_interfaces_restore_defaults_button_clicked));
+  network_load_refresh_delay_default_button->signal_clicked()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_network_load_refresh_delay_default_button_clicked));
 
   temperature_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_temperature_radiobutton_toggled));
+  temperature_refresh_delay_default_button->signal_clicked()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_temperature_refresh_delay_default_button_clicked));
 
   fan_speed_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_fan_speed_radiobutton_toggled));
+  fan_speed_refresh_delay_default_button->signal_clicked()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_fan_speed_refresh_delay_default_button_clicked));
 
   generic_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_generic_radiobutton_toggled));
-
   generic_extract_via_regex_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_generic_extract_via_regex_radiobutton_toggled));
-
   generic_change_in_value_checkbutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
                         on_generic_change_in_value_checkbutton_toggled));
+  generic_refresh_delay_default_button->signal_clicked()
+    .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
+                        on_generic_refresh_delay_default_button_clicked));
 
   // Note 1 off to avoid counting from zero in the interface
   cpu_no_spinbutton->set_range(1, CpuUsageMonitor::max_no_cpus);
 
-#if !HAVE_LIBSENSORS            // No sensors support, no options for it
-  device_notebook->get_nth_page(3)->hide();
-#endif
+  /* While I have set the defaults in the ui.glade Adjustment.Values, best to
+   * maintain it here */
+  cpu_usage_refresh_delay_spinbutton->set_value(
+        CpuUsageMonitor::update_interval_default / 1000);
+
+  load_average_refresh_delay_spinbutton->set_value(
+        LoadAverageMonitor::update_interval_default / 1000);
+
+  disk_usage_refresh_delay_spinbutton->set_value(
+        DiskUsageMonitor::update_interval_default / 1000);
 
   /* Setup disk statistics device name combobox - no column packing needed here
    * since this seems to be done automatically when a text entry is included */
@@ -226,6 +311,15 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
           stat_to_string(stat, false);
   }
 
+  disk_stats_refresh_delay_spinbutton->set_value(
+        DiskStatsMonitor::update_interval_default / 1000);
+
+  swap_refresh_delay_spinbutton->set_value(
+        SwapUsageMonitor::update_interval_default / 1000);
+
+  memory_refresh_delay_spinbutton->set_value(
+        MemoryUsageMonitor::update_interval_default / 1000);
+
   // Setup network interface type combobox
   static NetworkInterfaceTypeCols nitc;
   network_interface_type_store = Gtk::ListStore::create(nitc);
@@ -254,6 +348,13 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
       store_iter iter = network_direction_store->append();
       (*iter)[ndc.direction] = NetworkLoadMonitor::direction_to_string(direction);
   }
+
+  network_load_refresh_delay_spinbutton->set_value(
+        NetworkLoadMonitor::update_interval_default / 1000);
+
+#if !HAVE_LIBSENSORS            // No sensors support, no options for it
+  device_notebook->get_nth_page(3)->hide();
+#endif
 
   // Setup temperature combobox
   static SensorsCols tsc;
@@ -287,6 +388,9 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
     }
   }
 
+  temperature_refresh_delay_spinbutton->set_value(
+        TemperatureMonitor::update_interval_default / 1000);
+
   // Setup fan combobox
   static SensorsCols fsc;
   fan_sensors_store = Gtk::ListStore::create(fsc);
@@ -317,6 +421,12 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
       ++counter;
     }
   }
+
+  fan_speed_refresh_delay_spinbutton->set_value(
+        FanSpeedMonitor::update_interval_default / 1000);
+
+  generic_refresh_delay_spinbutton->set_value(
+        GenericMonitor::update_interval_default / 1000);
 
   /* Fix border on help linkbutton - border is specified in the glade config, yet
    * it is ignored?? */
@@ -352,48 +462,85 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
       xfce_rc_set_group(settings_ro, mon_dir.c_str());
       Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", ""),
                     tag = xfce_rc_read_entry(settings_ro, "tag", "");
+      int update_interval = xfce_rc_read_int_entry(settings_ro,
+                                                   "update_interval", -1);
 
       if (type == "memory_usage")
       {
         device_notebook->set_current_page(1);
         memory_usage_radiobutton->set_active();
         memory_usage_tag->set_text(tag);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = MemoryUsageMonitor::update_interval_default;
+        memory_refresh_delay_spinbutton->set_value(update_interval / 1000);
       }
       else if (type == "load_average")
       {
         device_notebook->set_current_page(0);
         load_average_radiobutton->set_active();
         load_average_tag->set_text(tag);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = LoadAverageMonitor::update_interval_default;
+        load_average_refresh_delay_spinbutton->set_value(update_interval / 1000);
       }
       else if (type == "disk_usage")
       {
         device_notebook->set_current_page(1);
         disk_usage_radiobutton->set_active();
         disk_usage_tag->set_text(tag);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = DiskUsageMonitor::update_interval_default;
+        disk_usage_refresh_delay_spinbutton->set_value(update_interval / 1000);
       }
       else if (type == "disk_statistics")
       {
         device_notebook->set_current_page(1);
         disk_stats_radiobutton->set_active();
         disk_stats_tag->set_text(tag);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = DiskStatsMonitor::update_interval_default;
+        disk_stats_refresh_delay_spinbutton->set_value(update_interval / 1000);
       }
       else if (type == "swap_usage")
       {
         device_notebook->set_current_page(1);
         swap_usage_radiobutton->set_active();
         swap_usage_tag->set_text(tag);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = SwapUsageMonitor::update_interval_default;
+        swap_refresh_delay_spinbutton->set_value(update_interval / 1000);
       }
       else if (type == "network_load")
       {
         device_notebook->set_current_page(2);
         network_load_radiobutton->set_active();
         network_load_tag->set_text(tag);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = NetworkLoadMonitor::update_interval_default;
+        network_load_refresh_delay_spinbutton->set_value(update_interval / 1000);
       }
       else if (type == "temperature")
       {
         device_notebook->set_current_page(3);
         temperature_radiobutton->set_active();
         temperature_tag->set_text(tag);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = TemperatureMonitor::update_interval_default;
+        temperature_refresh_delay_spinbutton->set_value(update_interval / 1000);
       }
 
       // TODO: When I start supporting it, why no fan stuff here?
@@ -403,12 +550,22 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         device_notebook->set_current_page(4);
         generic_radiobutton->set_active();
         generic_tag->set_text(tag);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = GenericMonitor::update_interval_default;
+        generic_refresh_delay_spinbutton->set_value(update_interval / 1000);
       }
       else
       {
         device_notebook->set_current_page(0);
         cpu_usage_radiobutton->set_active();
         cpu_tag->set_text(tag);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = CpuUsageMonitor::update_interval_default;
+        cpu_usage_refresh_delay_spinbutton->set_value(update_interval / 1000);
       }
       
       // Fill in cpu info
@@ -694,17 +851,32 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
       if (cpu_usage_radiobutton->get_active())
       {
         if (one_cpu_radiobutton->get_active())
-          mon = new CpuUsageMonitor(int(cpu_no_spinbutton->get_value()) - 1,
-                                    cpu_tag->get_text());
+          mon = new CpuUsageMonitor(
+                int(cpu_no_spinbutton->get_value()) - 1, cpu_tag->get_text(),
+                int(cpu_usage_refresh_delay_spinbutton->get_value() * 1000));
         else
-          mon = new CpuUsageMonitor(cpu_tag->get_text());
+          mon = new CpuUsageMonitor(
+                cpu_tag->get_text(),
+                int(cpu_usage_refresh_delay_spinbutton->get_value() * 1000));
       }
       else if (memory_usage_radiobutton->get_active())
-        mon = new MemoryUsageMonitor(memory_usage_tag->get_text());
+      {
+        mon = new MemoryUsageMonitor(
+              memory_usage_tag->get_text(),
+              int(memory_refresh_delay_spinbutton->get_value() * 1000));
+      }
       else if (swap_usage_radiobutton->get_active())
-        mon = new SwapUsageMonitor(swap_usage_tag->get_text());
+      {
+        mon = new SwapUsageMonitor(
+              swap_usage_tag->get_text(),
+              int(swap_refresh_delay_spinbutton->get_value() * 1000));
+      }
       else if (load_average_radiobutton->get_active())
-        mon = new LoadAverageMonitor(load_average_tag->get_text());
+      {
+        mon = new LoadAverageMonitor(
+              load_average_tag->get_text(),
+              int(load_average_refresh_delay_spinbutton->get_value() * 1000));
+      }
       else if (disk_usage_radiobutton->get_active())
       {
         Glib::ustring mount_dir = mount_dir_entry->get_text();
@@ -735,7 +907,8 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         }
 
         mon = new DiskUsageMonitor(mount_dir, show_free,
-                                   disk_usage_tag->get_text());
+                                   disk_usage_tag->get_text(),
+                  int(disk_usage_refresh_delay_spinbutton->get_value() * 1000));
       }
       else if (disk_stats_radiobutton->get_active())
       {
@@ -775,7 +948,8 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         }
 
         mon = new DiskStatsMonitor(device_name, stat,
-                                   disk_stats_tag->get_text());
+                                   disk_stats_tag->get_text(),
+                  int(disk_stats_refresh_delay_spinbutton->get_value() * 1000));
       }
       else if (network_load_radiobutton->get_active())
       {
@@ -818,14 +992,22 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         }
 
         mon = new NetworkLoadMonitor(interface_type, dir,
-                                     network_load_tag->get_text(), xfce_plugin);
+                                     network_load_tag->get_text(),
+                int(network_load_refresh_delay_spinbutton->get_value() * 1000),
+                                     xfce_plugin);
       }
       else if (temperature_radiobutton->get_active())
+      {
         mon = new TemperatureMonitor(temperature_combobox->get_active_row_number(),
-                                     temperature_tag->get_text());
+                                     temperature_tag->get_text(),
+                 int(temperature_refresh_delay_spinbutton->get_value() * 1000));
+      }
       else if (fan_speed_radiobutton->get_active())
+      {
         mon = new FanSpeedMonitor(fan_speed_combobox->get_active_row_number(),
-                                  fan_speed_tag->get_text());
+                                  fan_speed_tag->get_text(),
+                   int(fan_speed_refresh_delay_spinbutton->get_value() * 1000));
+      }
       else if (generic_radiobutton->get_active())
       {
         Glib::ustring file_path = generic_file_path_entry->get_text(),
@@ -959,7 +1141,8 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         mon = new GenericMonitor(file_path, value_from_contents, regex_string,
                                  follow_change, dir, data_source_name_long,
                                  data_source_name_short, units_long, units_short,
-                                 generic_tag->get_text());
+                                 generic_tag->get_text(),
+                     int(generic_refresh_delay_spinbutton->get_value() * 1000));
       }
 
       return mon;
@@ -979,10 +1162,22 @@ void ChooseMonitorWindow::on_cpu_usage_radiobutton_toggled()
     = cpu_usage_radiobutton->get_active();
 }
 
+void ChooseMonitorWindow::on_cpu_usage_refresh_delay_default_button_clicked()
+{
+  cpu_usage_refresh_delay_spinbutton->set_value(
+        CpuUsageMonitor::update_interval_default / 1000);
+}
+
 void ChooseMonitorWindow::on_load_average_radiobutton_toggled()
 {
   load_average_options->property_sensitive()
     = load_average_radiobutton->get_active();
+}
+
+void ChooseMonitorWindow::on_load_average_refresh_delay_default_button_clicked()
+{
+  load_average_refresh_delay_spinbutton->set_value(
+        LoadAverageMonitor::update_interval_default / 1000);
 }
 
 void ChooseMonitorWindow::on_disk_usage_radiobutton_toggled()
@@ -991,10 +1186,22 @@ void ChooseMonitorWindow::on_disk_usage_radiobutton_toggled()
     = disk_usage_radiobutton->get_active();
 }
 
+void ChooseMonitorWindow::on_disk_usage_refresh_delay_default_button_clicked()
+{
+  disk_usage_refresh_delay_spinbutton->set_value(
+        DiskUsageMonitor::update_interval_default / 1000);
+}
+
 void ChooseMonitorWindow::on_disk_stats_radiobutton_toggled()
 {
   disk_stats_options->property_sensitive()
     = disk_stats_radiobutton->get_active();
+}
+
+void ChooseMonitorWindow::on_disk_stats_refresh_delay_default_button_clicked()
+{
+  disk_stats_refresh_delay_spinbutton->set_value(
+        DiskStatsMonitor::update_interval_default / 1000);
 }
 
 void ChooseMonitorWindow::on_swap_usage_radiobutton_toggled()
@@ -1003,10 +1210,22 @@ void ChooseMonitorWindow::on_swap_usage_radiobutton_toggled()
     = swap_usage_radiobutton->get_active();
 }
 
+void ChooseMonitorWindow::on_swap_refresh_delay_default_button_clicked()
+{
+  swap_refresh_delay_spinbutton->set_value(
+        SwapUsageMonitor::update_interval_default / 1000);
+}
+
 void ChooseMonitorWindow::on_memory_usage_radiobutton_toggled()
 {
   memory_usage_options->property_sensitive()
     = memory_usage_radiobutton->get_active();
+}
+
+void ChooseMonitorWindow::on_memory_refresh_delay_default_button_clicked()
+{
+  memory_refresh_delay_spinbutton->set_value(
+        MemoryUsageMonitor::update_interval_default / 1000);
 }
 
 /* Triggered when user edits a network interface name after revealing the
@@ -1118,16 +1337,34 @@ void ChooseMonitorWindow::on_network_load_radiobutton_toggled()
     = network_load_radiobutton->get_active();
 }
 
+void ChooseMonitorWindow::on_network_load_refresh_delay_default_button_clicked()
+{
+  network_load_refresh_delay_spinbutton->set_value(
+        NetworkLoadMonitor::update_interval_default / 1000);
+}
+
 void ChooseMonitorWindow::on_temperature_radiobutton_toggled()
 {
   temperature_options->property_sensitive()
     = temperature_radiobutton->get_active();
 }
 
+void ChooseMonitorWindow::on_temperature_refresh_delay_default_button_clicked()
+{
+  temperature_refresh_delay_spinbutton->set_value(
+        TemperatureMonitor::update_interval_default / 1000);
+}
+
 void ChooseMonitorWindow::on_fan_speed_radiobutton_toggled()
 {
   fan_speed_options->property_sensitive()
     = fan_speed_radiobutton->get_active();
+}
+
+void ChooseMonitorWindow::on_fan_speed_refresh_delay_default_button_clicked()
+{
+  fan_speed_refresh_delay_spinbutton->set_value(
+        DiskStatsMonitor::update_interval_default / 1000);
 }
 
 void ChooseMonitorWindow::on_generic_radiobutton_toggled()
@@ -1146,6 +1383,12 @@ void ChooseMonitorWindow::on_generic_change_in_value_checkbutton_toggled()
 {
   generic_change_in_value_hbox->property_sensitive()
     = generic_change_in_value_checkbutton->get_active();
+}
+
+void ChooseMonitorWindow::on_generic_refresh_delay_default_button_clicked()
+{
+  generic_refresh_delay_spinbutton->set_value(
+        GenericMonitor::update_interval_default / 1000);
 }
 
 bool ChooseMonitorWindow::on_closed(GdkEventAny *)

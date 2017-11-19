@@ -35,8 +35,8 @@ extern "C"
 class Monitor: noncopyable
 {
 public:
-  Monitor(const Glib::ustring &tag_string)
-    : measured_value(0), tag(tag_string)
+  Monitor(const Glib::ustring &tag_string, int interval)
+    : measured_value(0), tag(tag_string), update_interval_priv(interval)
   {
   }
   
@@ -88,11 +88,15 @@ public:
   // Return a short name
   virtual Glib::ustring get_short_name() = 0;
 
-  // The interval between updates in milliseconds
+  /* The interval between updates in milliseconds, user configurable
+   * The default value is static per monitor implementation as you can't have
+   * static virtual members */
   virtual int update_interval() = 0;
 
   // Save information about the monitor
   virtual void save(XfceRc *settings_w) = 0;
+
+  virtual void set_update_interval(int interval) = 0;
 
   /* If other is watching the same thing as this monitor, it might be
    * a good idea to sync maxima with it */
@@ -107,6 +111,7 @@ public:
 
 protected:
   double measured_value;
+  int update_interval_priv;
 
 private:
 

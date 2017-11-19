@@ -71,8 +71,22 @@ private:
 
   Gtk::Box *cpu_usage_options, *load_average_options;
   Gtk::RadioButton *all_cpus_radiobutton, *one_cpu_radiobutton;
-  Gtk::SpinButton *cpu_no_spinbutton;
+  Gtk::SpinButton *cpu_no_spinbutton, *cpu_usage_refresh_delay_spinbutton,
+    *load_average_refresh_delay_spinbutton, *disk_usage_refresh_delay_spinbutton,
+    *disk_stats_refresh_delay_spinbutton, *swap_refresh_delay_spinbutton,
+    *memory_refresh_delay_spinbutton, *network_load_refresh_delay_spinbutton,
+    *temperature_refresh_delay_spinbutton, *fan_speed_refresh_delay_spinbutton,
+    *generic_refresh_delay_spinbutton;
   Gtk::Entry *cpu_tag, *load_average_tag;
+  Gtk::Button *cpu_usage_refresh_delay_default_button,
+    *load_average_refresh_delay_default_button,
+    *disk_usage_refresh_delay_default_button,
+    *disk_stats_refresh_delay_default_button, *swap_refresh_delay_default_button,
+    *memory_refresh_delay_default_button,
+    *network_load_refresh_delay_default_button,
+    *temperature_refresh_delay_default_button,
+    *fan_speed_refresh_delay_default_button,
+    *generic_refresh_delay_default_button;
 
   Gtk::Box *disk_usage_options, *disk_stats_options, *memory_usage_options,
            *swap_usage_options;
@@ -184,20 +198,30 @@ private:
 
   // GUI
   void on_cpu_usage_radiobutton_toggled();
+  void on_cpu_usage_refresh_delay_default_button_clicked();
   void on_load_average_radiobutton_toggled();
+  void on_load_average_refresh_delay_default_button_clicked();
   void on_disk_usage_radiobutton_toggled();
+  void on_disk_usage_refresh_delay_default_button_clicked();
   void on_disk_stats_radiobutton_toggled();
+  void on_disk_stats_refresh_delay_default_button_clicked();
   void on_swap_usage_radiobutton_toggled();
+  void on_swap_refresh_delay_default_button_clicked();
   void on_memory_usage_radiobutton_toggled();
+  void on_memory_refresh_delay_default_button_clicked();
   void on_network_interfaces_restore_defaults_button_clicked();
   void on_network_interface_name_edited(const Glib::ustring& path,
                                         const Glib::ustring& new_text);
   void on_network_load_radiobutton_toggled();
+  void on_network_load_refresh_delay_default_button_clicked();
   void on_temperature_radiobutton_toggled();
+  void on_temperature_refresh_delay_default_button_clicked();
   void on_fan_speed_radiobutton_toggled();
+  void on_fan_speed_refresh_delay_default_button_clicked();
   void on_generic_radiobutton_toggled();
   void on_generic_extract_via_regex_radiobutton_toggled();
   void on_generic_change_in_value_checkbutton_toggled();
+  void on_generic_refresh_delay_default_button_clicked();
   bool on_closed(GdkEventAny *);
 };
 

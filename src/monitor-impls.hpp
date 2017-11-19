@@ -48,19 +48,30 @@ extern "C"
 class CpuUsageMonitor: public Monitor
 {
 public:
-  CpuUsageMonitor(const Glib::ustring &tag_string);    // Monitor all CPUs
-  CpuUsageMonitor(int cpu_no, const Glib::ustring &tag_string);  // Monitor only
-                                                                 // CPU no.
+
+  // Monitor all CPUs
+  CpuUsageMonitor(const Glib::ustring &tag_string, int interval);
+
+  // Monitor only CPU no.
+  CpuUsageMonitor(int cpu_no, const Glib::ustring &tag_string, int interval);
 
   virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
-  virtual int update_interval();
   virtual void save(XfceRc *settings_w);
+  virtual void set_update_interval(int interval);
+
+  virtual int update_interval();
 
   static int const max_no_cpus;
+
+  /* The default interval between updates in milliseconds, for the monitor type
+   * - can't have a static virtual member so it is declared per class
+   *  implementation */
+  static int const update_interval_default;
+
 
 private:
   virtual double do_measure();
@@ -77,15 +88,21 @@ private:
 class SwapUsageMonitor: public Monitor
 {
 public:
-  SwapUsageMonitor(const Glib::ustring &tag_string);
+  SwapUsageMonitor(const Glib::ustring &tag_string, int interval);
 
   virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
-  virtual int update_interval();
   virtual void save(XfceRc *settings_w);
+  virtual void set_update_interval(int interval);
+  virtual int update_interval();
+
+  /* The default interval between updates in milliseconds, for the monitor type
+   * - can't have a static virtual member so it is declared per class
+   *  implementation */
+  static int const update_interval_default;
 
 private:
   virtual double do_measure();
@@ -97,15 +114,21 @@ private:
 class LoadAverageMonitor: public Monitor
 {
 public:
-  LoadAverageMonitor(const Glib::ustring &tag_string);
+  LoadAverageMonitor(const Glib::ustring &tag_string, int interval);
 
   virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
-  virtual int update_interval();
   virtual void save(XfceRc *settings_w);
+  virtual void set_update_interval(int interval);
+  virtual int update_interval();
+
+  /* The default interval between updates in milliseconds, for the monitor type
+   * - can't have a static virtual member so it is declared per class
+   *  implementation */
+  static int const update_interval_default;
 
 private:
   virtual double do_measure();
@@ -117,15 +140,21 @@ private:
 class MemoryUsageMonitor: public Monitor
 {
 public:
-  MemoryUsageMonitor(const Glib::ustring &tag_string);
+  MemoryUsageMonitor(const Glib::ustring &tag_string, int interval);
 
   virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
-  virtual int update_interval();
   virtual void save(XfceRc *settings_w);
+  virtual void set_update_interval(int interval);
+  virtual int update_interval();
+
+  /* The default interval between updates in milliseconds, for the monitor type
+   * - can't have a static virtual member so it is declared per class
+   *  implementation */
+  static int const update_interval_default;
 
 private:
   virtual double do_measure();
@@ -138,15 +167,21 @@ class DiskUsageMonitor: public Monitor
 {
 public:
   DiskUsageMonitor(const std::string &mount_dir, bool show_free,
-                   const Glib::ustring &tag_string);
+                   const Glib::ustring &tag_string, int interval);
 
   virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact= false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
-  virtual int update_interval();
   virtual void save(XfceRc *settings_w);
+  virtual void set_update_interval(int interval);
+  virtual int update_interval();
+
+  /* The default interval between updates in milliseconds, for the monitor type
+   * - can't have a static virtual member so it is declared per class
+   *  implementation */
+  static int const update_interval_default;
 
 private:
   virtual double do_measure();
@@ -179,15 +214,21 @@ public:
   };
 
   DiskStatsMonitor(const Glib::ustring &device_name, const Stat &stat_to_monitor,
-                   const Glib::ustring &tag_string);
+                   const Glib::ustring &tag_string, int interval);
 
   virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact=false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
-  virtual int update_interval();
   virtual void save(XfceRc *settings_w);
+  virtual void set_update_interval(int interval);
+  virtual int update_interval();
+
+  /* The default interval between updates in milliseconds, for the monitor type
+   * - can't have a static virtual member so it is declared per class
+   *  implementation */
+  static int const update_interval_default;
 
   static std::vector<Glib::ustring> current_device_names();
   static Glib::ustring stat_to_string(
@@ -243,17 +284,23 @@ public:
 
   NetworkLoadMonitor(InterfaceType &interface_type,
                      Direction direction, const Glib::ustring &tag_string,
-                     XfcePanelPlugin *xfce_plugin);
+                     int interval, XfcePanelPlugin *xfce_plugin);
 
   virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
-  virtual int update_interval();
-  virtual void save(XfceRc *settings_w);
   virtual void possibly_add_sync_with(Monitor *other);
   virtual void remove_sync_with(Monitor *other);
+  virtual void save(XfceRc *settings_w);
+  virtual void set_update_interval(int interval);
+  virtual int update_interval();
+
+  /* The default interval between updates in milliseconds, for the monitor type
+   * - can't have a static virtual function so it is declared per class
+   *  implementation */
+  static int const update_interval_default;
 
   /* Allow to maintain list of interface names separate to individual monitor
    * objects
@@ -312,15 +359,21 @@ class TemperatureMonitor: public Monitor
 public:
 
   // no. in the temperature features
-  TemperatureMonitor(int no, const Glib::ustring &tag_string);
+  TemperatureMonitor(int no, const Glib::ustring &tag_string, int interval);
 
   virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
-  virtual int update_interval();
   virtual void save(XfceRc *settings_w);
+  virtual void set_update_interval(int interval);
+  virtual int update_interval();
+
+  /* The default interval between updates in milliseconds, for the monitor type
+   * - can't have a static virtual member so it is declared per class
+   *  implementation */
+  static int const update_interval_default;
 
 private:
   virtual double do_measure();
@@ -336,15 +389,21 @@ class FanSpeedMonitor: public Monitor
 public:
 
   // no. in the fan features
-  FanSpeedMonitor(int no, const Glib::ustring &tag_string);
+  FanSpeedMonitor(int no, const Glib::ustring &tag_string, int interval);
 
   virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
-  virtual int update_interval();
   virtual void save(XfceRc *settings_w);
+  virtual void set_update_interval(int interval);
+  virtual int update_interval();
+
+  /* The default interval between updates in milliseconds, for the monitor type
+   * - can't have a static virtual member so it is declared per class
+   *  implementation */
+  static int const update_interval_default;
 
 private:
   virtual double do_measure();
@@ -376,15 +435,22 @@ public:
                  const Glib::ustring &data_source_name_short,
                  const Glib::ustring &units_long,
                  const Glib::ustring &units_short,
-                 const Glib::ustring &tag_string);
+                 const Glib::ustring &tag_string,
+                 int interval);
 
   virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact=false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
-  virtual int update_interval();
   virtual void save(XfceRc *settings_w);
+  virtual void set_update_interval(int interval);
+  virtual int update_interval();
+
+  /* The default interval between updates in milliseconds, for the monitor type
+   * - can't have a static virtual member so it is declared per class
+   *  implementation */
+  static int const update_interval_default;
 
 private:
   virtual double do_measure();
