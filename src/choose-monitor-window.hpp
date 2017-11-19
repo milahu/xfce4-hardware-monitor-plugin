@@ -92,7 +92,8 @@ private:
            *swap_usage_options;
   Gtk::Entry *mount_dir_entry, *disk_usage_tag, *disk_stats_tag, *memory_usage_tag,
              *swap_usage_tag;
-  Gtk::CheckButton *show_free_checkbutton;
+  Gtk::CheckButton *show_free_checkbutton, *cpu_usage_incl_low_checkbutton,
+                   *cpu_usage_incl_iowait_checkbutton;
 
   Gtk::ComboBox *disk_stats_device_combobox, *disk_stats_stat_combobox;
 

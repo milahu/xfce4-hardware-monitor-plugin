@@ -66,6 +66,10 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
   ui->get_widget("all_cpus_radiobutton", all_cpus_radiobutton);
   ui->get_widget("one_cpu_radiobutton", one_cpu_radiobutton);
   ui->get_widget("cpu_no_spinbutton", cpu_no_spinbutton);
+  ui->get_widget("cpu_usage_incl_low_checkbutton",
+                 cpu_usage_incl_low_checkbutton);
+  ui->get_widget("cpu_usage_incl_iowait_checkbutton",
+                 cpu_usage_incl_iowait_checkbutton);
   ui->get_widget("cpu_usage_tag_entry", cpu_tag);
   ui->get_widget("cpu_usage_refresh_delay_spinbutton",
                  cpu_usage_refresh_delay_spinbutton);
@@ -270,6 +274,9 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
 
   // Note 1 off to avoid counting from zero in the interface
   cpu_no_spinbutton->set_range(1, CpuUsageMonitor::max_no_cpus);
+
+  cpu_usage_incl_low_checkbutton->set_active(false);
+  cpu_usage_incl_iowait_checkbutton->set_active(false);
 
   /* While I have set the defaults in the ui.glade Adjustment.Values, best to
    * maintain it here */
@@ -579,6 +586,13 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         else {
           all_cpus_radiobutton->set_active();
         }
+
+        bool incl_low_prio = xfce_rc_read_bool_entry(settings_ro,
+          "include_low_priority", false);
+        cpu_usage_incl_low_checkbutton->set_active(incl_low_prio);
+        bool incl_iowait = xfce_rc_read_bool_entry(settings_ro,
+          "include_iowait", false);
+        cpu_usage_incl_iowait_checkbutton->set_active(incl_iowait);
       }
 
       // Fill in disk usage info
@@ -853,11 +867,15 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         if (one_cpu_radiobutton->get_active())
           mon = new CpuUsageMonitor(
                 int(cpu_no_spinbutton->get_value()) - 1, cpu_tag->get_text(),
-                int(cpu_usage_refresh_delay_spinbutton->get_value() * 1000));
+                int(cpu_usage_refresh_delay_spinbutton->get_value() * 1000),
+                cpu_usage_incl_low_checkbutton->get_active(),
+                cpu_usage_incl_iowait_checkbutton->get_active());
         else
           mon = new CpuUsageMonitor(
                 cpu_tag->get_text(),
-                int(cpu_usage_refresh_delay_spinbutton->get_value() * 1000));
+                int(cpu_usage_refresh_delay_spinbutton->get_value() * 1000),
+                cpu_usage_incl_low_checkbutton->get_active(),
+                cpu_usage_incl_iowait_checkbutton->get_active());
       }
       else if (memory_usage_radiobutton->get_active())
       {

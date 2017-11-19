@@ -50,10 +50,12 @@ class CpuUsageMonitor: public Monitor
 public:
 
   // Monitor all CPUs
-  CpuUsageMonitor(const Glib::ustring &tag_string, int interval);
+  CpuUsageMonitor(const Glib::ustring &tag_string, int interval,
+                  bool incl_low_prio, bool incl_iowait);
 
   // Monitor only CPU no.
-  CpuUsageMonitor(int cpu_no, const Glib::ustring &tag_string, int interval);
+  CpuUsageMonitor(int cpu_no, const Glib::ustring &tag_string, int interval,
+                  bool incl_low_prio, bool incl_iowait);
 
   virtual double max();
   virtual bool fixed_max();
@@ -78,6 +80,9 @@ private:
 
   static int const all_cpus = -1;
   int cpu_no;
+
+  // Define whether these are included in CPU time or not
+  bool incl_low_prio_priv, incl_iowait_priv;
 
   // we need to save these values to compute the difference next time the
   // monitor is updated

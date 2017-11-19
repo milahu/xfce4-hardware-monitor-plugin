@@ -91,11 +91,22 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
         if (update_interval == -1)
           update_interval = CpuUsageMonitor::update_interval_default;
 
+        bool incl_low_prio = xfce_rc_read_bool_entry(settings_ro,
+          "include_low_priority", false);
+        bool incl_iowait = xfce_rc_read_bool_entry(settings_ro,
+          "include_iowait", false);
+
         // Creating CPU usage monitor with provided number if valid
         if (cpu_no == -1)
-          monitors.push_back(new CpuUsageMonitor(tag, update_interval));
+        {
+          monitors.push_back(new CpuUsageMonitor(tag, update_interval,
+                                                 incl_low_prio, incl_iowait));
+        }
         else
-          monitors.push_back(new CpuUsageMonitor(cpu_no, tag, update_interval));
+        {
+          monitors.push_back(new CpuUsageMonitor(cpu_no, tag, update_interval,
+                                                 incl_low_prio, incl_iowait));
+        }
       }
       else if (type == "memory_usage")
       {
@@ -330,7 +341,7 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
 
   // Always start with a CpuUsageMonitor
   if (monitors.empty())
-    monitors.push_back(new CpuUsageMonitor("", 1000));
+    monitors.push_back(new CpuUsageMonitor("", 1000, false, false));
 
   return monitors;
 }
@@ -392,15 +403,19 @@ int const CpuUsageMonitor::max_no_cpus = GLIBTOP_NCPU;
 int const CpuUsageMonitor::update_interval_default = 1000;
 
 
-CpuUsageMonitor::CpuUsageMonitor(const Glib::ustring &tag_string, int interval)
-  : Monitor(tag_string, interval), cpu_no(all_cpus), total_time(0), nice_time(0),
-    idle_time(0), iowait_time(0)
+CpuUsageMonitor::CpuUsageMonitor(const Glib::ustring &tag_string, int interval,
+                                 bool incl_low_prio, bool incl_iowait)
+  : Monitor(tag_string, interval), cpu_no(all_cpus),
+    incl_low_prio_priv(incl_low_prio), incl_iowait_priv(incl_iowait),
+    total_time(0), nice_time(0), idle_time(0), iowait_time(0)
 {}
 
 CpuUsageMonitor::CpuUsageMonitor(int cpu, const Glib::ustring &tag_string,
-                                 int interval)
-  : Monitor(tag_string, interval), cpu_no(cpu), total_time(0), nice_time(0),
-    idle_time(0), iowait_time(0)
+                                 int interval, bool incl_low_prio,
+                                 bool incl_iowait)
+  : Monitor(tag_string, interval), cpu_no(cpu),
+    incl_low_prio_priv(incl_low_prio), incl_iowait_priv(incl_iowait),
+    total_time(0), nice_time(0), idle_time(0), iowait_time(0)
 {
   if (cpu_no < 0 || cpu_no >= max_no_cpus)
     cpu_no = all_cpus;
@@ -427,7 +442,7 @@ double CpuUsageMonitor::do_measure()
     io = cpu.xcpu_iowait[cpu_no];
   }
 
-  // calculate ticks since last call
+  // Calculate ticks since last call
   guint64
     dtotal = t - total_time,
     dnice = n - nice_time,
@@ -440,9 +455,13 @@ double CpuUsageMonitor::do_measure()
   idle_time = i;
   iowait_time = io;
 
-  // don't count in dnice to avoid always showing 100% with SETI@home and
-  // similar applications running
-  double res = double(dtotal - dnice - didle - diowait) / dtotal;
+  // Count nice and iowait if the user desires
+  double res = double(dtotal - didle);
+  if (!incl_low_prio_priv)
+    res -= double(dnice);
+  if (!incl_iowait_priv)
+    res -= double(diowait);
+  res /= double(dtotal);
 
   if (res > 0)
     return res;
@@ -492,6 +511,10 @@ void CpuUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "cpu_usage");
   xfce_rc_write_int_entry(settings_w, "cpu_no", cpu_no);
+  xfce_rc_write_bool_entry(settings_w, "include_low_priority",
+                           incl_low_prio_priv);
+  xfce_rc_write_bool_entry(settings_w, "include_iowait",
+                           incl_iowait_priv);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
 }
