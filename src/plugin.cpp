@@ -323,47 +323,44 @@ void Plugin::set_view(View *v)
     view->attach(*i);
 }
 
-void Plugin::viewer_type_listener(const Glib::ustring viewer_type)
+void Plugin::viewer_type_listener(const Glib::ustring viewer_type,
+                                  bool force_update)
 {
+  // Debug code
+  //std::cout << "Plugin::viewer_type_listener called!\n";
+
+  /* Setting viewer type, force_update allows resetting the view even when the
+   * type is already correct */
   if (viewer_type == "curve")
   {
-    // Setting view to CurveView if it isnt already
-    if (!dynamic_cast<CurveView *>(view.get()))
+    if (force_update || !dynamic_cast<CurveView *>(view.get()))
       set_view(new CurveView);
   }
   else if (viewer_type == "bar")
   {
-    // Setting view to horizontal BarView if it isnt already
     // It gets tricky here because them BarView can render 2 viewers.
     // Thus, we much also check the oriententation
     BarView *bar_view = dynamic_cast<BarView *>(view.get());
-    if (!(bar_view && bar_view->is_horizontal()) )
+    if (force_update || !(bar_view && bar_view->is_horizontal()) )
       set_view(new BarView);
   }
   else if (viewer_type == "vbar")
   {
-    // Setting view to vertical BarView if it isnt already
     // Same situation as with "bar"
     BarView *bar_view = dynamic_cast<BarView *>(view.get());
-    if (!(bar_view && !bar_view->is_horizontal()) )
+    if (force_update || !(bar_view && !bar_view->is_horizontal()) )
       set_view(new BarView(false));
   }
   else if (viewer_type == "text") {
-
-    // Setting view to TextView if it isnt already
-    if (!dynamic_cast<TextView *>(view.get()))
+    if (force_update || !dynamic_cast<TextView *>(view.get()))
       set_view(new TextView);
   }
   else if (viewer_type == "flame") {
-
-    // Setting view to FlameView if it isnt already
-    if (!dynamic_cast<FlameView *>(view.get()))
+    if (force_update || !dynamic_cast<FlameView *>(view.get()))
       set_view(new FlameView);
   }
   else if (viewer_type == "column") {
-
-    // Setting view to ColumnView if it isnt already
-    if (!dynamic_cast<ColumnView *>(view.get()))
+    if (force_update || !dynamic_cast<ColumnView *>(view.get()))
       set_view(new ColumnView);
   }
 

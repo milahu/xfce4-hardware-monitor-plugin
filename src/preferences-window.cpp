@@ -1043,6 +1043,9 @@ void PreferencesWindow::on_monitor_colorbutton_set(Gtk::ColorButton *colorbutton
     Glib::ustring mon_dir = (*(*i)[mc.monitor]).get_settings_dir();
 
     sync_conf_with_colorbutton(mon_dir, "color", colorbutton);
+
+    // Forcing an update of the view to have the new colour applied
+    plugin.viewer_type_listener(plugin.get_viewer_type(), true);
   }
 }
 

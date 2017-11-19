@@ -85,7 +85,13 @@ public:
   const CurveView::TextOverlayPosition get_viewer_text_overlay_position();
   void set_viewer_text_overlay_position(CurveView::TextOverlayPosition
                                         position);
-  void viewer_type_listener(const Glib::ustring viewer_type);
+
+  /* Force update allows for this to be called to essentially reload the view
+   * e.g. when line colour is updated, despite the fact the viewer type hasn't
+   * changed */
+  void viewer_type_listener(const Glib::ustring viewer_type,
+                            bool force_update=false);
+
   void background_color_listener(unsigned int background_color);
   void use_background_color_listener(gboolean use_background_color);
   
