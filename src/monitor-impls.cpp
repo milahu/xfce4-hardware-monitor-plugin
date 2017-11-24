@@ -570,12 +570,14 @@ double SwapUsageMonitor::do_measure()
 
   glibtop_get_swap(&swp);
 
+  // User-specified max is not allowed here, so this is fine
   max_value = swp.total;
 
   if (swp.total > 0)
     return swp.used;
   else
     return 0;
+
 }
 
 bool SwapUsageMonitor::fixed_max()
@@ -661,13 +663,17 @@ double LoadAverageMonitor::do_measure()
 
   double val = loadavg.loadavg[0];
 
-  max_value *= max_decay; // reduce gradually
+  // Only alter max_value if the monitor doesn't have a user-specified fixed max
+  if (!fixed_max_priv)
+  {
+    max_value *= max_decay; // reduce gradually
 
-  if (max_value < 1)    // make sure we don't get below 1
-    max_value = 1;
+    if (max_value < 1)    // make sure we don't get below 1
+      max_value = 1;
 
-  if (val > max_value)
-    max_value = val * 1.05;
+    if (val > max_value)
+      max_value = val * 1.05;
+  }
 
   if (max_value > 0)
     return val;
@@ -758,6 +764,7 @@ double MemoryUsageMonitor::do_measure()
 
   glibtop_get_mem (&mem);
 
+  // User-specified max is not allowed here, so this is fine
   max_value = mem.total;
 
   if (mem.total > 0)
@@ -844,7 +851,7 @@ double DiskUsageMonitor::do_measure()
 
   glibtop_get_fsusage(&fsusage, mount_dir.c_str());
 
-  // Keeping max_value available whether the monitor has a fixed max or not
+  // User-specified fixed max is not allowed here, so this is fine
   max_value = fsusage.blocks * fsusage.block_size;
 
   double v = 0;
@@ -1041,13 +1048,17 @@ double DiskStatsMonitor::do_measure()
     val = it->second[stat_to_monitor];
   }
 
-  /* Note - max_value is no longer used to determine the graph max for
-   * Curves - the actual maxima stored in the ValueHistories are used */
-  if (val != 0)     // Reduce scale gradually
-    max_value = guint64(max_value * max_decay);
+  // Only altering the max_value if there is no user-specified fixed max
+  if (!fixed_max_priv)
+  {
+    /* Note - max_value is no longer used to determine the graph max for
+     * Curves - the actual maxima stored in the ValueHistories are used */
+    if (val != 0)     // Reduce scale gradually
+      max_value = guint64(max_value * max_decay);
 
-  if (val > max_value)
-    max_value = guint64(val * 1.05);
+    if (val > max_value)
+      max_value = guint64(val * 1.05);
+  }
 
   // Debug code
   //std::cerr << "Returning value: " << val << "\n";
@@ -1593,21 +1604,25 @@ double NetworkLoadMonitor::do_measure()
 
   byte_count = measured_bytes;
 
-  /* Note - max_value is no longer used to determine the graph max for
+  // Only altering max_value if there is no user-specified max
+  if (!fixed_max_priv)
+  {
+    /* Note - max_value is no longer used to determine the graph max for
    * Curves - the actual maxima stored in the ValueHistories are used */
-  if (val != 0)     // Reduce scale gradually
-    max_value = guint64(max_value * max_decay);
+    if (val != 0)     // Reduce scale gradually
+      max_value = guint64(max_value * max_decay);
 
-  if (val > max_value)
-    max_value = guint64(val * 1.05);
+    if (val > max_value)
+      max_value = guint64(val * 1.05);
 
-  for (nlm_seq::iterator i = sync_monitors.begin(), end = sync_monitors.end();
-       i != end; ++i) {
-    NetworkLoadMonitor &other = **i;
-    if (other.max_value > max_value)
-      max_value = other.max_value;
-    else if (max_value > other.max_value)
-      other.max_value = max_value;
+    for (nlm_seq::iterator i = sync_monitors.begin(), end = sync_monitors.end();
+         i != end; ++i) {
+      NetworkLoadMonitor &other = **i;
+      if (other.max_value > max_value)
+        max_value = other.max_value;
+      else if (max_value > other.max_value)
+        other.max_value = max_value;
+    }
   }
 
   // calculate difference in msecs
@@ -2074,7 +2089,8 @@ double TemperatureMonitor::do_measure()
 {
   double val = Sensors::instance().get_value(chip_no, feature_no);
 
-  if (val > max_value)
+  // Only altering max_value if there is no user-specified max
+  if (!fixed_max_priv && val > max_value)
     max_value = val;
 
   return val;
@@ -2180,7 +2196,8 @@ double FanSpeedMonitor::do_measure()
 {
   double val = Sensors::instance().get_value(chip_no, feature_no);
 
-  if (val > max_value)
+  // Only altering max value if there is no user-specified max
+  if (!fixed_max_priv && val > max_value)
     max_value = val;
 
   return val;
@@ -2401,13 +2418,17 @@ double GenericMonitor::do_measure()
   else
     return_value = val;
 
-  /* Note - max_value is no longer used to determine the graph max for
+  // Only altering max_value if there is no user-specified fixed max
+  if (!fixed_max_priv)
+  {
+    /* Note - max_value is no longer used to determine the graph max for
    * Curves - the actual maxima stored in the ValueHistories are used */
-  if (val != 0)     // Reduce scale gradually
-    max_value = guint64(max_value * max_decay);
+    if (val != 0)     // Reduce scale gradually
+      max_value = guint64(max_value * max_decay);
 
-  if (val > max_value)
-    max_value = guint64(val * 1.05);
+    if (val > max_value)
+      max_value = guint64(val * 1.05);
+  }
 
   // Debug code
   /*std::cerr << Glib::ustring::compose("Generic Monitor '%1' data: %2, previous "
