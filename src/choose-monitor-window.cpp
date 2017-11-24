@@ -55,11 +55,11 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
   objects[12] = "memory_refresh_delay_adjustment";
   objects[13] = "memory_max_adjustment";
   objects[14] = "network_load_delay_adjustment";
-  objects[15] = "network_load_max_spinbutton";
+  objects[15] = "network_load_max_adjustment";
   objects[16] = "temperature_delay_adjustment";
-  objects[17] = "temperature_max_spinbutton";
+  objects[17] = "temperature_max_adjustment";
   objects[18] = "fan_delay_adjustment";
-  objects[19] = "fan_max_spinbutton";
+  objects[19] = "fan_max_adjustment";
   objects[20] = "generic_delay_adjustment";
   objects[21] = "generic_max_adjustment";
   ui = get_builder_xml(objects);
