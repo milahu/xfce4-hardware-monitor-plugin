@@ -108,8 +108,9 @@ void Curve::draw(Gnome::Canvas::Canvas &canvas, int width, int height,
   line->property_width_units() = line_width;
 
   /* Use the actual maxima associated with all curves in the view, unless
-   * the monitor has a fixed max (variable maxes should not be used with
-   * monitors like the CPU usage monitor) */
+   * the monitor has a fixed max (variable maxes should not normally be used
+   * with monitors like the CPU usage monitor, although the user can configure
+   * this nowadays) */
   if (monitor->fixed_max())
       max = monitor->max();
   
@@ -266,7 +267,7 @@ void CurveView::do_detach(Monitor *monitor)
 
 void CurveView::do_draw_loop()
 {
-  double max = 0, tmp_max = 0;
+  double max = 0, fixed_max = 0;
   Glib::ustring max_formatted, max_formatted_compact, monitor_data,
       monitor_data_compact, text_overlay_format_string, tag_string,
       separator_string = plugin->get_viewer_text_overlay_separator();
@@ -274,20 +275,19 @@ void CurveView::do_draw_loop()
       monitor_data_needed = false, monitor_data_compact_needed = false,
       text_overlay_enabled = plugin->get_viewer_text_overlay_enabled();
 
-  /* Obtain maximum value of all curves in the view, respecting individual
-   * curve/monitor's fixed maxes if present */
+  /* Obtain maximum value of all curves in the view, separately tracking fixed
+   * maxes incase all monitors are fixed. Graphs with fixed monitors are not
+   * supposed to be scaled, but the text overlay still needs to refer to a max
+   * if there are no normal monitors present */
   for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
   {
-    if ((*i)->monitor->fixed_max())
-    {
-      tmp_max = ((*i)->get_max_value() < (*i)->monitor->fixed_max()) ?
-            (*i)->get_max_value() : (*i)->monitor->fixed_max();
-      if (tmp_max > max)
-        max = tmp_max;
-    }
-    else if ((*i)->get_max_value() > max)
+    if (!(*i)->monitor->fixed_max() && (*i)->get_max_value() > max)
       max = (*i)->get_max_value();
+    else if ((*i)->monitor->fixed_max() && (*i)->monitor->max() > fixed_max)
+      fixed_max = (*i)->monitor->max();
   }
+  if (max == 0 && fixed_max > 0)
+    max = fixed_max;
 
   // If the text overlay is enabled, detecting all information required to output
   if (text_overlay_enabled)

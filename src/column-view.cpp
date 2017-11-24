@@ -38,14 +38,15 @@ class ColumnGraph
 public:
   ColumnGraph(Monitor *monitor, unsigned int color);
 
-  void update(unsigned int max_samples); // gather info from monitor
-  void draw(Gnome::Canvas::Canvas &canvas, // redraw columns on canvas
-      Plugin *plugin, int width, int height);
+  void update(unsigned int max_samples);  // Gather info from monitor
+  void draw(Gnome::Canvas::Canvas &canvas,  // Redraw columns on canvas
+      Plugin *plugin, int width, int height, double max);
+  double get_max_value();  // Used to get overall max across columns
 
   Monitor *monitor;
   
 private:
-  // a pixbuf is used for the columns
+  // A pixbuf is used for the columns
   std::auto_ptr<Gnome::Canvas::Pixbuf> columns;
 
   ValueHistory value_history;
@@ -67,8 +68,8 @@ void ColumnGraph::update(unsigned int max_samples)
     remaining_draws = CanvasView::draw_iterations;
 }
 
-void ColumnGraph::draw(Gnome::Canvas::Canvas &canvas,
-           Plugin *plugin, int width, int height)
+void ColumnGraph::draw(Gnome::Canvas::Canvas &canvas, Plugin *plugin, int width,
+                       int height, double max)
 {
   if (remaining_draws <= 0)
     return;
@@ -80,15 +81,17 @@ void ColumnGraph::draw(Gnome::Canvas::Canvas &canvas,
   ValueHistory::iterator vi = value_history.values.begin(),
     vend = value_history.values.end();
 
-  if (vi == vend)   // there must be at least one point
+  // There must be at least one point
+  if (vi == vend)
     return;
 
-  // make sure we got a pixbuf and that it has the right size
+  // Make sure we got a pixbuf and that it has the right size
   Glib::RefPtr<Gdk::Pixbuf> pixbuf;
 
   if (columns.get() == 0)
     pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, width, height);
-  else {
+  else
+  {
     pixbuf = columns->property_pixbuf();
 
     // but perhaps the dimensions have changed
@@ -98,11 +101,17 @@ void ColumnGraph::draw(Gnome::Canvas::Canvas &canvas,
 
   pixbuf->fill(color & 0xFFFFFF00);
   
-  double max = monitor->max();
+  /* Use the actual maxima associated with all columns in the view, unless
+   * the monitor has a fixed max (variable maxes should not normally be used
+   * with monitors like the CPU usage monitor, although the user can configure
+   * this nowadays) */
+  if (monitor->fixed_max())
+      max = monitor->max();
+
   if (max <= 0)
     max = 0.0000001;
 
-  // start from right
+  // Start from right
   double l = width - ColumnView::pixels_per_sample
     + ColumnView::pixels_per_sample * time_offset;
 
@@ -121,7 +130,7 @@ void ColumnGraph::draw(Gnome::Canvas::Canvas &canvas,
       {
         PixelPosition pos = get_position(pixbuf, x, t);
 
-        // anti-aliasing effect; if we are partly on a pixel, scale alpha down
+        // Anti-aliasing effect; if we are partly on a pixel, scale alpha down
         double scale = 1.0;
         if (x < l)
           scale -= l - std::floor(l);
@@ -138,11 +147,18 @@ void ColumnGraph::draw(Gnome::Canvas::Canvas &canvas,
     l -= ColumnView::pixels_per_sample;
   } while (++vi != vend);
   
-  // update columns
+  // Update columns
   if (columns.get() == 0)
     columns.reset(new Gnome::Canvas::Pixbuf(*canvas.root(), 0, 0, pixbuf));
   else
     columns->property_pixbuf() = pixbuf;
+}
+
+double ColumnGraph::get_max_value()
+{
+  /* Used as part of determination of the max value for all columns in
+   * the view */
+  return value_history.get_max_value();
 }
 
 
@@ -167,9 +183,10 @@ void ColumnView::do_update()
 {
   CanvasView::do_update();
   
-  // update each column graph
+  // Update each column graph
   for (column_iterator i = columns.begin(), end = columns.end(); i != end; ++i)
-     // one extra because of animation
+
+     // One extra because of animation
     (*i)->update(width() / pixels_per_sample + 1);
 }
 
@@ -253,6 +270,17 @@ void ColumnView::do_detach(Monitor *monitor)
 
 void ColumnView::do_draw_loop()
 {
+  double max = 0;
+
+  /* Obtain maximum value of all columns in the view, ignoring any monitors with
+   * fixed maxes (their graphs are not supposed to be scaled) */
   for (column_iterator i = columns.begin(), end = columns.end(); i != end; ++i)
-    (*i)->draw(*canvas, plugin, width(), height());
+  {
+    if (!(*i)->monitor->fixed_max() && (*i)->get_max_value() > max)
+      max = (*i)->get_max_value();
+  }
+
+  // Drawing the columns with the unified max value
+  for (column_iterator i = columns.begin(), end = columns.end(); i != end; ++i)
+    (*i)->draw(*canvas, plugin, width(), height(), max);
 }
