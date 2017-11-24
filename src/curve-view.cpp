@@ -266,7 +266,7 @@ void CurveView::do_detach(Monitor *monitor)
 
 void CurveView::do_draw_loop()
 {
-  double max = 0;
+  double max = 0, tmp_max = 0;
   Glib::ustring max_formatted, max_formatted_compact, monitor_data,
       monitor_data_compact, text_overlay_format_string, tag_string,
       separator_string = plugin->get_viewer_text_overlay_separator();
@@ -274,10 +274,20 @@ void CurveView::do_draw_loop()
       monitor_data_needed = false, monitor_data_compact_needed = false,
       text_overlay_enabled = plugin->get_viewer_text_overlay_enabled();
 
-  // Obtain maximum value of all curves in the view
+  /* Obtain maximum value of all curves in the view, respecting individual
+   * curve/monitor's fixed maxes if present */
   for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
-    if ((*i)->get_max_value() > max)
+  {
+    if ((*i)->monitor->fixed_max())
+    {
+      tmp_max = ((*i)->get_max_value() < (*i)->monitor->fixed_max()) ?
+            (*i)->get_max_value() : (*i)->monitor->fixed_max();
+      if (tmp_max > max)
+        max = tmp_max;
+    }
+    else if ((*i)->get_max_value() > max)
       max = (*i)->get_max_value();
+  }
 
   // If the text overlay is enabled, detecting all information required to output
   if (text_overlay_enabled)
