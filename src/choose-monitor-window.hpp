@@ -72,11 +72,14 @@ private:
   Gtk::Box *cpu_usage_options, *load_average_options;
   Gtk::RadioButton *all_cpus_radiobutton, *one_cpu_radiobutton;
   Gtk::SpinButton *cpu_no_spinbutton, *cpu_usage_refresh_delay_spinbutton,
-    *load_average_refresh_delay_spinbutton, *disk_usage_refresh_delay_spinbutton,
-    *disk_stats_refresh_delay_spinbutton, *swap_refresh_delay_spinbutton,
-    *memory_refresh_delay_spinbutton, *network_load_refresh_delay_spinbutton,
-    *temperature_refresh_delay_spinbutton, *fan_speed_refresh_delay_spinbutton,
-    *generic_refresh_delay_spinbutton;
+    *load_average_refresh_delay_spinbutton, *load_average_max_spinbutton,
+    *disk_usage_refresh_delay_spinbutton, *disk_stats_refresh_delay_spinbutton,
+    *disk_stats_max_spinbutton, *swap_refresh_delay_spinbutton,
+    *memory_refresh_delay_spinbutton,
+    *network_load_refresh_delay_spinbutton, *network_load_max_spinbutton,
+    *temperature_refresh_delay_spinbutton, *temperature_max_spinbutton,
+    *fan_speed_refresh_delay_spinbutton, *fan_max_spinbutton,
+    *generic_refresh_delay_spinbutton, *generic_max_spinbutton;
   Gtk::Entry *cpu_tag, *load_average_tag;
   Gtk::Button *cpu_usage_refresh_delay_default_button,
     *load_average_refresh_delay_default_button,
@@ -92,8 +95,13 @@ private:
            *swap_usage_options;
   Gtk::Entry *mount_dir_entry, *disk_usage_tag, *disk_stats_tag, *memory_usage_tag,
              *swap_usage_tag;
-  Gtk::CheckButton *show_free_checkbutton, *cpu_usage_incl_low_checkbutton,
-                   *cpu_usage_incl_iowait_checkbutton;
+  Gtk::CheckButton *cpu_usage_incl_low_checkbutton,
+    *cpu_usage_incl_iowait_checkbutton, *cpu_usage_fixed_max_checkbutton,
+    *load_average_fixed_max_checkbutton, *show_free_checkbutton,
+    *disk_usage_fixed_max_checkbutton, *disk_stats_fixed_max_checkbutton,
+    *swap_fixed_max_checkbutton, *memory_fixed_max_checkbutton,
+    *network_load_fixed_max_checkbutton, *temperature_fixed_max_checkbutton,
+    *fan_fixed_max_checkbutton, *generic_fixed_max_checkbutton;
 
   Gtk::ComboBox *disk_stats_device_combobox, *disk_stats_stat_combobox;
 

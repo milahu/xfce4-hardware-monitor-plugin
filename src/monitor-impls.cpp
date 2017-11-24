@@ -22,6 +22,7 @@
 #include <iomanip>  // Needed for Precision helper
 #include <iostream>
 #include <limits>  // Used for sentinel value in Generic Monitor
+#include <sstream>  // Used for string to number conversion
 #include <string>
 #include <vector>
 
@@ -78,9 +79,16 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
       // Obtaining general monitor details
       Glib::ustring type = xfce_rc_read_entry(settings_ro, "type", ""),
           tag = xfce_rc_read_entry(settings_ro, "tag", "");
-
       int update_interval = xfce_rc_read_int_entry(settings_ro,
                                                    "update_interval", -1);
+
+      /* Floats are not supported by XFCE configuration code, so need to
+       * unstringify the double */
+      double max;
+      std::stringstream s(xfce_rc_read_entry(settings_ro, "max", "0"));
+      s >> max;
+
+      bool fixed_max = xfce_rc_read_bool_entry(settings_ro, "fixed_max", false);
 
       if (type == "cpu_usage")
       {
@@ -99,13 +107,15 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
         // Creating CPU usage monitor with provided number if valid
         if (cpu_no == -1)
         {
-          monitors.push_back(new CpuUsageMonitor(tag, update_interval,
-                                                 incl_low_prio, incl_iowait));
+          monitors.push_back(new CpuUsageMonitor(fixed_max, incl_low_prio,
+                                                 incl_iowait, update_interval,
+                                                 tag));
         }
         else
         {
-          monitors.push_back(new CpuUsageMonitor(cpu_no, tag, update_interval,
-                                                 incl_low_prio, incl_iowait));
+          monitors.push_back(new CpuUsageMonitor(cpu_no, fixed_max,
+                                                 incl_low_prio, incl_iowait,
+                                                 update_interval, tag));
         }
       }
       else if (type == "memory_usage")
@@ -114,7 +124,8 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
         if (update_interval == -1)
           update_interval = MemoryUsageMonitor::update_interval_default;
 
-        monitors.push_back(new MemoryUsageMonitor(tag, update_interval));
+        monitors.push_back(new MemoryUsageMonitor(update_interval, fixed_max,
+                                                  tag));
       }
       else if (type == "swap_usage")
       {
@@ -122,7 +133,7 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
         if (update_interval == -1)
           update_interval = SwapUsageMonitor::update_interval_default;
 
-        monitors.push_back(new SwapUsageMonitor(tag, update_interval));
+        monitors.push_back(new SwapUsageMonitor(update_interval, fixed_max, tag));
       }
       else if (type == "load_average")
       {
@@ -130,7 +141,8 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
         if (update_interval == -1)
           update_interval = LoadAverageMonitor::update_interval_default;
 
-        monitors.push_back(new LoadAverageMonitor(tag, update_interval));
+        monitors.push_back(new LoadAverageMonitor(update_interval, fixed_max,
+                                                  max, tag));
       }
       else if (type == "disk_usage")
       {
@@ -147,8 +159,8 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
           update_interval = DiskUsageMonitor::update_interval_default;
 
         // Creating disk usage monitor
-        monitors.push_back(new DiskUsageMonitor(mount_dir, show_free, tag,
-                                                update_interval));
+        monitors.push_back(new DiskUsageMonitor(mount_dir, show_free,
+                                                update_interval, fixed_max, tag));
       }
       else if (type == "disk_statistics")
       {
@@ -165,8 +177,9 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
           update_interval = DiskStatsMonitor::update_interval_default;
 
         // Creating disk statistics monitor
-        monitors.push_back(new DiskStatsMonitor(device_name, stat, tag,
-                                                update_interval));
+        monitors.push_back(new DiskStatsMonitor(device_name, stat,
+                                                update_interval, fixed_max, max,
+                                                tag));
       }
       else if (type == "network_load")
       {
@@ -255,8 +268,8 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
 
         // Creating network load monitor
         monitors.push_back(new NetworkLoadMonitor(inter_type, inter_direction,
-                                                  tag, update_interval,
-                                                  panel_plugin));
+                                                  update_interval, fixed_max,
+                                                  max, tag, panel_plugin));
       }
       else if (type == "temperature")
       {
@@ -269,8 +282,9 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
           update_interval = TemperatureMonitor::update_interval_default;
 
         // Creating temperature monitor
-        monitors.push_back(new TemperatureMonitor(temperature_no, tag,
-                                                  update_interval));
+        monitors.push_back(new TemperatureMonitor(temperature_no,
+                                                  update_interval, fixed_max,
+                                                  max, tag));
       }
       else if (type == "fan_speed")
       {
@@ -282,7 +296,8 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
           update_interval = FanSpeedMonitor::update_interval_default;
 
         // Creating fan monitor
-        monitors.push_back(new FanSpeedMonitor(fan_no, tag, update_interval));
+        monitors.push_back(new FanSpeedMonitor(fan_no, update_interval,
+                                               fixed_max, max, tag));
       }
 
       else if (type == "generic")
@@ -328,7 +343,8 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
                                               regex_string, follow_change, dir,
                                               data_source_name_long,
                                               data_source_name_short, units_long,
-                                              units_short, tag, update_interval));
+                                              units_short, update_interval,
+                                              fixed_max, max, tag));
       }
 
       // Saving the monitor's settings root
@@ -341,7 +357,7 @@ load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin)
 
   // Always start with a CpuUsageMonitor
   if (monitors.empty())
-    monitors.push_back(new CpuUsageMonitor("", 1000, false, false));
+    monitors.push_back(new CpuUsageMonitor(true, false, false, 1000, ""));
 
   return monitors;
 }
@@ -403,17 +419,18 @@ int const CpuUsageMonitor::max_no_cpus = GLIBTOP_NCPU;
 int const CpuUsageMonitor::update_interval_default = 1000;
 
 
-CpuUsageMonitor::CpuUsageMonitor(const Glib::ustring &tag_string, int interval,
-                                 bool incl_low_prio, bool incl_iowait)
-  : Monitor(tag_string, interval), cpu_no(all_cpus),
+CpuUsageMonitor::CpuUsageMonitor(bool fixed_max, bool incl_low_prio,
+                                 bool incl_iowait, int interval,
+                                 const Glib::ustring &tag_string)
+  : Monitor(tag_string, interval), cpu_no(all_cpus), fixed_max_priv(fixed_max),
     incl_low_prio_priv(incl_low_prio), incl_iowait_priv(incl_iowait),
     total_time(0), nice_time(0), idle_time(0), iowait_time(0)
 {}
 
-CpuUsageMonitor::CpuUsageMonitor(int cpu, const Glib::ustring &tag_string,
-                                 int interval, bool incl_low_prio,
-                                 bool incl_iowait)
-  : Monitor(tag_string, interval), cpu_no(cpu),
+CpuUsageMonitor::CpuUsageMonitor(int cpu, bool fixed_max, bool incl_low_prio,
+                                 bool incl_iowait, int interval,
+                                 const Glib::ustring &tag_string)
+  : Monitor(tag_string, interval), cpu_no(cpu), fixed_max_priv(fixed_max),
     incl_low_prio_priv(incl_low_prio), incl_iowait_priv(incl_iowait),
     total_time(0), nice_time(0), idle_time(0), iowait_time(0)
 {
@@ -469,14 +486,9 @@ double CpuUsageMonitor::do_measure()
     return 0;
 }
 
-double CpuUsageMonitor::max()
-{
-  return 1;
-}
-
 bool CpuUsageMonitor::fixed_max()
 {
-  return true;
+  return fixed_max_priv;
 }
 
 Glib::ustring CpuUsageMonitor::format_value(double val, bool compact)
@@ -502,6 +514,11 @@ Glib::ustring CpuUsageMonitor::get_short_name()
     return String::ucompose(_("CPU %1"), cpu_no + 1);
 }
 
+double CpuUsageMonitor::max()
+{
+  return 1;
+}
+
 void CpuUsageMonitor::save(XfceRc *settings_w)
 {
   // Fetching assigned settings group
@@ -515,8 +532,14 @@ void CpuUsageMonitor::save(XfceRc *settings_w)
                            incl_low_prio_priv);
   xfce_rc_write_bool_entry(settings_w, "include_iowait",
                            incl_iowait_priv);
-  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+}
+
+void CpuUsageMonitor::set_fixed_max(bool fixed_max)
+{
+  fixed_max_priv = fixed_max;
 }
 
 void CpuUsageMonitor::set_update_interval(int interval)
@@ -535,8 +558,9 @@ int CpuUsageMonitor::update_interval()
 // Static initialisation
 int const SwapUsageMonitor::update_interval_default = 10 * 1000;
 
-SwapUsageMonitor::SwapUsageMonitor(const Glib::ustring &tag_string, int interval)
-  : Monitor(tag_string, interval), max_value(0)
+SwapUsageMonitor::SwapUsageMonitor(int interval, bool fixed_max,
+                                   const Glib::ustring &tag_string)
+  : Monitor(tag_string, interval), max_value(0), fixed_max_priv(fixed_max)
 {
 }
 
@@ -554,14 +578,9 @@ double SwapUsageMonitor::do_measure()
     return 0;
 }
 
-double SwapUsageMonitor::max()
-{
-  return max_value;
-}
-
 bool SwapUsageMonitor::fixed_max()
 {
-  return false;
+  return fixed_max_priv;
 }
 
 Glib::ustring SwapUsageMonitor::format_value(double val, bool compact)
@@ -584,6 +603,11 @@ Glib::ustring SwapUsageMonitor::get_short_name()
   return _("Swap");
 }
 
+double SwapUsageMonitor::max()
+{
+  return max_value;
+}
+
 void SwapUsageMonitor::save(XfceRc *settings_w)
 {
   // Fetching assigned settings group
@@ -592,8 +616,19 @@ void SwapUsageMonitor::save(XfceRc *settings_w)
   // Saving settings
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "swap_usage");
-  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
+
+  // No support for floats - stringifying
+  Glib::ustring setting = String::ucompose("%1", max_value);
+  xfce_rc_write_entry(settings_w, "max", setting.c_str());
+
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+}
+
+void SwapUsageMonitor::set_fixed_max(bool fixed_max)
+{
+  fixed_max_priv = fixed_max;
 }
 
 void SwapUsageMonitor::set_update_interval(int interval)
@@ -612,8 +647,9 @@ int SwapUsageMonitor::update_interval()
 // Static initialisation
 int const LoadAverageMonitor::update_interval_default = 30 * 1000;
 
-LoadAverageMonitor::LoadAverageMonitor(const Glib::ustring &tag_string, int interval)
-  : Monitor(tag_string, interval), max_value(1.0)
+LoadAverageMonitor::LoadAverageMonitor(int interval, bool fixed_max, double max,
+                                       const Glib::ustring &tag_string)
+  : Monitor(tag_string, interval), max_value(max), fixed_max_priv(fixed_max)
 {
 }
 
@@ -639,14 +675,9 @@ double LoadAverageMonitor::do_measure()
     return 0;
 }
 
-double LoadAverageMonitor::max()
-{
-  return max_value;
-}
-
 bool LoadAverageMonitor::fixed_max()
 {
-  return false;
+  return fixed_max_priv;
 }
 
 Glib::ustring LoadAverageMonitor::format_value(double val, bool compact)
@@ -666,6 +697,11 @@ Glib::ustring LoadAverageMonitor::get_short_name()
   return _("Load");
 }
 
+double LoadAverageMonitor::max()
+{
+  return max_value;
+}
+
 void LoadAverageMonitor::save(XfceRc *settings_w)
 {
   // Fetching assigned settings group
@@ -674,12 +710,24 @@ void LoadAverageMonitor::save(XfceRc *settings_w)
   // Saving settings
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "load_average");
-  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
 
   // No support for floats - stringifying
   Glib::ustring setting = String::ucompose("%1", max_value);
   xfce_rc_write_entry(settings_w, "max", setting.c_str());
+
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+}
+
+void LoadAverageMonitor::set_fixed_max(bool fixed_max)
+{
+  fixed_max_priv = fixed_max;
+}
+
+void LoadAverageMonitor::set_max(double max)
+{
+  max_value = max;
 }
 
 void LoadAverageMonitor::set_update_interval(int interval)
@@ -698,8 +746,9 @@ int LoadAverageMonitor::update_interval()
 // Static initialisation
 int const MemoryUsageMonitor::update_interval_default = 10 * 1000;
 
-MemoryUsageMonitor::MemoryUsageMonitor(const Glib::ustring &tag_string, int interval)
-  : Monitor(tag_string, interval), max_value(0)
+MemoryUsageMonitor::MemoryUsageMonitor(int interval, bool fixed_max,
+                                       const Glib::ustring &tag_string)
+  : Monitor(tag_string, interval), max_value(0), fixed_max_priv(fixed_max)
 {
 }
 
@@ -717,14 +766,9 @@ double MemoryUsageMonitor::do_measure()
     return 0;
 }
 
-double MemoryUsageMonitor::max()
-{
-  return max_value;
-}
-
 bool MemoryUsageMonitor::fixed_max()
 {
-  return false;
+  return fixed_max_priv;
 }
 
 Glib::ustring MemoryUsageMonitor::format_value(double val, bool compact)
@@ -747,6 +791,11 @@ Glib::ustring MemoryUsageMonitor::get_short_name()
   return _("Mem.");
 }
 
+double MemoryUsageMonitor::max()
+{
+  return max_value;
+}
+
 void MemoryUsageMonitor::save(XfceRc *settings_w)
 {
   // Fetching assigned settings group
@@ -755,8 +804,14 @@ void MemoryUsageMonitor::save(XfceRc *settings_w)
   // Saving settings
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "memory_usage");
-  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+}
+
+void MemoryUsageMonitor::set_fixed_max(bool fixed_max)
+{
+  fixed_max_priv = fixed_max;
 }
 
 void MemoryUsageMonitor::set_update_interval(int interval)
@@ -776,8 +831,10 @@ int MemoryUsageMonitor::update_interval()
 int const DiskUsageMonitor::update_interval_default = 60 * 1000;
 
 DiskUsageMonitor::DiskUsageMonitor(const std::string &dir, bool free,
-                                   const Glib::ustring &tag_string, int interval)
-  : Monitor(tag_string, interval), max_value(0), mount_dir(dir), show_free(free)
+                                   int interval, bool fixed_max,
+                                   const Glib::ustring &tag_string)
+  : Monitor(tag_string, interval), max_value(0), fixed_max_priv(fixed_max),
+    mount_dir(dir), show_free(free)
 {
 }
 
@@ -787,6 +844,7 @@ double DiskUsageMonitor::do_measure()
 
   glibtop_get_fsusage(&fsusage, mount_dir.c_str());
 
+  // Keeping max_value available whether the monitor has a fixed max or not
   max_value = fsusage.blocks * fsusage.block_size;
 
   double v = 0;
@@ -803,14 +861,9 @@ double DiskUsageMonitor::do_measure()
   return v;
 }
 
-double DiskUsageMonitor::max()
-{
-  return max_value;
-}
-
 bool DiskUsageMonitor::fixed_max()
 {
-  return false;
+  return fixed_max_priv;
 }
 
 Glib::ustring DiskUsageMonitor::format_value(double val, bool compact)
@@ -848,6 +901,11 @@ Glib::ustring DiskUsageMonitor::get_short_name()
   return String::ucompose("%1", mount_dir);
 }
 
+double DiskUsageMonitor::max()
+{
+  return max_value;
+}
+
 void DiskUsageMonitor::save(XfceRc *settings_w)
 {
   // Fetching assigned settings group
@@ -858,8 +916,14 @@ void DiskUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "type", "disk_usage");
   xfce_rc_write_entry(settings_w, "mount_dir", mount_dir.c_str());
   xfce_rc_write_bool_entry(settings_w, "show_free", show_free);
-  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+}
+
+void DiskUsageMonitor::set_fixed_max(bool fixed_max)
+{
+  fixed_max_priv = fixed_max;
 }
 
 void DiskUsageMonitor::set_update_interval(int interval)
@@ -882,10 +946,11 @@ int const DiskStatsMonitor::update_interval_default = 1000;
 // No stats allow for negative values, so using that to detect no previous value
 DiskStatsMonitor::DiskStatsMonitor(const Glib::ustring &device_name,
                                    const Stat &stat_to_monitor,
-                                   const Glib::ustring &tag_string,
-                                   int interval)
+                                   int interval, bool fixed_max, double max,
+                                   const Glib::ustring &tag_string)
   : Monitor(tag_string, interval), device_name(device_name),
-    stat_to_monitor(stat_to_monitor), previous_value(-1), max_value(1)
+    stat_to_monitor(stat_to_monitor), previous_value(-1), max_value(max),
+    fixed_max_priv(fixed_max)
 {
 }
 
@@ -992,7 +1057,7 @@ double DiskStatsMonitor::do_measure()
 
 bool DiskStatsMonitor::fixed_max()
 {
-  return false;
+  return fixed_max_priv;
 }
 
 Glib::ustring DiskStatsMonitor::format_value(double val, bool compact)
@@ -1116,9 +1181,20 @@ void DiskStatsMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "type", "disk_statistics");
   xfce_rc_write_entry(settings_w, "disk_stats_device", device_name.c_str());
   xfce_rc_write_int_entry(settings_w, "disk_stats_stat", int(stat_to_monitor));
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
   xfce_rc_write_int_entry(settings_w, "max", int(max_value));
-  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+}
+
+void DiskStatsMonitor::set_fixed_max(bool fixed_max)
+{
+  fixed_max_priv = fixed_max;
+}
+
+void DiskStatsMonitor::set_max(double max)
+{
+  max_value = max;
 }
 
 void DiskStatsMonitor::set_update_interval(int interval)
@@ -1234,11 +1310,12 @@ std::vector<Glib::ustring> NetworkLoadMonitor::interface_type_names_default = in
 bool NetworkLoadMonitor::interface_names_configured = false;
 
 NetworkLoadMonitor::NetworkLoadMonitor(InterfaceType &inter_type, Direction dir,
+                                       int interval, bool fixed_max, double max,
                                        const Glib::ustring &tag_string,
-                                       int interval, XfcePanelPlugin* xfce_plugin)
-  : Monitor(tag_string, interval), max_value(1), byte_count(0),
-    time_stamp_secs(0), time_stamp_usecs(0),interface_type(inter_type),
-    direction(dir), xfce_plugin(xfce_plugin)
+                                       XfcePanelPlugin* xfce_plugin)
+  : Monitor(tag_string, interval), max_value(max), fixed_max_priv(fixed_max),
+    byte_count(0), time_stamp_secs(0), time_stamp_usecs(0),
+    interface_type(inter_type), direction(dir), xfce_plugin(xfce_plugin)
 {
 }
 
@@ -1552,7 +1629,7 @@ double NetworkLoadMonitor::do_measure()
 
 bool NetworkLoadMonitor::fixed_max()
 {
-  return false;
+  return fixed_max_priv;
 }
 
 Glib::ustring NetworkLoadMonitor::format_value(double val, bool compact)
@@ -1782,9 +1859,10 @@ void NetworkLoadMonitor::save(XfceRc *settings_w)
   xfce_rc_write_int_entry(settings_w, "interface_type", int(interface_type));
   xfce_rc_write_int_entry(settings_w, "interface_direction",
     int(direction));
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
   xfce_rc_write_int_entry(settings_w, "max", int(max_value));
-  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
 void NetworkLoadMonitor::save_interfaces(XfceRc *settings_w)
@@ -1827,9 +1905,19 @@ void NetworkLoadMonitor::save_interfaces(XfceRc *settings_w)
                       interface_type_names[wireless_third].c_str());
 }
 
+void NetworkLoadMonitor::set_fixed_max(bool fixed_max)
+{
+  fixed_max_priv = fixed_max;
+}
+
 void NetworkLoadMonitor::set_interface_name(InterfaceType type, const Glib::ustring interface_name)
 {
   interface_type_names[type] = interface_name;
+}
+
+void NetworkLoadMonitor::set_max(double max)
+{
+  max_value = max;
 }
 
 void NetworkLoadMonitor::set_update_interval(int interval)
@@ -1964,9 +2052,11 @@ double const Sensors::invalid_max = -1000000;
 
 int const TemperatureMonitor::update_interval_default = 20 * 1000;
 
-TemperatureMonitor::TemperatureMonitor(int no, const Glib::ustring &tag_string,
-                                       int interval)
-  : Monitor(tag_string, interval), sensors_no(no)
+TemperatureMonitor::TemperatureMonitor(int no, int interval, bool fixed_max,
+                                       double max,
+                                       const Glib::ustring &tag_string)
+  : Monitor(tag_string, interval), sensors_no(no), max_value(max),
+    fixed_max_priv(fixed_max)
 {
   Sensors::FeatureInfo info
     = Sensors::instance().get_temperature_features()[sensors_no];
@@ -1992,7 +2082,7 @@ double TemperatureMonitor::do_measure()
 
 bool TemperatureMonitor::fixed_max()
 {
-  return false;
+  return fixed_max_priv;
 }
 
 
@@ -2032,12 +2122,24 @@ void TemperatureMonitor::save(XfceRc *settings_w)
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "temperature");
   xfce_rc_write_int_entry(settings_w, "temperature_no", sensors_no);
-  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
 
   // No support for floats - stringifying
   Glib::ustring setting = String::ucompose("%1", max_value);
   xfce_rc_write_entry(settings_w, "max", setting.c_str());
+
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+}
+
+void TemperatureMonitor::set_fixed_max(bool fixed_max)
+{
+  fixed_max_priv = fixed_max;
+}
+
+void TemperatureMonitor::set_max(double max)
+{
+  max_value = max;
 }
 
 void TemperatureMonitor::set_update_interval(int interval)
@@ -2056,9 +2158,11 @@ int TemperatureMonitor::update_interval()
 // Static initialisation
 int const FanSpeedMonitor::update_interval_default = 20 * 1000;
 
-FanSpeedMonitor::FanSpeedMonitor(int no, const Glib::ustring &tag_string,
-                                 int interval)
-  : Monitor(tag_string, interval), sensors_no(no)
+FanSpeedMonitor::FanSpeedMonitor(int no, int interval, bool fixed_max,
+                                 double max,
+                                 const Glib::ustring &tag_string)
+  : Monitor(tag_string, interval), sensors_no(no), max_value(max),
+    fixed_max_priv(fixed_max)
 {
   Sensors::FeatureInfo info
     = Sensors::instance().get_fan_features()[sensors_no];
@@ -2084,7 +2188,7 @@ double FanSpeedMonitor::do_measure()
 
 bool FanSpeedMonitor::fixed_max()
 {
-  return false;
+  return fixed_max_priv;
 }
 
 Glib::ustring FanSpeedMonitor::format_value(double val, bool compact)
@@ -2113,6 +2217,16 @@ double FanSpeedMonitor::max()
   return max_value;
 }
 
+void FanSpeedMonitor::set_fixed_max(bool fixed_max)
+{
+  fixed_max_priv = fixed_max;
+}
+
+void FanSpeedMonitor::set_max(double max)
+{
+  max_value = max;
+}
+
 void FanSpeedMonitor::save(XfceRc *settings_w)
 {
     // Fetching assigned settings group
@@ -2122,12 +2236,14 @@ void FanSpeedMonitor::save(XfceRc *settings_w)
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "fan_speed");
   xfce_rc_write_int_entry(settings_w, "fan_no", sensors_no);
-  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
 
   // No support for floats - stringifying
   Glib::ustring setting = String::ucompose("%1", max_value);
   xfce_rc_write_entry(settings_w, "max", setting.c_str());
+
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
 void FanSpeedMonitor::set_update_interval(int interval)
@@ -2155,9 +2271,9 @@ GenericMonitor::GenericMonitor(const Glib::ustring &file_path,
                                const Glib::ustring &data_source_name_short,
                                const Glib::ustring &units_long,
                                const Glib::ustring &units_short,
-                               const Glib::ustring &tag_string,
-                               int interval)
-  : Monitor(tag_string, interval), max_value(0),
+                               int interval, bool fixed_max, double max,
+                               const Glib::ustring &tag_string)
+  : Monitor(tag_string, interval), max_value(max), fixed_max_priv(fixed_max),
     previous_value(std::numeric_limits<double>::min()),
     file_path(file_path), value_from_contents(value_from_contents),
     follow_change(follow_change), dir(dir),
@@ -2303,7 +2419,7 @@ double GenericMonitor::do_measure()
 
 bool GenericMonitor::fixed_max()
 {
-  return false;
+  return fixed_max_priv;
 }
 
 Glib::ustring GenericMonitor::format_value(double val, bool compact)
@@ -2347,8 +2463,24 @@ void GenericMonitor::save(XfceRc *settings_w)
                       data_source_name_short.c_str());
   xfce_rc_write_entry(settings_w, "units_long", units_long.c_str());
   xfce_rc_write_entry(settings_w, "units_short", units_short.c_str());
-  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
+
+  // No support for floats - stringifying
+  Glib::ustring setting = String::ucompose("%1", max_value);
+  xfce_rc_write_entry(settings_w, "max", setting.c_str());
+
+  xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+}
+
+void GenericMonitor::set_fixed_max(bool fixed_max)
+{
+  fixed_max_priv = fixed_max;
+}
+
+void GenericMonitor::set_max(double max)
+{
+  max_value = max;
 }
 
 void GenericMonitor::set_update_interval(int interval)

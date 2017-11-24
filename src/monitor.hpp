@@ -96,6 +96,7 @@ public:
   // Save information about the monitor
   virtual void save(XfceRc *settings_w) = 0;
 
+  virtual void set_fixed_max(bool fixed_max) = 0;
   virtual void set_update_interval(int interval) = 0;
 
   /* If other is watching the same thing as this monitor, it might be

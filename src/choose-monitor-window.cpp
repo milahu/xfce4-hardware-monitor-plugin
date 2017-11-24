@@ -39,19 +39,29 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
   : xfce_plugin(xfce_plugin)
 {
   // Now we are forced to use top-level widgets this is much more over the top...
-  std::vector<Glib::ustring> objects(12);
+  std::vector<Glib::ustring> objects(22);
   objects[0] = "choose_monitor_window";
   objects[1] = "cpu_no_adjustment";
   objects[2] = "cpu_usage_refresh_delay_adjustment";
-  objects[3] = "disk_stats_refresh_delay_adjustment";
-  objects[4] = "disk_usage_refresh_delay_adjustment";
-  objects[5] = "fan_delay_adjustment";
-  objects[6] = "generic_delay_adjustment";
-  objects[7] = "load_average_refresh_delay_adjustment";
-  objects[8] = "memory_refresh_delay_adjustment";
-  objects[9] = "network_load_delay_adjustment";
+  objects[3] = "cpu_usage_max_adjustment";
+  objects[4] = "load_average_refresh_delay_adjustment";
+  objects[5] = "load_average_max_adjustment";
+  objects[6] = "disk_usage_refresh_delay_adjustment";
+  objects[7] = "disk_usage_max_adjustment";
+  objects[8] = "disk_stats_refresh_delay_adjustment";
+  objects[9] = "disk_stats_max_adjustment";
   objects[10] = "swap_refresh_delay_adjustment";
-  objects[11] = "temperature_delay_adjustment";
+  objects[11] = "swap_max_adjustment";
+  objects[12] = "memory_refresh_delay_adjustment";
+  objects[13] = "memory_max_adjustment";
+  objects[14] = "network_load_delay_adjustment";
+  objects[15] = "network_load_max_spinbutton";
+  objects[16] = "temperature_delay_adjustment";
+  objects[17] = "temperature_max_spinbutton";
+  objects[18] = "fan_delay_adjustment";
+  objects[19] = "fan_max_spinbutton";
+  objects[20] = "generic_delay_adjustment";
+  objects[21] = "generic_max_adjustment";
   ui = get_builder_xml(objects);
 
   ui->get_widget("choose_monitor_window", window);
@@ -70,71 +80,87 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
                  cpu_usage_incl_low_checkbutton);
   ui->get_widget("cpu_usage_incl_iowait_checkbutton",
                  cpu_usage_incl_iowait_checkbutton);
-  ui->get_widget("cpu_usage_tag_entry", cpu_tag);
   ui->get_widget("cpu_usage_refresh_delay_spinbutton",
                  cpu_usage_refresh_delay_spinbutton);
   ui->get_widget("cpu_usage_refresh_delay_default_button",
                  cpu_usage_refresh_delay_default_button);
+  ui->get_widget("cpu_usage_fixed_max_checkbutton",
+                 cpu_usage_fixed_max_checkbutton);
+  ui->get_widget("cpu_usage_tag_entry", cpu_tag);
 
   ui->get_widget("load_average_radiobutton", load_average_radiobutton);
   ui->get_widget("load_average_options", load_average_options);
-  ui->get_widget("load_average_tag_entry", load_average_tag);
   ui->get_widget("load_average_refresh_delay_spinbutton",
                  load_average_refresh_delay_spinbutton);
   ui->get_widget("load_average_refresh_delay_default_button",
                  load_average_refresh_delay_default_button);
+  ui->get_widget("load_average_fixed_max_checkbutton",
+                 load_average_fixed_max_checkbutton);
+  ui->get_widget("load_average_max_spinbutton", load_average_max_spinbutton);
+  ui->get_widget("load_average_tag_entry", load_average_tag);
 
   ui->get_widget("disk_usage_radiobutton", disk_usage_radiobutton);
   ui->get_widget("disk_usage_options", disk_usage_options);
   ui->get_widget("mount_dir_entry", mount_dir_entry);
   ui->get_widget("show_free_checkbutton", show_free_checkbutton);
-  ui->get_widget("disk_usage_tag_entry", disk_usage_tag);
   ui->get_widget("disk_usage_refresh_delay_spinbutton",
                  disk_usage_refresh_delay_spinbutton);
   ui->get_widget("disk_usage_refresh_delay_default_button",
                  disk_usage_refresh_delay_default_button);
+  ui->get_widget("disk_usage_fixed_max_checkbutton",
+                 disk_usage_fixed_max_checkbutton);
+  ui->get_widget("disk_usage_tag_entry", disk_usage_tag);
 
   ui->get_widget("disk_stats_radiobutton", disk_stats_radiobutton);
   ui->get_widget("disk_stats_options", disk_stats_options);
   ui->get_widget("disk_stats_device_combobox", disk_stats_device_combobox);
   ui->get_widget("disk_stats_stat_combobox", disk_stats_stat_combobox);
-  ui->get_widget("disk_stats_tag_entry", disk_stats_tag);
   ui->get_widget("disk_stats_refresh_delay_spinbutton",
                  disk_stats_refresh_delay_spinbutton);
   ui->get_widget("disk_stats_refresh_delay_default_button",
                  disk_stats_refresh_delay_default_button);
+  ui->get_widget("disk_stats_fixed_max_checkbutton",
+                 disk_stats_fixed_max_checkbutton);
+  ui->get_widget("disk_stats_max_spinbutton",
+                 disk_stats_max_spinbutton);
+  ui->get_widget("disk_stats_tag_entry", disk_stats_tag);
 
   ui->get_widget("swap_usage_radiobutton", swap_usage_radiobutton);
   ui->get_widget("swap_usage_options", swap_usage_options);
-  ui->get_widget("swap_tag_entry", swap_usage_tag);
   ui->get_widget("swap_refresh_delay_spinbutton", swap_refresh_delay_spinbutton);
   ui->get_widget("swap_refresh_delay_default_button",
                  swap_refresh_delay_default_button);
+  ui->get_widget("swap_fixed_max_checkbutton", swap_fixed_max_checkbutton);
+  ui->get_widget("swap_tag_entry", swap_usage_tag);
 
   ui->get_widget("memory_usage_radiobutton", memory_usage_radiobutton);
   ui->get_widget("memory_usage_options", memory_usage_options);
-  ui->get_widget("memory_tag_entry", memory_usage_tag);
   ui->get_widget("memory_refresh_delay_spinbutton",
                  memory_refresh_delay_spinbutton);
   ui->get_widget("memory_refresh_delay_default_button",
                  memory_refresh_delay_default_button);
+  ui->get_widget("memory_fixed_max_checkbutton", memory_fixed_max_checkbutton);
+  ui->get_widget("memory_tag_entry", memory_usage_tag);
 
   ui->get_widget("network_load_radiobutton", network_load_radiobutton);
   ui->get_widget("network_load_options", network_load_options);
   ui->get_widget("network_type_combobox", network_type_combobox);
   ui->get_widget("network_direction_combobox", network_direction_combobox);
   ui->get_widget("network_interfaces_treeview", network_interfaces_treeview);
-  ui->get_widget("network_load_tag_entry", network_load_tag);
   ui->get_widget("network_load_refresh_delay_spinbutton",
                  network_load_refresh_delay_spinbutton);
   ui->get_widget("network_load_refresh_delay_default_button",
                  network_load_refresh_delay_default_button);
+  ui->get_widget("network_load_fixed_max_checkbutton",
+                 network_load_fixed_max_checkbutton);
+  ui->get_widget("network_load_max_spinbutton", network_load_max_spinbutton);
+  ui->get_widget("network_load_tag_entry", network_load_tag);
 
   /* Need special code here to set the desired stock icon as GTK Builder doesn't
    * support setting a stock icon but custom text, and as soon as you change the
    * label on a stock button the icon is removed! Attaching a custom image widget
    * requires extra hacking in the code, don't see why it is superior to just
-   * this*/
+   * this */
   ui->get_widget("network_interfaces_restore_defaults_button",
                  network_interfaces_restore_defaults_button);
   Gtk::Image *stock_image = Gtk::manage(new Gtk::Image(
@@ -146,21 +172,26 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
   ui->get_widget("temperature_box", temperature_box);
   ui->get_widget("temperature_options", temperature_options);
   ui->get_widget("temperature_combobox", temperature_combobox);
-  ui->get_widget("temperature_tag_entry", temperature_tag);
   ui->get_widget("temperature_refresh_delay_spinbutton",
                  temperature_refresh_delay_spinbutton);
   ui->get_widget("temperature_refresh_delay_default_button",
                  temperature_refresh_delay_default_button);
+  ui->get_widget("temperature_fixed_max_checkbutton",
+                 temperature_fixed_max_checkbutton);
+  ui->get_widget("temperature_max_spinbutton", temperature_max_spinbutton);
+  ui->get_widget("temperature_tag_entry", temperature_tag);
 
   ui->get_widget("fan_speed_radiobutton", fan_speed_radiobutton);
   ui->get_widget("fan_speed_box", fan_speed_box);
   ui->get_widget("fan_speed_options", fan_speed_options);
   ui->get_widget("fan_speed_combobox", fan_speed_combobox);
-  ui->get_widget("fan_speed_tag_entry", fan_speed_tag);
   ui->get_widget("fan_speed_refresh_delay_spinbutton",
                  fan_speed_refresh_delay_spinbutton);
   ui->get_widget("fan_speed_refresh_delay_default_button",
                  fan_speed_refresh_delay_default_button);
+  ui->get_widget("fan_fixed_max_checkbutton", fan_fixed_max_checkbutton);
+  ui->get_widget("fan_max_spinbutton", fan_max_spinbutton);
+  ui->get_widget("fan_speed_tag_entry", fan_speed_tag);
 
   ui->get_widget("generic_radiobutton", generic_radiobutton);
   ui->get_widget("generic_box", generic_box);
@@ -187,11 +218,13 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
                  generic_data_source_name_short_entry);
   ui->get_widget("generic_units_long_entry", generic_units_long_entry);
   ui->get_widget("generic_units_short_entry", generic_units_short_entry);
-  ui->get_widget("generic_tag_entry", generic_tag);
   ui->get_widget("generic_refresh_delay_spinbutton",
                  generic_refresh_delay_spinbutton);
   ui->get_widget("generic_refresh_delay_default_button",
                  generic_refresh_delay_default_button);
+  ui->get_widget("generic_fixed_max_checkbutton", generic_fixed_max_checkbutton);
+  ui->get_widget("generic_max_spinbutton", generic_max_spinbutton);
+  ui->get_widget("generic_tag_entry", generic_tag);
 
   cpu_usage_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
@@ -282,12 +315,16 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
    * maintain it here */
   cpu_usage_refresh_delay_spinbutton->set_value(
         CpuUsageMonitor::update_interval_default / 1000);
+  cpu_usage_fixed_max_checkbutton->set_active(true);
 
   load_average_refresh_delay_spinbutton->set_value(
         LoadAverageMonitor::update_interval_default / 1000);
+  load_average_fixed_max_checkbutton->set_active(false);
+  load_average_max_spinbutton->set_value(0);
 
   disk_usage_refresh_delay_spinbutton->set_value(
         DiskUsageMonitor::update_interval_default / 1000);
+  disk_usage_fixed_max_checkbutton->set_active(true);
 
   /* Setup disk statistics device name combobox - no column packing needed here
    * since this seems to be done automatically when a text entry is included */
@@ -320,12 +357,16 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
 
   disk_stats_refresh_delay_spinbutton->set_value(
         DiskStatsMonitor::update_interval_default / 1000);
+  disk_stats_fixed_max_checkbutton->set_active(false);
+  disk_stats_max_spinbutton->set_value(0);
 
   swap_refresh_delay_spinbutton->set_value(
         SwapUsageMonitor::update_interval_default / 1000);
+  swap_fixed_max_checkbutton->set_active(true);
 
   memory_refresh_delay_spinbutton->set_value(
         MemoryUsageMonitor::update_interval_default / 1000);
+  memory_fixed_max_checkbutton->set_active(true);
 
   // Setup network interface type combobox
   static NetworkInterfaceTypeCols nitc;
@@ -358,6 +399,8 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
 
   network_load_refresh_delay_spinbutton->set_value(
         NetworkLoadMonitor::update_interval_default / 1000);
+  network_load_fixed_max_checkbutton->set_active(false);
+  network_load_max_spinbutton->set_value(0);
 
 #if !HAVE_LIBSENSORS            // No sensors support, no options for it
   device_notebook->get_nth_page(3)->hide();
@@ -397,6 +440,8 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
 
   temperature_refresh_delay_spinbutton->set_value(
         TemperatureMonitor::update_interval_default / 1000);
+  temperature_fixed_max_checkbutton->set_active(false);
+  temperature_max_spinbutton->set_value(0);
 
   // Setup fan combobox
   static SensorsCols fsc;
@@ -431,9 +476,13 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
 
   fan_speed_refresh_delay_spinbutton->set_value(
         FanSpeedMonitor::update_interval_default / 1000);
+  fan_fixed_max_checkbutton->set_active(false);
+  fan_max_spinbutton->set_value(0);
 
   generic_refresh_delay_spinbutton->set_value(
         GenericMonitor::update_interval_default / 1000);
+  generic_fixed_max_checkbutton->set_active(false);
+  generic_max_spinbutton->set_value(0);
 
   /* Fix border on help linkbutton - border is specified in the glade config, yet
    * it is ignored?? */
@@ -472,6 +521,15 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
       int update_interval = xfce_rc_read_int_entry(settings_ro,
                                                    "update_interval", -1);
 
+      /* Floats are not supported by XFCE configuration code, so need to
+       * unserialise the double */
+      double max;
+      std::stringstream s(xfce_rc_read_entry(settings_ro, "max", "0"));
+      s >> max;
+
+      /* Have moved fixed_max to individual monitors to default the value as
+       * appropriate */
+
       if (type == "memory_usage")
       {
         device_notebook->set_current_page(1);
@@ -482,6 +540,9 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         if (update_interval == -1)
           update_interval = MemoryUsageMonitor::update_interval_default;
         memory_refresh_delay_spinbutton->set_value(update_interval / 1000);
+
+        bool fixed_max = xfce_rc_read_bool_entry(settings_ro, "fixed_max", true);
+        memory_fixed_max_checkbutton->set_active(fixed_max);
       }
       else if (type == "load_average")
       {
@@ -493,125 +554,37 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         if (update_interval == -1)
           update_interval = LoadAverageMonitor::update_interval_default;
         load_average_refresh_delay_spinbutton->set_value(update_interval / 1000);
+
+        bool fixed_max = xfce_rc_read_bool_entry(settings_ro, "fixed_max", false);
+        load_average_fixed_max_checkbutton->set_active(fixed_max);
+        load_average_max_spinbutton->set_value(max);
       }
       else if (type == "disk_usage")
       {
         device_notebook->set_current_page(1);
         disk_usage_radiobutton->set_active();
+
+        Glib::ustring mount_dir = xfce_rc_read_entry(settings_ro,
+          "mount_dir", "");
+        mount_dir_entry->set_text(mount_dir);
+        bool show_free  = xfce_rc_read_bool_entry(settings_ro,
+          "show_free", false);
+        show_free_checkbutton->set_active(show_free);
         disk_usage_tag->set_text(tag);
 
         // Enforcing default update interval when it isn't present
         if (update_interval == -1)
           update_interval = DiskUsageMonitor::update_interval_default;
         disk_usage_refresh_delay_spinbutton->set_value(update_interval / 1000);
+
+        bool fixed_max = xfce_rc_read_bool_entry(settings_ro, "fixed_max", true);
+        disk_usage_fixed_max_checkbutton->set_active(fixed_max);
       }
       else if (type == "disk_statistics")
       {
         device_notebook->set_current_page(1);
         disk_stats_radiobutton->set_active();
-        disk_stats_tag->set_text(tag);
 
-        // Enforcing default update interval when it isn't present
-        if (update_interval == -1)
-          update_interval = DiskStatsMonitor::update_interval_default;
-        disk_stats_refresh_delay_spinbutton->set_value(update_interval / 1000);
-      }
-      else if (type == "swap_usage")
-      {
-        device_notebook->set_current_page(1);
-        swap_usage_radiobutton->set_active();
-        swap_usage_tag->set_text(tag);
-
-        // Enforcing default update interval when it isn't present
-        if (update_interval == -1)
-          update_interval = SwapUsageMonitor::update_interval_default;
-        swap_refresh_delay_spinbutton->set_value(update_interval / 1000);
-      }
-      else if (type == "network_load")
-      {
-        device_notebook->set_current_page(2);
-        network_load_radiobutton->set_active();
-        network_load_tag->set_text(tag);
-
-        // Enforcing default update interval when it isn't present
-        if (update_interval == -1)
-          update_interval = NetworkLoadMonitor::update_interval_default;
-        network_load_refresh_delay_spinbutton->set_value(update_interval / 1000);
-      }
-      else if (type == "temperature")
-      {
-        device_notebook->set_current_page(3);
-        temperature_radiobutton->set_active();
-        temperature_tag->set_text(tag);
-
-        // Enforcing default update interval when it isn't present
-        if (update_interval == -1)
-          update_interval = TemperatureMonitor::update_interval_default;
-        temperature_refresh_delay_spinbutton->set_value(update_interval / 1000);
-      }
-
-      // TODO: When I start supporting it, why no fan stuff here?
-
-      else if (type == "generic")
-      {
-        device_notebook->set_current_page(4);
-        generic_radiobutton->set_active();
-        generic_tag->set_text(tag);
-
-        // Enforcing default update interval when it isn't present
-        if (update_interval == -1)
-          update_interval = GenericMonitor::update_interval_default;
-        generic_refresh_delay_spinbutton->set_value(update_interval / 1000);
-      }
-      else
-      {
-        device_notebook->set_current_page(0);
-        cpu_usage_radiobutton->set_active();
-        cpu_tag->set_text(tag);
-
-        // Enforcing default update interval when it isn't present
-        if (update_interval == -1)
-          update_interval = CpuUsageMonitor::update_interval_default;
-        cpu_usage_refresh_delay_spinbutton->set_value(update_interval / 1000);
-      }
-      
-      // Fill in cpu info
-      if (xfce_rc_has_entry(settings_ro, "cpu_no"))
-      {
-        int no = xfce_rc_read_int_entry(settings_ro, "cpu_no", -1);
-        if (no >= 0 && no < CpuUsageMonitor::max_no_cpus) {
-          one_cpu_radiobutton->set_active();
-          cpu_no_spinbutton->set_value(no + 1);
-        }
-        else {
-          all_cpus_radiobutton->set_active();
-        }
-
-        bool incl_low_prio = xfce_rc_read_bool_entry(settings_ro,
-          "include_low_priority", false);
-        cpu_usage_incl_low_checkbutton->set_active(incl_low_prio);
-        bool incl_iowait = xfce_rc_read_bool_entry(settings_ro,
-          "include_iowait", false);
-        cpu_usage_incl_iowait_checkbutton->set_active(incl_iowait);
-      }
-
-      // Fill in disk usage info
-      if (xfce_rc_has_entry(settings_ro, "mount_dir"))
-      {
-        Glib::ustring mount_dir = xfce_rc_read_entry(settings_ro,
-          "mount_dir", "");
-        mount_dir_entry->set_text(mount_dir);
-      }
-      if (xfce_rc_has_entry(settings_ro, "show_free"))
-      {
-        bool show_free  = xfce_rc_read_bool_entry(settings_ro,
-          "show_free", false);
-        show_free_checkbutton->set_active(show_free);
-      }
-
-      // Fill in disk stats info
-      if (xfce_rc_has_entry(settings_ro, "disk_stats_device"))
-      {
         Glib::ustring device_name = xfce_rc_read_entry(settings_ro,
           "disk_stats_device", "");
 
@@ -648,18 +621,38 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
 
         // Selecting the correct statistic
         disk_stats_stat_combobox->set_active(stat);
-      }
 
-      if (xfce_rc_has_entry(settings_ro, "show_free"))
-      {
-        bool show_free  = xfce_rc_read_bool_entry(settings_ro,
-          "show_free", false);
-        show_free_checkbutton->set_active(show_free);
-      }
+        disk_stats_tag->set_text(tag);
 
-      // Fill in network load info
-      if (xfce_rc_has_entry(settings_ro, "interface_type"))
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = DiskStatsMonitor::update_interval_default;
+        disk_stats_refresh_delay_spinbutton->set_value(update_interval / 1000);
+
+        bool fixed_max = xfce_rc_read_bool_entry(settings_ro, "fixed_max", false);
+        disk_stats_fixed_max_checkbutton->set_active(fixed_max);
+        disk_stats_max_spinbutton->set_value(max);
+      }
+      else if (type == "swap_usage")
       {
+        device_notebook->set_current_page(1);
+        swap_usage_radiobutton->set_active();
+        swap_usage_tag->set_text(tag);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = SwapUsageMonitor::update_interval_default;
+        swap_refresh_delay_spinbutton->set_value(update_interval / 1000);
+
+        // WIP: Why is this not max by default?
+        bool fixed_max = xfce_rc_read_bool_entry(settings_ro, "fixed_max", true);
+        swap_fixed_max_checkbutton->set_active(fixed_max);
+      }
+      else if (type == "network_load")
+      {
+        device_notebook->set_current_page(2);
+        network_load_radiobutton->set_active();
+
         /* By the time this code is reached, deprecated configuration will be
          * updated so no need to convert stuff etc */
         NetworkLoadMonitor::InterfaceType interface_type =
@@ -749,19 +742,78 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
             network_direction_combobox->set_active(2);
             break;
         }
-      }
 
-      // Fill in temperature info
-      if (xfce_rc_has_entry(settings_ro, "temperature_no"))
+        /* Populate interface type interface names advanced settings - interface
+         * name column needs to be editable + trigger validation on entry - note
+         * that append_column returns the number of columns present rather than
+         * the genuine ordinal to the last column, hence -1
+         * This is here as it is independent of monitors but dependent on a settings
+         * file being available, and needs to run both when a monitor does and doesn't
+         * exist */
+        network_interfaces_names_store = Gtk::ListStore::create(nc);
+        network_interfaces_treeview->set_model(network_interfaces_names_store);
+        network_interfaces_treeview->append_column(_("Interface Type"),
+                                                   nc.interface_type);
+        int column_num = network_interfaces_treeview
+            ->append_column(_("Interface Name"), nc.interface_name) - 1;
+
+        // Documentation asks for dynamic_cast here
+        Gtk::CellRendererText *cell_renderer = dynamic_cast<Gtk::CellRendererText*>(network_interfaces_treeview
+                                        ->get_column_cell_renderer(column_num));
+        cell_renderer->property_editable() = true;
+        cell_renderer->signal_edited().connect(
+              sigc::mem_fun(*this, &ChooseMonitorWindow::
+                            on_network_interface_name_edited));
+
+        for (int i = 0; i < NetworkLoadMonitor::NUM_INTERFACE_TYPES; ++i)
+        {
+            NetworkLoadMonitor::InterfaceType interface_type =
+                static_cast<NetworkLoadMonitor::InterfaceType>(i);
+            store_iter iter = network_interfaces_names_store->append();
+            (*iter)[nc.interface_type] = NetworkLoadMonitor::
+                interface_type_to_string(interface_type, false);
+            (*iter)[nc.interface_name] = NetworkLoadMonitor::
+                get_interface_name(interface_type, xfce_plugin);
+        }
+
+        network_load_tag->set_text(tag);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = NetworkLoadMonitor::update_interval_default;
+        network_load_refresh_delay_spinbutton->set_value(update_interval / 1000);
+
+        bool fixed_max = xfce_rc_read_bool_entry(settings_ro, "fixed_max", false);
+        network_load_fixed_max_checkbutton->set_active(fixed_max);
+        network_load_max_spinbutton->set_value(max);
+      }
+      else if (type == "temperature")
       {
+        device_notebook->set_current_page(3);
+        temperature_radiobutton->set_active();
+
         int temperature_no = xfce_rc_read_int_entry(settings_ro,
                                                     "temperature_no", 0);
         temperature_combobox->set_active(temperature_no);
+        temperature_tag->set_text(tag);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = TemperatureMonitor::update_interval_default;
+        temperature_refresh_delay_spinbutton->set_value(update_interval / 1000);
+
+        bool fixed_max = xfce_rc_read_bool_entry(settings_ro, "fixed_max", false);
+        temperature_fixed_max_checkbutton->set_active(fixed_max);
+        temperature_max_spinbutton->set_value(max);
       }
 
-      // Fill in generic info
-      if (xfce_rc_has_entry(settings_ro, "file_path"))
+      // TODO: When I start supporting it, why no fan stuff here?
+
+      else if (type == "generic")
       {
+        device_notebook->set_current_page(4);
+        generic_radiobutton->set_active();
+
         Glib::ustring file_path = xfce_rc_read_entry(settings_ro, "file_path",
                                                  ""),
             regex_string = xfce_rc_read_entry(settings_ro, "regex", ""),
@@ -805,6 +857,49 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         generic_data_source_name_short_entry->set_text(data_source_name_short);
         generic_units_long_entry->set_text(units_long);
         generic_units_short_entry->set_text(units_short);
+
+        generic_tag->set_text(tag);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = GenericMonitor::update_interval_default;
+        generic_refresh_delay_spinbutton->set_value(update_interval / 1000);
+
+        bool fixed_max = xfce_rc_read_bool_entry(settings_ro, "fixed_max", false);
+        generic_fixed_max_checkbutton->set_active(fixed_max);
+        generic_max_spinbutton->set_value(max);
+      }
+      else
+      {
+        // CPU usage monitor
+        device_notebook->set_current_page(0);
+        cpu_usage_radiobutton->set_active();
+
+        int no = xfce_rc_read_int_entry(settings_ro, "cpu_no", -1);
+        if (no >= 0 && no < CpuUsageMonitor::max_no_cpus) {
+          one_cpu_radiobutton->set_active();
+          cpu_no_spinbutton->set_value(no + 1);
+        }
+        else {
+          all_cpus_radiobutton->set_active();
+        }
+
+        bool incl_low_prio = xfce_rc_read_bool_entry(settings_ro,
+          "include_low_priority", false);
+        cpu_usage_incl_low_checkbutton->set_active(incl_low_prio);
+        bool incl_iowait = xfce_rc_read_bool_entry(settings_ro,
+          "include_iowait", false);
+        cpu_usage_incl_iowait_checkbutton->set_active(incl_iowait);
+
+        // Enforcing default update interval when it isn't present
+        if (update_interval == -1)
+          update_interval = CpuUsageMonitor::update_interval_default;
+        cpu_usage_refresh_delay_spinbutton->set_value(update_interval / 1000);
+
+        bool fixed_max = xfce_rc_read_bool_entry(settings_ro, "fixed_max", true);
+        cpu_usage_fixed_max_checkbutton->set_active(fixed_max);
+
+        cpu_tag->set_text(tag);
       }
 
       xfce_rc_close(settings_ro);
@@ -814,39 +909,6 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
       // No monitor present so an addition - defaults
       device_notebook->set_current_page(0);
       cpu_usage_radiobutton->set_active();
-    }
-
-    /* Populate interface type interface names advanced settings - interface
-     * name column needs to be editable + trigger validation on entry - note
-     * that append_column returns the number of columns present rather than
-     * the genuine ordinal to the last column, hence -1
-     * This is here as it is independent of monitors but dependent on a settings
-     * file being available, and needs to run both when a monitor does and doesn't
-     * exist */
-    network_interfaces_names_store = Gtk::ListStore::create(nc);
-    network_interfaces_treeview->set_model(network_interfaces_names_store);
-    network_interfaces_treeview->append_column(_("Interface Type"),
-                                               nc.interface_type);
-    int column_num = network_interfaces_treeview
-        ->append_column(_("Interface Name"), nc.interface_name) - 1;
-
-    // Documentation asks for dynamic_cast here
-    Gtk::CellRendererText *cell_renderer = dynamic_cast<Gtk::CellRendererText*>(network_interfaces_treeview
-                                    ->get_column_cell_renderer(column_num));
-    cell_renderer->property_editable() = true;
-    cell_renderer->signal_edited().connect(
-          sigc::mem_fun(*this, &ChooseMonitorWindow::
-                        on_network_interface_name_edited));
-
-    for (int i = 0; i < NetworkLoadMonitor::NUM_INTERFACE_TYPES; ++i)
-    {
-        NetworkLoadMonitor::InterfaceType interface_type =
-            static_cast<NetworkLoadMonitor::InterfaceType>(i);
-        store_iter iter = network_interfaces_names_store->append();
-        (*iter)[nc.interface_type] = NetworkLoadMonitor::
-            interface_type_to_string(interface_type, false);
-        (*iter)[nc.interface_name] = NetworkLoadMonitor::
-            get_interface_name(interface_type, xfce_plugin);
     }
   }
 
@@ -866,34 +928,41 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
       {
         if (one_cpu_radiobutton->get_active())
           mon = new CpuUsageMonitor(
-                int(cpu_no_spinbutton->get_value()) - 1, cpu_tag->get_text(),
+                int(cpu_no_spinbutton->get_value()) - 1,
+                cpu_usage_fixed_max_checkbutton->get_active(),
                 int(cpu_usage_refresh_delay_spinbutton->get_value() * 1000),
                 cpu_usage_incl_low_checkbutton->get_active(),
-                cpu_usage_incl_iowait_checkbutton->get_active());
+                cpu_usage_incl_iowait_checkbutton->get_active(),
+                cpu_tag->get_text());
         else
           mon = new CpuUsageMonitor(
-                cpu_tag->get_text(),
+                cpu_usage_fixed_max_checkbutton->get_active(),
                 int(cpu_usage_refresh_delay_spinbutton->get_value() * 1000),
                 cpu_usage_incl_low_checkbutton->get_active(),
-                cpu_usage_incl_iowait_checkbutton->get_active());
+                cpu_usage_incl_iowait_checkbutton->get_active(),
+                cpu_tag->get_text());
       }
       else if (memory_usage_radiobutton->get_active())
       {
         mon = new MemoryUsageMonitor(
-              memory_usage_tag->get_text(),
-              int(memory_refresh_delay_spinbutton->get_value() * 1000));
+              int(memory_refresh_delay_spinbutton->get_value() * 1000),
+              memory_fixed_max_checkbutton->get_active(),
+              memory_usage_tag->get_text());
       }
       else if (swap_usage_radiobutton->get_active())
       {
         mon = new SwapUsageMonitor(
-              swap_usage_tag->get_text(),
-              int(swap_refresh_delay_spinbutton->get_value() * 1000));
+              int(swap_refresh_delay_spinbutton->get_value() * 1000),
+              swap_fixed_max_checkbutton->get_active(),
+              swap_usage_tag->get_text());
       }
       else if (load_average_radiobutton->get_active())
       {
         mon = new LoadAverageMonitor(
-              load_average_tag->get_text(),
-              int(load_average_refresh_delay_spinbutton->get_value() * 1000));
+              int(load_average_refresh_delay_spinbutton->get_value() * 1000),
+              load_average_fixed_max_checkbutton->get_active(),
+              load_average_max_spinbutton->get_value(),
+              load_average_tag->get_text());
       }
       else if (disk_usage_radiobutton->get_active())
       {
@@ -925,8 +994,9 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         }
 
         mon = new DiskUsageMonitor(mount_dir, show_free,
-                                   disk_usage_tag->get_text(),
-                  int(disk_usage_refresh_delay_spinbutton->get_value() * 1000));
+                  int(disk_usage_refresh_delay_spinbutton->get_value() * 1000),
+                                   disk_usage_fixed_max_checkbutton->get_active(),
+                                   disk_usage_tag->get_text());
       }
       else if (disk_stats_radiobutton->get_active())
       {
@@ -966,8 +1036,10 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         }
 
         mon = new DiskStatsMonitor(device_name, stat,
-                                   disk_stats_tag->get_text(),
-                  int(disk_stats_refresh_delay_spinbutton->get_value() * 1000));
+                  int(disk_stats_refresh_delay_spinbutton->get_value() * 1000),
+                                   disk_stats_fixed_max_checkbutton->get_active(),
+                                   disk_stats_max_spinbutton->get_value(),
+                                   disk_stats_tag->get_text());
       }
       else if (network_load_radiobutton->get_active())
       {
@@ -1010,21 +1082,26 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         }
 
         mon = new NetworkLoadMonitor(interface_type, dir,
-                                     network_load_tag->get_text(),
                 int(network_load_refresh_delay_spinbutton->get_value() * 1000),
-                                     xfce_plugin);
+                               network_load_fixed_max_checkbutton->get_active(),
+                                     network_load_max_spinbutton->get_value(),
+                                     network_load_tag->get_text(), xfce_plugin);
       }
       else if (temperature_radiobutton->get_active())
       {
         mon = new TemperatureMonitor(temperature_combobox->get_active_row_number(),
-                                     temperature_tag->get_text(),
-                 int(temperature_refresh_delay_spinbutton->get_value() * 1000));
+                 int(temperature_refresh_delay_spinbutton->get_value() * 1000),
+                                temperature_fixed_max_checkbutton->get_active(),
+                                     temperature_max_spinbutton->get_value(),
+                                     temperature_tag->get_text());
       }
       else if (fan_speed_radiobutton->get_active())
       {
         mon = new FanSpeedMonitor(fan_speed_combobox->get_active_row_number(),
-                                  fan_speed_tag->get_text(),
-                   int(fan_speed_refresh_delay_spinbutton->get_value() * 1000));
+                   int(fan_speed_refresh_delay_spinbutton->get_value() * 1000),
+                                  fan_fixed_max_checkbutton->get_active(),
+                                  fan_max_spinbutton->get_value(),
+                                  fan_speed_tag->get_text());
       }
       else if (generic_radiobutton->get_active())
       {
@@ -1159,8 +1236,10 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         mon = new GenericMonitor(file_path, value_from_contents, regex_string,
                                  follow_change, dir, data_source_name_long,
                                  data_source_name_short, units_long, units_short,
-                                 generic_tag->get_text(),
-                     int(generic_refresh_delay_spinbutton->get_value() * 1000));
+                     int(generic_refresh_delay_spinbutton->get_value() * 1000),
+                                 generic_fixed_max_checkbutton->get_active(),
+                                 generic_max_spinbutton->get_value(),
+                                 generic_tag->get_text());
       }
 
       return mon;

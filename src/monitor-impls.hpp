@@ -50,19 +50,21 @@ class CpuUsageMonitor: public Monitor
 public:
 
   // Monitor all CPUs
-  CpuUsageMonitor(const Glib::ustring &tag_string, int interval,
-                  bool incl_low_prio, bool incl_iowait);
+  CpuUsageMonitor(bool fixed_max, bool incl_low_prio, bool incl_iowait,
+                  int interval, const Glib::ustring &tag_string);
 
   // Monitor only CPU no.
-  CpuUsageMonitor(int cpu_no, const Glib::ustring &tag_string, int interval,
-                  bool incl_low_prio, bool incl_iowait);
+  CpuUsageMonitor(int cpu_no, bool fixed_max, bool incl_low_prio,
+                  bool incl_iowait, int interval,
+                  const Glib::ustring &tag_string);
 
-  virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
+  virtual double max();
   virtual void save(XfceRc *settings_w);
+  virtual void set_fixed_max(bool fixed_max);
   virtual void set_update_interval(int interval);
 
   virtual int update_interval();
@@ -80,6 +82,7 @@ private:
 
   static int const all_cpus = -1;
   int cpu_no;
+  bool fixed_max_priv;
 
   // Define whether these are included in CPU time or not
   bool incl_low_prio_priv, incl_iowait_priv;
@@ -93,14 +96,15 @@ private:
 class SwapUsageMonitor: public Monitor
 {
 public:
-  SwapUsageMonitor(const Glib::ustring &tag_string, int interval);
+  SwapUsageMonitor(int interval, bool fixed_max, const Glib::ustring &tag_string);
 
-  virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
+  virtual double max();
   virtual void save(XfceRc *settings_w);
+  virtual void set_fixed_max(bool fixed_max);
   virtual void set_update_interval(int interval);
   virtual int update_interval();
 
@@ -112,6 +116,7 @@ public:
 private:
   virtual double do_measure();
 
+  bool fixed_max_priv;
   guint64 max_value;    // maximum available swap
 };
 
@@ -119,14 +124,17 @@ private:
 class LoadAverageMonitor: public Monitor
 {
 public:
-  LoadAverageMonitor(const Glib::ustring &tag_string, int interval);
+  LoadAverageMonitor(int interval, bool fixed_max, double max,
+                     const Glib::ustring &tag_string);
 
-  virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
+  virtual double max();
   virtual void save(XfceRc *settings_w);
+  virtual void set_fixed_max(bool fixed_max);
+  virtual void set_max(double max);
   virtual void set_update_interval(int interval);
   virtual int update_interval();
 
@@ -138,21 +146,27 @@ public:
 private:
   virtual double do_measure();
 
-  double max_value;   // currently monitored max number of processes
+  bool fixed_max_priv;
+
+  /* Recent max load average, i.e. processes running or waiting to run on all
+   * cores */
+  double max_value;
 };
 
 
 class MemoryUsageMonitor: public Monitor
 {
 public:
-  MemoryUsageMonitor(const Glib::ustring &tag_string, int interval);
+  MemoryUsageMonitor(int interval, bool fixed_max,
+                     const Glib::ustring &tag_string);
 
-  virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
+  virtual double max();
   virtual void save(XfceRc *settings_w);
+  virtual void set_fixed_max(bool fixed_max);
   virtual void set_update_interval(int interval);
   virtual int update_interval();
 
@@ -164,22 +178,24 @@ public:
 private:
   virtual double do_measure();
 
-  guint64 max_value;    // maximum available physical RAM
+  bool fixed_max_priv;
+  guint64 max_value;    // Maximum available physical RAM
 };
 
 
 class DiskUsageMonitor: public Monitor
 {
 public:
-  DiskUsageMonitor(const std::string &mount_dir, bool show_free,
-                   const Glib::ustring &tag_string, int interval);
+  DiskUsageMonitor(const std::string &mount_dir, bool show_free, int interval,
+                   bool fixed_max, const Glib::ustring &tag_string);
 
-  virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact= false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
+  virtual double max();  // Fixed at size of the relevant volume
   virtual void save(XfceRc *settings_w);
+  virtual void set_fixed_max(bool fixed_max);
   virtual void set_update_interval(int interval);
   virtual int update_interval();
 
@@ -191,10 +207,10 @@ public:
 private:
   virtual double do_measure();
 
-  guint64 max_value;    // maximum available disk blocks
+  guint64 max_value;    // Maximum available bytes in relevant volume
 
   std::string mount_dir;
-  bool show_free;
+  bool fixed_max_priv, show_free;
 };
 
 class DiskStatsMonitor: public Monitor
@@ -219,14 +235,17 @@ public:
   };
 
   DiskStatsMonitor(const Glib::ustring &device_name, const Stat &stat_to_monitor,
-                   const Glib::ustring &tag_string, int interval);
+                   int interval, bool fixed_max, double max,
+                   const Glib::ustring &tag_string);
 
-  virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact=false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
+  virtual double max();
   virtual void save(XfceRc *settings_w);
+  virtual void set_fixed_max(bool fixed_max);
+  virtual void set_max(double max);
   virtual void set_update_interval(int interval);
   virtual int update_interval();
 
@@ -253,11 +272,11 @@ private:
    * vector of reported stats. Note that unordered_map is C++11 */
   static std::map<Glib::ustring, std::vector<unsigned long int> > parse_disk_stats();
 
-  guint64 max_value;
-
+  bool fixed_max_priv;
   Glib::ustring device_name;
-  Stat stat_to_monitor;
+  guint64 max_value;
   double previous_value;
+  Stat stat_to_monitor;
 };
 
 class NetworkLoadMonitor: public Monitor
@@ -288,17 +307,20 @@ public:
   };
 
   NetworkLoadMonitor(InterfaceType &interface_type,
-                     Direction direction, const Glib::ustring &tag_string,
-                     int interval, XfcePanelPlugin *xfce_plugin);
+                     Direction dir, int interval, bool fixed_max, double max,
+                     const Glib::ustring &tag_string,
+                     XfcePanelPlugin *xfce_plugin);
 
-  virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
+  virtual double max();
   virtual void possibly_add_sync_with(Monitor *other);
   virtual void remove_sync_with(Monitor *other);
   virtual void save(XfceRc *settings_w);
+  virtual void set_fixed_max(bool fixed_max);
+  virtual void set_max(double max);
   virtual void set_update_interval(int interval);
   virtual int update_interval();
 
@@ -338,6 +360,7 @@ private:
   XfcePanelPlugin *xfce_plugin;  // Needed to allow do_measure to call
                                  // get_interface_name(xfce_plugin)
 
+  bool fixed_max_priv;
   guint64 max_value;    // maximum measured capacity of line
   long int time_difference; // no. of msecs. between the last two calls
 
@@ -364,14 +387,17 @@ class TemperatureMonitor: public Monitor
 public:
 
   // no. in the temperature features
-  TemperatureMonitor(int no, const Glib::ustring &tag_string, int interval);
+  TemperatureMonitor(int no, int interval, bool fixed_max, double max,
+                     const Glib::ustring &tag_string);
 
-  virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
+  virtual double max();
   virtual void save(XfceRc *settings_w);
+  virtual void set_fixed_max(bool fixed_max);
+  virtual void set_max(double max);
   virtual void set_update_interval(int interval);
   virtual int update_interval();
 
@@ -384,6 +410,7 @@ private:
   virtual double do_measure();
 
   double max_value;
+  bool fixed_max_priv;
   int chip_no, feature_no, sensors_no;
   std::string description;
 };
@@ -394,14 +421,17 @@ class FanSpeedMonitor: public Monitor
 public:
 
   // no. in the fan features
-  FanSpeedMonitor(int no, const Glib::ustring &tag_string, int interval);
+  FanSpeedMonitor(int no, int interval, bool fixed_max, double max,
+                  const Glib::ustring &tag_string);
 
-  virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
+  virtual double max();
   virtual void save(XfceRc *settings_w);
+  virtual void set_fixed_max(bool fixed_max);
+  virtual void set_max(double max);
   virtual void set_update_interval(int interval);
   virtual int update_interval();
 
@@ -414,6 +444,7 @@ private:
   virtual double do_measure();
 
   double max_value;
+  bool fixed_max_priv;
   int chip_no, feature_no, sensors_no;
   std::string description;
 };
@@ -440,15 +471,17 @@ public:
                  const Glib::ustring &data_source_name_short,
                  const Glib::ustring &units_long,
                  const Glib::ustring &units_short,
-                 const Glib::ustring &tag_string,
-                 int interval);
+                 int interval, bool fixed_max, double max,
+                 const Glib::ustring &tag_string);
 
-  virtual double max();
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact=false);
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
+  virtual double max();
   virtual void save(XfceRc *settings_w);
+  virtual void set_fixed_max(bool fixed_max);
+  virtual void set_max(double max);
   virtual void set_update_interval(int interval);
   virtual int update_interval();
 
@@ -464,7 +497,7 @@ private:
 
   Glib::ustring file_path, data_source_name_long,
                 data_source_name_short, units_long, units_short, tag;
-  bool value_from_contents, follow_change;
+  bool fixed_max_priv, follow_change, value_from_contents;
   ValueChangeDirection dir;
   Glib::RefPtr<Glib::Regex> regex;
 };
