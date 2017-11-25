@@ -383,6 +383,40 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
           interface_type_to_string(interface_type, false);
   }
 
+  /* Populate interface type interface names advanced settings - interface
+   * name column needs to be editable + trigger validation on entry - note
+   * that append_column returns the number of columns present rather than
+   * the genuine ordinal to the last column, hence -1
+   * Advanced interface-naming is per-plugin and saved in the global plugin
+   * settings - its not reliant on a network monitor being selected and/or
+   * saved etc, and should be available when the user is browsing through
+   * the monitor types */
+  network_interfaces_names_store = Gtk::ListStore::create(nc);
+  network_interfaces_treeview->set_model(network_interfaces_names_store);
+  network_interfaces_treeview->append_column(_("Interface Type"),
+                                             nc.interface_type);
+  int column_num = network_interfaces_treeview
+      ->append_column(_("Interface Name"), nc.interface_name) - 1;
+
+  // Documentation asks for dynamic_cast here
+  Gtk::CellRendererText *cell_renderer = dynamic_cast<Gtk::CellRendererText*>(network_interfaces_treeview
+                                  ->get_column_cell_renderer(column_num));
+  cell_renderer->property_editable() = true;
+  cell_renderer->signal_edited().connect(
+        sigc::mem_fun(*this, &ChooseMonitorWindow::
+                      on_network_interface_name_edited));
+
+  for (int i = 0; i < NetworkLoadMonitor::NUM_INTERFACE_TYPES; ++i)
+  {
+      NetworkLoadMonitor::InterfaceType interface_type =
+          static_cast<NetworkLoadMonitor::InterfaceType>(i);
+      store_iter iter = network_interfaces_names_store->append();
+      (*iter)[nc.interface_type] = NetworkLoadMonitor::
+          interface_type_to_string(interface_type, false);
+      (*iter)[nc.interface_name] = NetworkLoadMonitor::
+          get_interface_name(interface_type, xfce_plugin);
+  }
+
   // Setup network direction combobox
   static NetworkDirectionCols ndc;
   network_direction_store = Gtk::ListStore::create(ndc);
@@ -743,38 +777,8 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
             break;
         }
 
-        /* Populate interface type interface names advanced settings - interface
-         * name column needs to be editable + trigger validation on entry - note
-         * that append_column returns the number of columns present rather than
-         * the genuine ordinal to the last column, hence -1
-         * This is here as it is independent of monitors but dependent on a settings
-         * file being available, and needs to run both when a monitor does and doesn't
-         * exist */
-        network_interfaces_names_store = Gtk::ListStore::create(nc);
-        network_interfaces_treeview->set_model(network_interfaces_names_store);
-        network_interfaces_treeview->append_column(_("Interface Type"),
-                                                   nc.interface_type);
-        int column_num = network_interfaces_treeview
-            ->append_column(_("Interface Name"), nc.interface_name) - 1;
-
-        // Documentation asks for dynamic_cast here
-        Gtk::CellRendererText *cell_renderer = dynamic_cast<Gtk::CellRendererText*>(network_interfaces_treeview
-                                        ->get_column_cell_renderer(column_num));
-        cell_renderer->property_editable() = true;
-        cell_renderer->signal_edited().connect(
-              sigc::mem_fun(*this, &ChooseMonitorWindow::
-                            on_network_interface_name_edited));
-
-        for (int i = 0; i < NetworkLoadMonitor::NUM_INTERFACE_TYPES; ++i)
-        {
-            NetworkLoadMonitor::InterfaceType interface_type =
-                static_cast<NetworkLoadMonitor::InterfaceType>(i);
-            store_iter iter = network_interfaces_names_store->append();
-            (*iter)[nc.interface_type] = NetworkLoadMonitor::
-                interface_type_to_string(interface_type, false);
-            (*iter)[nc.interface_name] = NetworkLoadMonitor::
-                get_interface_name(interface_type, xfce_plugin);
-        }
+        /* Interface type interface names advanced settings are already
+         * populated when this form is instantiated */
 
         network_load_tag->set_text(tag);
 
