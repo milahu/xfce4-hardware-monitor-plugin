@@ -222,11 +222,12 @@ public:
   enum Stat {
     num_reads_completed,        // # of reads completed
     num_reads_merged,           // # of reads merged
-    num_sectors_read,           // # of sectors read
+    num_bytes_read,             // # of bytes read, originally num_sectors_read
     num_ms_reading,             // # of milliseconds spent reading
     num_writes_completed,       // # of writes completed
     num_writes_merged,          // # of writes merged
-    num_sectors_written,        // # of sectors written
+    num_bytes_written,          // # of bytes written, originally
+                                // num_sectors_written
     num_ms_writing,             // # of milliseconds spent writing
     num_ios_in_progress,        // # of I/Os currently in progress
     num_ms_doing_ios,           // # of milliseconds spent doing I/Os
@@ -260,8 +261,6 @@ public:
 
 private:
 
-  static const Glib::ustring& diskstats_path;
-
   /* Determines whether the statistic is to be treated as a straight number or
    * diffed from its previous value and therefore expressed as change/time */
   bool convert_to_rate();
@@ -277,6 +276,14 @@ private:
   guint64 max_value;
   double previous_value;
   Stat stat_to_monitor;
+
+  /* No. of msecs. between the last two calls - used to determine precise data
+   * rate for disk read/writing */
+  long int time_difference;
+  long int time_stamp_secs, time_stamp_usecs;  // Time stamp for last call
+
+  static const Glib::ustring& diskstats_path;
+  static const int SECTOR_SIZE;
 };
 
 class NetworkLoadMonitor: public Monitor

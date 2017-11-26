@@ -410,6 +410,42 @@ Precision decimal_digits(double val, int n)
   return p;
 }
 
+Glib::ustring format_bytes_per_second(long duration_ms, double bytes,
+                                      bool compact)
+{
+  Glib::ustring format;
+
+  // 1000 ms = 1 s
+  double val = bytes / duration_ms * 1000;
+
+  // Debug code
+  std::cerr << String::ucompose("format_bytes_per_second formatting %1\n", val);
+
+  if (val <= 0)     // fix weird problem with negative values
+    val = 0;
+
+  if (val >= 1024 * 1024 * 1024) {
+    val /= 1024 * 1024 * 1024;
+    format = compact ? _("%1G") : _("%1 GB/s");
+    return String::ucompose(format, decimal_digits(val, 3), val);
+  }
+  else if (val >= 1024 * 1024) {
+    val /= 1024 * 1024;
+    format = compact ? _("%1M") : _("%1 MB/s");
+    return String::ucompose(format, decimal_digits(val, 3), val);
+  }
+  else if (val >= 1024) {
+    val /= 1024;
+    format = compact ? _("%1K") : _("%1 KB/s");
+    return String::ucompose(format, decimal_digits(val, 3), val);
+  }
+  else
+  {
+    format = compact ? _("%1B") : _("%1 B/s");
+    return String::ucompose(format, decimal_digits(val, 3), val);
+  }
+}
+
 
 //
 // class CpuUsageMonitor
@@ -948,6 +984,12 @@ int DiskUsageMonitor::update_interval()
 //
 // Static initialisation
 const Glib::ustring& DiskStatsMonitor::diskstats_path = "/proc/diskstats";
+
+/* Used for working out read/write data rate - apparently the kernel always
+ * considers this the sector size for a volume:
+ * https://serverfault.com/questions/238033/measuring-total-bytes-written-under-linux#comment669172_239010measures volume sectors */
+const int DiskStatsMonitor::SECTOR_SIZE = 512;
+
 int const DiskStatsMonitor::update_interval_default = 1000;
 
 // No stats allow for negative values, so using that to detect no previous value
@@ -957,7 +999,7 @@ DiskStatsMonitor::DiskStatsMonitor(const Glib::ustring &device_name,
                                    const Glib::ustring &tag_string)
   : Monitor(tag_string, interval), device_name(device_name),
     stat_to_monitor(stat_to_monitor), previous_value(-1), max_value(max),
-    fixed_max_priv(fixed_max)
+    fixed_max_priv(fixed_max), time_stamp_secs(0), time_stamp_usecs(0)
 {
 }
 
@@ -1025,21 +1067,55 @@ double DiskStatsMonitor::do_measure()
   }
 
   // Debug code
-  /*std::cerr << Glib::ustring::compose("Device '%1' stat %2: %3\n", device_name,
+  std::cerr << Glib::ustring::compose("Device '%1' stat %2: %3\n", device_name,
                                       stat_to_string(stat_to_monitor, false),
-                                      it->second[stat_to_monitor]);*/
+                                      it->second[stat_to_monitor]);
 
   double val;
   if (convert_to_rate())
   {
+    /* Sectors read and written are now converted to bytes based off the
+     * relevant device's sector size, allowing for the much more interesting
+     * data rate to be reported on
+     * Conversion to bytes is left to here so as not to call fsuage on all
+     * volumes pointlessly
+     * Time of call used to get at a precise data rate, like the network load
+     * monitor does */
+    int multiplication_factor;
+    if (stat_to_monitor == Stat::num_bytes_read ||
+        stat_to_monitor == Stat::num_bytes_written)
+    {
+      multiplication_factor = SECTOR_SIZE;
+
+      /* Calculate time difference in msecs between last sample and current
+       * sample */
+      struct timeval tv;
+      if (gettimeofday(&tv, 0) == 0) {
+        time_difference =
+          (tv.tv_sec - time_stamp_secs) * 1000 +
+          (tv.tv_usec - time_stamp_usecs) / 1000;
+        time_stamp_secs = tv.tv_sec;
+        time_stamp_usecs = tv.tv_usec;
+      }
+
+      // Debug code
+      std::cerr << Glib::ustring::compose("Device '%1' has filesystem block size"
+                                          " %2, measurement time difference %3\n",
+                                          device_name, multiplication_factor,
+                                          time_difference);
+    }
+    else
+      multiplication_factor = 1;
+
     /* Stats that need to be diffed to make a rate of change
      * Dealing with the first value to be processed */
     if (previous_value == -1)
-      previous_value = it->second[stat_to_monitor];
+      previous_value = it->second[stat_to_monitor] * multiplication_factor;
 
     // Returning desired stat
-    val = it->second[stat_to_monitor] - previous_value;
-    previous_value = it->second[stat_to_monitor];
+    val = (it->second[stat_to_monitor] * multiplication_factor) -
+        previous_value;
+    previous_value = it->second[stat_to_monitor] * multiplication_factor;
   }
   else
   {
@@ -1073,9 +1149,18 @@ bool DiskStatsMonitor::fixed_max()
 
 Glib::ustring DiskStatsMonitor::format_value(double val, bool compact)
 {
-  // Currently measurement is every second
-  Glib::ustring unit = (convert_to_rate() && !compact) ? "/s" : "";
-  return Glib::ustring::compose("%1%2", val, unit);
+  /* Currently measurement is every second
+   * For read and write data rates, return in appropriate scaled units */
+  if (stat_to_monitor == Stat::num_bytes_read ||
+      stat_to_monitor == Stat::num_bytes_written)
+  {
+    return format_bytes_per_second(time_difference, val, compact);
+  }
+  else
+  {
+    Glib::ustring unit = (convert_to_rate() && !compact) ? "/s" : "";
+    return Glib::ustring::compose("%1%2", val, unit);
+  }
 }
 
 Glib::ustring DiskStatsMonitor::get_name()
@@ -1171,6 +1256,7 @@ DiskStatsMonitor::parse_disk_stats()
                                               "defaulting to 0\n", i,
                                               convert.str());
       }
+
       device_parsed_stats.push_back(stat);
 
       // Debug code
@@ -1234,11 +1320,11 @@ Glib::ustring DiskStatsMonitor::stat_to_string(const DiskStatsMonitor::Stat &sta
         stat_str = _("Number of reads merged");
       break;
 
-    case num_sectors_read:
+    case num_bytes_read:
       if (short_ver)
-        stat_str = _("Num sect rd");
+        stat_str = _("Num B rd");
       else
-        stat_str = _("Number of sectors read");
+        stat_str = _("Number of bytes read per duration");
       break;
 
     case num_ms_reading:
@@ -1262,11 +1348,11 @@ Glib::ustring DiskStatsMonitor::stat_to_string(const DiskStatsMonitor::Stat &sta
         stat_str = _("Number of writes merged");
       break;
 
-    case num_sectors_written:
+    case num_bytes_written:
       if (short_ver)
-        stat_str = _("Num sect wr");
+        stat_str = _("Num B wr");
       else
-        stat_str = _("Number of sectors written");
+        stat_str = _("Number of bytes written per duration");
       break;
 
     case num_ms_writing:
@@ -1625,7 +1711,7 @@ double NetworkLoadMonitor::do_measure()
     }
   }
 
-  // calculate difference in msecs
+  // Calculate time difference in msecs between last sample and current sample
   struct timeval tv;
   if (gettimeofday(&tv, 0) == 0) {
     time_difference =
@@ -1649,34 +1735,7 @@ bool NetworkLoadMonitor::fixed_max()
 
 Glib::ustring NetworkLoadMonitor::format_value(double val, bool compact)
 {
-  Glib::ustring format;
-
-  // 1000 ms = 1 s
-  val = val / time_difference * 1000;
-
-  if (val <= 0)     // fix weird problem with negative values
-    val = 0;
-
-  if (val >= 1024 * 1024 * 1024) {
-    val /= 1024 * 1024 * 1024;
-    format = compact ? _("%1G") : _("%1 GB/s");
-    return String::ucompose(format, decimal_digits(val, 3), val);
-  }
-  else if (val >= 1024 * 1024) {
-    val /= 1024 * 1024;
-    format = compact ? _("%1M") : _("%1 MB/s");
-    return String::ucompose(format, decimal_digits(val, 3), val);
-  }
-  else if (val >= 1024) {
-    val /= 1024;
-    format = compact ? _("%1K") : _("%1 KB/s");
-    return String::ucompose(format, decimal_digits(val, 3), val);
-  }
-  else
-  {
-    format = compact ? _("%1B") : _("%1 B/s");
-    return String::ucompose(format, decimal_digits(val, 3), val);
-  }
+  return format_bytes_per_second(time_difference, val, compact);
 }
 
 Glib::ustring NetworkLoadMonitor::get_default_interface_name(InterfaceType type)
