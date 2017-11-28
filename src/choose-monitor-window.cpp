@@ -678,7 +678,6 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
           update_interval = SwapUsageMonitor::update_interval_default;
         swap_refresh_delay_spinbutton->set_value(update_interval / 1000);
 
-        // WIP: Why is this not max by default?
         bool fixed_max = xfce_rc_read_bool_entry(settings_ro, "fixed_max", true);
         swap_fixed_max_checkbutton->set_active(fixed_max);
       }
