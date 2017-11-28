@@ -38,15 +38,16 @@
 #include <glibtop/netload.h>
 #include <glibtop/netlist.h>
 
-#include <sys/time.h>       // for high-precision timing for the network load
+#include <sys/time.h>  // For high-precision timing for network load and disk
+                       // read/write speed
 
 #include "monitor-impls.hpp"
 #include "ucompose.hpp"
 #include "i18n.hpp"
 
 /* Decay factor for maximum values (log_0.999(0.9) = 105 iterations
- * before reduced 10%). This is now no longer used for CurveView - the
- * actual max value across the ValueHistories is used */
+ * before reduced 10%). This is now no longer used for CurveView or ColumnView -
+ * the actual max value across the ValueHistories is used */
 double const max_decay = 0.999;
 
 
@@ -419,7 +420,7 @@ Glib::ustring format_bytes_per_second(long duration_ms, double bytes,
   double val = bytes / duration_ms * 1000;
 
   // Debug code
-  std::cerr << String::ucompose("format_bytes_per_second formatting %1\n", val);
+  //std::cerr << String::ucompose("format_bytes_per_second formatting %1\n", val);
 
   if (val <= 0)     // fix weird problem with negative values
     val = 0;
@@ -1067,9 +1068,9 @@ double DiskStatsMonitor::do_measure()
   }
 
   // Debug code
-  std::cerr << Glib::ustring::compose("Device '%1' stat %2: %3\n", device_name,
+  /*std::cerr << Glib::ustring::compose("Device '%1' stat %2: %3\n", device_name,
                                       stat_to_string(stat_to_monitor, false),
-                                      it->second[stat_to_monitor]);
+                                      it->second[stat_to_monitor]);*/
 
   double val;
   if (convert_to_rate())
@@ -1099,10 +1100,10 @@ double DiskStatsMonitor::do_measure()
       }
 
       // Debug code
-      std::cerr << Glib::ustring::compose("Device '%1' has filesystem block size"
+      /*std::cerr << Glib::ustring::compose("Device '%1' has filesystem block size"
                                           " %2, measurement time difference %3\n",
                                           device_name, multiplication_factor,
-                                          time_difference);
+                                          time_difference);*/
     }
     else
       multiplication_factor = 1;
