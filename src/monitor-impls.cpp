@@ -657,11 +657,6 @@ void SwapUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "type", "swap_usage");
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
-
-  // No support for floats - stringifying
-  Glib::ustring setting = String::ucompose("%1", max_value);
-  xfce_rc_write_entry(settings_w, "max", setting.c_str());
-
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
