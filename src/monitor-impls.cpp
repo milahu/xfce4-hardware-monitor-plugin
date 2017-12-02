@@ -411,39 +411,89 @@ Precision decimal_digits(double val, int n)
   return p;
 }
 
-Glib::ustring format_bytes_per_second(long duration_ms, double bytes,
-                                      bool compact)
+Glib::ustring format_duration_to_string(long duration)
+{
+  /* This is intended to summarise a user-customisable time period for long
+   * monitor descriptions, breaking millisecond duration into hours, minutes,
+   * seconds */
+  int hours = 0, minutes = 0, seconds = 0;
+  Glib::ustring duration_string("");
+
+  if (duration >= 3600000)
+  {
+    hours = duration / 3600000;
+    duration -= (hours * 3600000);
+    duration_string += String::ucompose(_("%1h"), hours);
+  }
+  if (duration >= 60000)
+  {
+    minutes = duration / 60000;
+    duration -= (minutes * 60000);
+    duration_string += String::ucompose(_("%1m"), minutes);
+  }
+  if (duration >= 1000)
+  {
+    seconds = duration / 1000;
+    duration_string += String::ucompose(_("%1s"), seconds);
+  }
+
+  /* When a single unit of a single time period is returned, don't return the
+   * number */
+  if (hours + minutes + seconds == 1)
+  {
+    if (hours == 1)
+      return "h";
+    else if (minutes == 1)
+      return "m";
+    else
+      return "s";
+  }
+  else
+    return duration_string;
+}
+
+Glib::ustring format_bytes_per_duration(long duration, int expected_duration,
+                                        double bytes, bool compact)
 {
   Glib::ustring format;
 
-  // 1000 ms = 1 s
-  double val = bytes / duration_ms * 1000;
+  /* Values are in milliseconds - this creates an average rate over the actual
+   * time duration measured, scaled to the precise desired duration - otherwise
+   * the timer tick is slightly inaccurate (so 1ms late for a second etc) */
+  double val = bytes / duration * expected_duration;
 
   // Debug code
-  //std::cerr << String::ucompose("format_bytes_per_second formatting %1\n", val);
+  //std::cerr << String::ucompose("format_bytes_per_duration formatting %1\n", val);
 
   if (val <= 0)     // fix weird problem with negative values
     val = 0;
 
-  if (val >= 1024 * 1024 * 1024) {
+  if (val >= 1024 * 1024 * 1024)
+  {
     val /= 1024 * 1024 * 1024;
-    format = compact ? _("%1G") : _("%1 GB/s");
-    return String::ucompose(format, decimal_digits(val, 3), val);
+    format = compact ? _("%1G%2") : "%1 GB/%2";
+    return String::ucompose(format, decimal_digits(val, 3), val,
+                   compact ? "" : format_duration_to_string(expected_duration));
   }
-  else if (val >= 1024 * 1024) {
+  else if (val >= 1024 * 1024)
+  {
     val /= 1024 * 1024;
-    format = compact ? _("%1M") : _("%1 MB/s");
-    return String::ucompose(format, decimal_digits(val, 3), val);
+    format = compact ? _("%1M%2") : "%1 MB/%2";
+    return String::ucompose(format, decimal_digits(val, 3), val,
+                   compact ? "" : format_duration_to_string(expected_duration));
   }
-  else if (val >= 1024) {
+  else if (val >= 1024)
+  {
     val /= 1024;
-    format = compact ? _("%1K") : _("%1 KB/s");
-    return String::ucompose(format, decimal_digits(val, 3), val);
+    format = compact ? _("%1K%2") : "%1 KB/%2";
+    return String::ucompose(format, decimal_digits(val, 3), val,
+                   compact ? "" : format_duration_to_string(expected_duration));
   }
   else
   {
-    format = compact ? _("%1B") : _("%1 B/s");
-    return String::ucompose(format, decimal_digits(val, 3), val);
+    format = compact ? _("%1B%2") : "%1 B/%2";
+    return String::ucompose(format, decimal_digits(val, 3), val,
+                   compact ? "" : format_duration_to_string(expected_duration));
   }
 }
 
@@ -1070,29 +1120,14 @@ double DiskStatsMonitor::do_measure()
   double val;
   if (convert_to_rate())
   {
-    /* Sectors read and written are now converted to bytes based off the
-     * relevant device's sector size, allowing for the much more interesting
-     * data rate to be reported on
-     * Conversion to bytes is left to here so as not to call fsuage on all
-     * volumes pointlessly
-     * Time of call used to get at a precise data rate, like the network load
-     * monitor does */
+    /* Sectors read and written are now converted to bytes based off a fixed
+     * sector size (see SECTOR_SIZE static initialiser notes), allowing for the
+     * much more interesting data rate to be reported on */
     int multiplication_factor;
     if (stat_to_monitor == Stat::num_bytes_read ||
         stat_to_monitor == Stat::num_bytes_written)
     {
       multiplication_factor = SECTOR_SIZE;
-
-      /* Calculate time difference in msecs between last sample and current
-       * sample */
-      struct timeval tv;
-      if (gettimeofday(&tv, 0) == 0) {
-        time_difference =
-          (tv.tv_sec - time_stamp_secs) * 1000 +
-          (tv.tv_usec - time_stamp_usecs) / 1000;
-        time_stamp_secs = tv.tv_sec;
-        time_stamp_usecs = tv.tv_usec;
-      }
 
       // Debug code
       /*std::cerr << Glib::ustring::compose("Device '%1' has filesystem block size"
@@ -1108,10 +1143,22 @@ double DiskStatsMonitor::do_measure()
     if (previous_value == -1)
       previous_value = it->second[stat_to_monitor] * multiplication_factor;
 
-    // Returning desired stat
     val = (it->second[stat_to_monitor] * multiplication_factor) -
         previous_value;
     previous_value = it->second[stat_to_monitor] * multiplication_factor;
+
+    /* Calculate time difference in msecs between last sample and current
+     * sample
+     * Time of call used to get at a precise data rate, like the network load
+     * monitor does - every rate measurement should be precise */
+    struct timeval tv;
+    if (gettimeofday(&tv, 0) == 0) {
+      time_difference =
+        (tv.tv_sec - time_stamp_secs) * 1000 +
+        (tv.tv_usec - time_stamp_usecs) / 1000;
+      time_stamp_secs = tv.tv_sec;
+      time_stamp_usecs = tv.tv_usec;
+    }
   }
   else
   {
@@ -1145,16 +1192,22 @@ bool DiskStatsMonitor::fixed_max()
 
 Glib::ustring DiskStatsMonitor::format_value(double val, bool compact)
 {
-  /* Currently measurement is every second
-   * For read and write data rates, return in appropriate scaled units */
+  // For read and write data rates, return in appropriate scaled units
   if (stat_to_monitor == Stat::num_bytes_read ||
       stat_to_monitor == Stat::num_bytes_written)
   {
-    return format_bytes_per_second(time_difference, val, compact);
+    return format_bytes_per_duration(time_difference, update_interval_priv, val,
+                                   compact);
   }
   else
   {
-    Glib::ustring unit = (convert_to_rate() && !compact) ? "/s" : "";
+    /* Remember users can define the monitoring interval, so the time unit must
+     * be calculated specially */
+    Glib::ustring unit =
+        (convert_to_rate() && !compact) ?
+          Glib::ustring::compose("/%1",
+                                format_duration_to_string(update_interval_priv))
+        : "";
     return Glib::ustring::compose("%1%2", val, unit);
   }
 }
@@ -1731,7 +1784,8 @@ bool NetworkLoadMonitor::fixed_max()
 
 Glib::ustring NetworkLoadMonitor::format_value(double val, bool compact)
 {
-  return format_bytes_per_second(time_difference, val, compact);
+  return format_bytes_per_duration(time_difference, update_interval_priv, val,
+                                 compact);
 }
 
 Glib::ustring NetworkLoadMonitor::get_default_interface_name(InterfaceType type)
@@ -2477,7 +2531,8 @@ double GenericMonitor::do_measure()
   if (!fixed_max_priv)
   {
     /* Note - max_value is no longer used to determine the graph max for
-   * Curves - the actual maxima stored in the ValueHistories are used */
+   * Curves and Columns - the actual maxima stored in the ValueHistories are
+   * used */
     if (val != 0)     // Reduce scale gradually
       max_value = guint64(max_value * max_decay);
 
