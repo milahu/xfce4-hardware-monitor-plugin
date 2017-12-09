@@ -652,7 +652,7 @@ void CpuUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_bool_entry(settings_w, "include_iowait",
                            incl_iowait_priv);
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
@@ -740,7 +740,7 @@ void SwapUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "swap_usage");
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
@@ -835,11 +835,17 @@ void LoadAverageMonitor::save(XfceRc *settings_w)
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "load_average");
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
 
-  // No support for floats - stringifying
-  Glib::ustring setting = String::ucompose("%1", max_value);
-  xfce_rc_write_entry(settings_w, "max", setting.c_str());
+  /* Only save the max if it is a user-set fixed max, otherwise effectively
+   * reset it
+   * No support for floats - stringifying */
+  if (fixed_max_priv)
+  {
+    Glib::ustring setting = String::ucompose("%1", max_value);
+    xfce_rc_write_entry(settings_w, "max", setting.c_str());
+  }
+  else
+    xfce_rc_write_entry(settings_w, "max", "0");
 
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
@@ -931,7 +937,7 @@ void MemoryUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "memory_usage");
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
@@ -1044,7 +1050,7 @@ void DiskUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "mount_dir", mount_dir.c_str());
   xfce_rc_write_bool_entry(settings_w, "show_free", show_free);
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
@@ -1366,8 +1372,12 @@ void DiskStatsMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "type", "disk_statistics");
   xfce_rc_write_entry(settings_w, "disk_stats_device", device_name.c_str());
   xfce_rc_write_int_entry(settings_w, "disk_stats_stat", int(stat_to_monitor));
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
-  xfce_rc_write_int_entry(settings_w, "max", int(max_value));
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
+
+  /* Only save the max if it is a user-set fixed max, otherwise effectively
+   * reset it */
+  xfce_rc_write_int_entry(settings_w, "max", fixed_max_priv ? int(max_value) : 0);
+
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 
@@ -2028,8 +2038,12 @@ void NetworkLoadMonitor::save(XfceRc *settings_w)
   xfce_rc_write_int_entry(settings_w, "interface_type", int(interface_type));
   xfce_rc_write_int_entry(settings_w, "interface_direction",
     int(direction));
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
-  xfce_rc_write_int_entry(settings_w, "max", int(max_value));
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
+
+  /* Only save the max if it is a user-set fixed max, otherwise effectively
+   * reset it */
+  xfce_rc_write_int_entry(settings_w, "max", fixed_max_priv ? int(max_value) : 0);
+
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 
@@ -2299,11 +2313,18 @@ void TemperatureMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "type", "temperature");
   xfce_rc_write_int_entry(settings_w, "temperature_no", sensors_no);
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
 
-  // No support for floats - stringifying
-  Glib::ustring setting = String::ucompose("%1", max_value);
-  xfce_rc_write_entry(settings_w, "max", setting.c_str());
+  /* Only save the max if it is a user-set fixed max, otherwise effectively
+   * reset it
+   * No support for floats - stringifying */
+  if (fixed_max_priv)
+  {
+    Glib::ustring setting = String::ucompose("%1", max_value);
+    xfce_rc_write_entry(settings_w, "max", setting.c_str());
+  }
+  else
+    xfce_rc_write_entry(settings_w, "max", "0");
 
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
@@ -2414,11 +2435,18 @@ void FanSpeedMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "type", "fan_speed");
   xfce_rc_write_int_entry(settings_w, "fan_no", sensors_no);
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
 
-  // No support for floats - stringifying
-  Glib::ustring setting = String::ucompose("%1", max_value);
-  xfce_rc_write_entry(settings_w, "max", setting.c_str());
+  /* Only save the max if it is a user-set fixed max, otherwise effectively
+   * reset it
+   * No support for floats - stringifying */
+  if (fixed_max_priv)
+  {
+    Glib::ustring setting = String::ucompose("%1", max_value);
+    xfce_rc_write_entry(settings_w, "max", setting.c_str());
+  }
+  else
+    xfce_rc_write_entry(settings_w, "max", "0");
 
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
@@ -2647,11 +2675,18 @@ void GenericMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "units_long", units_long.c_str());
   xfce_rc_write_entry(settings_w, "units_short", units_short.c_str());
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max());
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
 
-  // No support for floats - stringifying
-  Glib::ustring setting = String::ucompose("%1", max_value);
-  xfce_rc_write_entry(settings_w, "max", setting.c_str());
+  /* Only save the max if it is a user-set fixed max, otherwise effectively
+   * reset it
+   * No support for floats - stringifying */
+  if (fixed_max_priv)
+  {
+    Glib::ustring setting = String::ucompose("%1", max_value);
+    xfce_rc_write_entry(settings_w, "max", setting.c_str());
+  }
+  else
+    xfce_rc_write_entry(settings_w, "max", "0");
 
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
