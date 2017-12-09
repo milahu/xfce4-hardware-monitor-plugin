@@ -324,8 +324,15 @@ public:
   virtual Glib::ustring get_name();
   virtual Glib::ustring get_short_name();
   virtual double max();
+
+  /*
+   * Shared monitor maxes in a visualisation has now been moved to the
+   * individual view implementations, so its not just for network monitors
+   * anymore
   virtual void possibly_add_sync_with(Monitor *other);
   virtual void remove_sync_with(Monitor *other);
+  */
+
   virtual void save(XfceRc *settings_w);
   virtual void set_fixed_max(bool fixed_max);
   virtual void set_max(double max);
@@ -379,8 +386,11 @@ private:
                                  // when needed
   Direction direction;
 
-  typedef std::list<NetworkLoadMonitor *> nlm_seq;
-  nlm_seq sync_monitors;
+  // Shared monitor maxes in a visualisation has now been moved to the
+  // individual view implementations, so its not just for network monitors
+  // anymore
+  /*typedef std::list<NetworkLoadMonitor *> nlm_seq;
+  nlm_seq sync_monitors;*/
 
   /* Storage for default or customised interface names for all types - can't
    * initialise vector here?? */

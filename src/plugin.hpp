@@ -116,8 +116,14 @@ public:
 private:
   // monitors
   monitor_seq monitors;
+
+  /*
+   * Shared monitor maxes in a visualisation has now been moved to the
+   * individual view implementations, so its not just for network monitors
+   * anymore
   void add_sync_for(Monitor *monitor);
   void remove_sync_for(Monitor *monitor);
+  */
 
   // the context menu
   void on_preferences_activated();

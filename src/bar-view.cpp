@@ -38,10 +38,11 @@ public:
   Bar(Monitor *monitor, unsigned int fill_color, bool horizontal = false);
   ~Bar();
 
-  void update();
   void draw(Gnome::Canvas::Canvas &canvas,
       Plugin *plugin, int width, int height, int no, int total,
-      double time_offset);
+      double time_offset, double max);
+  double get_max_value();
+  void update();
 
   Monitor *monitor;
   
@@ -98,7 +99,7 @@ unsigned int outlineified(unsigned int color)
 
 void Bar::draw(Gnome::Canvas::Canvas &canvas,
          Plugin *plugin, int width, int height, int no, int total,
-         double time_offset)
+         double time_offset, double max)
 { 
   unsigned int outline_color = outlineified(fill_color);
 
@@ -127,7 +128,6 @@ void Bar::draw(Gnome::Canvas::Canvas &canvas,
   // don't attain new value immediately
   double value = old_value * (1 - time_offset) + new_value * time_offset;
 
-  double max = monitor->max();
   if (max <= 0)
     max = 0.0000001;
 
@@ -188,6 +188,18 @@ void Bar::draw(Gnome::Canvas::Canvas &canvas,
       = (outline_color & 0xffffff00) |
       static_cast<unsigned int>((outline_color & 0xff) * alpha);
   }
+}
+
+double Bar::get_max_value()
+{
+  /* Used as part of determination of the max value for all bars in
+   * the view
+   * max is not tracked by the visualisation here */
+  double max = monitor->max();
+  if (max <= 0)
+    max = 0.0000001;
+
+  return max;
 }
 
 
@@ -303,9 +315,20 @@ void BarView::do_draw_loop()
  
   int total = bars.size();
   int no = 0;
-  
+
+  double max = 0;
+
+  /* Obtain maximum value of all columns in the view, ignoring any monitors with
+   * fixed maxes (their visualisations are not supposed to be scaled) */
   for (bar_iterator i = bars.begin(), end = bars.end(); i != end; ++i)
-    (*i)->draw(*canvas, plugin, width(), height(), no++, total, time_offset);
+  {
+    if (!(*i)->monitor->fixed_max() && (*i)->get_max_value() > max)
+      max = (*i)->get_max_value();
+  }
+
+  // Drawing bars with the unified max value
+  for (bar_iterator i = bars.begin(), end = bars.end(); i != end; ++i)
+    (*i)->draw(*canvas, plugin, width(), height(), no++, total, time_offset, max);
 
   ++draws_since_update;
 }

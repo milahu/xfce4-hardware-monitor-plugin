@@ -640,7 +640,7 @@ void Plugin::set_viewer_text_overlay_position(CurveView::TextOverlayPosition
 
 void Plugin::add_monitor(Monitor *monitor)
 {
-  add_sync_for(monitor);
+  //add_sync_for(monitor);
   monitors.push_back(monitor);
 
   /* Checking if monitor has a defined settings directory and therefore
@@ -711,7 +711,7 @@ void Plugin::remove_monitor(Monitor *monitor)
   // Everyone has been notified, it's now safe to remove and delete
   // the monitor
   monitors.remove(monitor);
-  remove_sync_for(monitor);
+  //remove_sync_for(monitor);
   
   delete monitor;
 }
@@ -723,7 +723,7 @@ void Plugin::replace_monitor(Monitor *prev_mon, Monitor *new_mon)
   assert(i != monitors.end());
 
   // Basic configuration
-  add_sync_for(new_mon);
+  //add_sync_for(new_mon);
   *i = new_mon;
   new_mon->set_settings_dir(prev_mon->get_settings_dir());
 
@@ -756,10 +756,14 @@ void Plugin::replace_monitor(Monitor *prev_mon, Monitor *new_mon)
   }
 
   // Deleting previous monitor
-  remove_sync_for(prev_mon);
+  //remove_sync_for(prev_mon);
   delete prev_mon;
 }
 
+/*
+ * Shared monitor maxes in a visualisation has now been moved to the
+ * individual view implementations, so its not just for network monitors
+ * anymore
 void Plugin::add_sync_for(Monitor *monitor)
 {
   for (monitor_iter i = monitors.begin(), end = monitors.end(); i != end; ++i)
@@ -771,6 +775,7 @@ void Plugin::remove_sync_for(Monitor *monitor)
   for (monitor_iter i = monitors.begin(), end = monitors.end(); i != end; ++i)
     (*i)->remove_sync_with(monitor);
 }
+*/
 
 Glib::ustring Plugin::find_empty_monitor_dir()
 {

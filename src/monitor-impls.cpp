@@ -1798,13 +1798,18 @@ double NetworkLoadMonitor::do_measure()
   if (!fixed_max_priv)
   {
     /* Note - max_value is no longer used to determine the graph max for
-   * Curves - the actual maxima stored in the ValueHistories are used */
+     * Curves and Columns - the actual maxima stored in the ValueHistories are
+     * used */
     if (val != 0)     // Reduce scale gradually
       max_value = guint64(max_value * max_decay);
 
     if (val > max_value)
       max_value = guint64(val * 1.05);
 
+    /*
+    // Shared monitor maxes in a visualisation has now been moved to the
+    // individual view implementations, so its not just for network monitors
+    // anymore
     for (nlm_seq::iterator i = sync_monitors.begin(), end = sync_monitors.end();
          i != end; ++i) {
       NetworkLoadMonitor &other = **i;
@@ -1813,6 +1818,7 @@ double NetworkLoadMonitor::do_measure()
       else if (max_value > other.max_value)
         other.max_value = max_value;
     }
+    */
   }
 
   // Calculate time difference in msecs between last sample and current sample
@@ -2005,12 +2011,16 @@ double NetworkLoadMonitor::max()
   return max_value;
 }
 
-void NetworkLoadMonitor::possibly_add_sync_with(Monitor *other)
+// Shared monitor maxes in a visualisation has now been moved to the
+// individual view implementations, so its not just for network monitors
+// anymore
+/*void NetworkLoadMonitor::possibly_add_sync_with(Monitor *other)
 {
   if (NetworkLoadMonitor *o = dynamic_cast<NetworkLoadMonitor *>(other))
     if (interface_type == o->interface_type && direction != o->direction)
       sync_monitors.push_back(o);
 }
+*/
 
 void NetworkLoadMonitor::restore_default_interface_names(XfceRc *settings_w)
 {
@@ -2018,7 +2028,9 @@ void NetworkLoadMonitor::restore_default_interface_names(XfceRc *settings_w)
   NetworkLoadMonitor::save_interfaces(settings_w);
 }
 
-void NetworkLoadMonitor::remove_sync_with(Monitor *other)
+// Shared monitor maxes in a visualisation has now been moved to the View,
+// so its not just for network monitors anymore
+/*void NetworkLoadMonitor::remove_sync_with(Monitor *other)
 {
   nlm_seq::iterator i
     = std::find(sync_monitors.begin(), sync_monitors.end(), other);
@@ -2026,6 +2038,7 @@ void NetworkLoadMonitor::remove_sync_with(Monitor *other)
   if (i != sync_monitors.end())
     sync_monitors.erase(i);
 }
+*/
 
 void NetworkLoadMonitor::save(XfceRc *settings_w)
 {

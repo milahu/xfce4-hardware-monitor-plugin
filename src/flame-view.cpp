@@ -39,10 +39,10 @@ class Flame
 public:
   Flame(Monitor *monitor, unsigned int color);
 
+  void burn(double overall_max);
+  double get_max_value();
   void update(Gnome::Canvas::Canvas &canvas,
         Plugin *plugin, int width, int height, int no, int total);
-
-  void burn();
   
   Monitor *monitor;
   
@@ -55,7 +55,7 @@ private:
   int next_refuel;
   int cooling;      // cooling factor
 
-  void recompute_fuel();
+  void recompute_fuel(double overall_max);
   unsigned int color;
 };
 
@@ -131,9 +131,9 @@ unsigned int random_between(unsigned int min, unsigned int max)
   return min + std::rand() % (max - min);
 }
 
-void Flame::recompute_fuel()
+void Flame::recompute_fuel(double overall_max)
 {
-  int ratio = int(value / max * 255);
+  int ratio = int(value / overall_max * 255);
 
   if (ratio > 255)
     ratio = 255;
@@ -167,7 +167,7 @@ void Flame::recompute_fuel()
     --next_refuel;
 }
 
-void Flame::burn()
+void Flame::burn(double overall_max)
 {
   if (!flame.get())
     return;
@@ -177,7 +177,7 @@ void Flame::burn()
   int width = pixbuf->get_width();
   int height = pixbuf->get_height();
 
-  recompute_fuel();
+  recompute_fuel(overall_max);
   
   // Process the lowest row
   PixelPosition lowest = get_position(pixbuf, 0, height - 1);
@@ -228,6 +228,11 @@ void Flame::burn()
   }
   
   flame->property_pixbuf() = pixbuf;
+}
+
+double Flame::get_max_value()
+{
+  return max;
 }
 
 
@@ -339,6 +344,17 @@ void FlameView::do_detach(Monitor *monitor)
 
 void FlameView::do_draw_loop()
 {
+  double max = 0;
+
+  /* Obtain maximum value of all flames in the view, ignoring any monitors with
+   * fixed maxes (their visualisations are not supposed to be scaled) */
   for (flame_iterator i = flames.begin(), end = flames.end(); i != end; ++i)
-    (*i)->burn();
+  {
+    if (!(*i)->monitor->fixed_max() && (*i)->get_max_value() > max)
+      max = (*i)->get_max_value();
+  }
+
+  // Drawing flames with the unified max value
+  for (flame_iterator i = flames.begin(), end = flames.end(); i != end; ++i)
+    (*i)->burn(max);
 }
