@@ -51,12 +51,12 @@ public:
 
   // Monitor all CPUs
   CpuUsageMonitor(bool fixed_max, bool incl_low_prio, bool incl_iowait,
-                  int interval, const Glib::ustring &tag_string);
+                  int interval, const Glib::ustring &tag_string, Plugin& plugin);
 
   // Monitor only CPU no.
   CpuUsageMonitor(int cpu_no, bool fixed_max, bool incl_low_prio,
                   bool incl_iowait, int interval,
-                  const Glib::ustring &tag_string);
+                  const Glib::ustring &tag_string, Plugin& plugin);
 
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
@@ -96,7 +96,8 @@ private:
 class SwapUsageMonitor: public Monitor
 {
 public:
-  SwapUsageMonitor(int interval, bool fixed_max, const Glib::ustring &tag_string);
+  SwapUsageMonitor(int interval, bool fixed_max, const Glib::ustring &tag_string,
+                   Plugin& plugin);
 
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
@@ -125,7 +126,7 @@ class LoadAverageMonitor: public Monitor
 {
 public:
   LoadAverageMonitor(int interval, bool fixed_max, double max,
-                     const Glib::ustring &tag_string);
+                     const Glib::ustring &tag_string, Plugin& plugin);
 
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
@@ -158,7 +159,7 @@ class MemoryUsageMonitor: public Monitor
 {
 public:
   MemoryUsageMonitor(int interval, bool fixed_max,
-                     const Glib::ustring &tag_string);
+                     const Glib::ustring &tag_string, Plugin& plugin);
 
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
@@ -187,7 +188,8 @@ class DiskUsageMonitor: public Monitor
 {
 public:
   DiskUsageMonitor(const std::string &mount_dir, bool show_free, int interval,
-                   bool fixed_max, const Glib::ustring &tag_string);
+                   bool fixed_max, const Glib::ustring &tag_string,
+                   Plugin& plugin);
 
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact= false);
@@ -237,7 +239,7 @@ public:
 
   DiskStatsMonitor(const Glib::ustring &device_name, const Stat &stat_to_monitor,
                    int interval, bool fixed_max, double max,
-                   const Glib::ustring &tag_string);
+                   const Glib::ustring &tag_string, Plugin& plugin);
 
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact=false);
@@ -315,8 +317,7 @@ public:
 
   NetworkLoadMonitor(InterfaceType &interface_type,
                      Direction dir, int interval, bool fixed_max, double max,
-                     const Glib::ustring &tag_string,
-                     XfcePanelPlugin *xfce_plugin);
+                     const Glib::ustring &tag_string, Plugin& plugin);
 
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
@@ -395,7 +396,7 @@ public:
 
   // no. in the temperature features
   TemperatureMonitor(int no, int interval, bool fixed_max, double max,
-                     const Glib::ustring &tag_string);
+                     const Glib::ustring &tag_string, Plugin& plugin);
 
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
@@ -429,7 +430,7 @@ public:
 
   // no. in the fan features
   FanSpeedMonitor(int no, int interval, bool fixed_max, double max,
-                  const Glib::ustring &tag_string);
+                  const Glib::ustring &tag_string, Plugin& plugin);
 
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact = false);
@@ -479,7 +480,7 @@ public:
                  const Glib::ustring &units_long,
                  const Glib::ustring &units_short,
                  int interval, bool fixed_max, double max,
-                 const Glib::ustring &tag_string);
+                 const Glib::ustring &tag_string, Plugin& plugin);
 
   virtual bool fixed_max();
   virtual Glib::ustring format_value(double val, bool compact=false);

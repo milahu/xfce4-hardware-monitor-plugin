@@ -52,7 +52,7 @@ public:
 
   /* xfce_plugin is required here as the user can edit NetworkLoadMonitor
    * interface names through a settings dialog, and this needs special saving */
-  ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin, Gtk::Window &parent);
+  ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent);
   ~ChooseMonitorWindow();
 
   // given a monitor directory (may be ""), return a new monitor or 0
@@ -129,7 +129,7 @@ private:
                    *generic_change_in_value_negative_radiobutton,
                    *generic_change_in_value_both_radiobutton;
 
-  XfcePanelPlugin* xfce_plugin;
+  Plugin& plugin_priv;
 
   // For disk statistics device name combobox
   class DiskStatsDeviceNameCols: public Gtk::TreeModel::ColumnRecord

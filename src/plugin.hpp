@@ -27,6 +27,7 @@
 
 #include <sigc++/connection.h>
 
+#include <giomm/file.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/window.h>
 #include <gtkmm/tooltips.h>
@@ -101,6 +102,12 @@ public:
   void remove_monitor(Monitor *monitor); // get rid of the monitor
   void replace_monitor(Monitor *prev_monitor, Monitor *new_monitor);
 
+  /* Log a message to a debug log file and output to stderr. Have had many
+   * examples of stderr messages resulting in supposedly no output from the
+   * perspective of xfce4-panel's stderr - this should demonstrate that the
+   * events actually happen */
+  void debug_log(const Glib::ustring &msg);
+
   // For opening settings file associated with the plugin
   XfcePanelPlugin *xfce_plugin;
 
@@ -138,6 +145,7 @@ private:
   std::auto_ptr<View> view;
   std::auto_ptr<PreferencesWindow> preferences_window;
   Gtk::Tooltips tooltips;
+  Glib::RefPtr<Gio::OutputStream> debug_log_stream;
 
   friend void display_preferences(Plugin *plugin);
   friend void display_about(Plugin *plugin);

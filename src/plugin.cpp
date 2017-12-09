@@ -237,7 +237,9 @@ Plugin::Plugin(XfcePanelPlugin *xfce_plugin)
    * seems that it needs to be done in or after the mainloop kicks off */
 
   // Loading up monitors
-  monitor_seq mon = load_monitors(settings_ro, xfce_plugin);
+  /* Plugin& is initialised from non-transient address of this ('this' itself
+   * is an rvalue so not allowed for a reference) */
+  monitor_seq mon = load_monitors(settings_ro, *this);
   for (monitor_iter i = mon.begin(), end = mon.end(); i != end; ++i)
     add_monitor(*i);
 
@@ -292,6 +294,9 @@ Plugin::Plugin(XfcePanelPlugin *xfce_plugin)
 
 Plugin::~Plugin()
 {
+  // Debug code
+  //std::cerr << "XFCE4 Hardware Monitor Plugin: Plugin destructor running...\n";
+
   timer.disconnect();
   
   // Make sure noone is trying to read the monitors before we kill them
@@ -842,4 +847,32 @@ void Plugin::on_about_activated()
     about->show();
     about->raise();
   }
+}
+
+void Plugin::debug_log(const Glib::ustring &msg)
+{
+  /* When Plugin stream reference goes out of scope, it will be automatically
+   * flushed and closed etc */
+  if (!debug_log_stream)
+  {
+      /* Work out a suitable log path in the same directory as the writeable
+       * configuration path for this instance of the plugin - 'create_for_path'
+       * doesn't actually create anything, but just instantiates the virtual
+       * File object */
+      gchar* file_path = xfce_panel_plugin_save_location(xfce_plugin, FALSE);
+      Glib::RefPtr<Gio::File> file = Gio::File::create_for_path(file_path)
+              ->get_parent()
+              ->get_child(
+                  String::ucompose("%1-debug.log",
+                                   xfce_panel_plugin_get_unique_id(xfce_plugin)));
+      g_free(file_path);
+      debug_log_stream = file->append_to();
+
+      // Debug code
+      std::cerr << "XFCE4 Hardware Monitor Plugin: Debug log file created at "
+                << file->get_path() << "\n";
+  }
+
+  debug_log_stream->write(String::ucompose("%1\n", msg));
+  std::cerr << msg << "\n";
 }

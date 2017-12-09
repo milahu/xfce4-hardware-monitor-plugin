@@ -28,15 +28,15 @@
 #include "choose-monitor-window.hpp"
 #include "gui-helpers.hpp"
 #include "monitor-impls.hpp"
+#include "plugin.hpp"
 #include "ucompose.hpp"
 
 
 // Static intialisation
 ChooseMonitorWindow::NetworkInterfacesNamesCols ChooseMonitorWindow::nc;
 
-ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
-                                         Gtk::Window &parent)
-  : xfce_plugin(xfce_plugin)
+ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
+  : plugin_priv(plugin)
 {
   // Now we are forced to use top-level widgets this is much more over the top...
   std::vector<Glib::ustring> objects(22);
@@ -414,7 +414,7 @@ ChooseMonitorWindow::ChooseMonitorWindow(XfcePanelPlugin* xfce_plugin,
       (*iter)[nc.interface_type] = NetworkLoadMonitor::
           interface_type_to_string(interface_type, false);
       (*iter)[nc.interface_name] = NetworkLoadMonitor::
-          get_interface_name(interface_type, xfce_plugin);
+          get_interface_name(interface_type, plugin_priv.xfce_plugin);
   }
 
   // Setup network direction combobox
@@ -539,7 +539,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
 {
   // Set up monitor
   // Search for settings file
-  gchar* file = xfce_panel_plugin_lookup_rc_file(xfce_plugin);
+  gchar* file = xfce_panel_plugin_lookup_rc_file(plugin_priv.xfce_plugin);
   if (file)
   {
     // Loading settings
@@ -666,6 +666,12 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         bool fixed_max = xfce_rc_read_bool_entry(settings_ro, "fixed_max", false);
         disk_stats_fixed_max_checkbutton->set_active(fixed_max);
         disk_stats_max_spinbutton->set_value(max);
+
+        // Debug code
+        /*plugin_priv.debug_log(
+              String::ucompose("XFCE4 Hardware Monitor Plugin: "
+                             "ChooseMonitorWindow::run, disk stats monitor max "
+                             "value: %1", max));*/
       }
       else if (type == "swap_usage")
       {
@@ -789,6 +795,10 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         bool fixed_max = xfce_rc_read_bool_entry(settings_ro, "fixed_max", false);
         network_load_fixed_max_checkbutton->set_active(fixed_max);
         network_load_max_spinbutton->set_value(max);
+
+        // Debug code
+        /*std::cerr << "XFCE4 Hardware Monitor Plugin: ChooseMonitorWindow::run, "
+                     "network load monitor max value: " << max << "\n";*/
       }
       else if (type == "temperature")
       {
@@ -936,28 +946,28 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
                 int(cpu_usage_refresh_delay_spinbutton->get_value() * 1000),
                 cpu_usage_incl_low_checkbutton->get_active(),
                 cpu_usage_incl_iowait_checkbutton->get_active(),
-                cpu_tag->get_text());
+                cpu_tag->get_text(), plugin_priv);
         else
           mon = new CpuUsageMonitor(
                 cpu_usage_fixed_max_checkbutton->get_active(),
                 int(cpu_usage_refresh_delay_spinbutton->get_value() * 1000),
                 cpu_usage_incl_low_checkbutton->get_active(),
                 cpu_usage_incl_iowait_checkbutton->get_active(),
-                cpu_tag->get_text());
+                cpu_tag->get_text(), plugin_priv);
       }
       else if (memory_usage_radiobutton->get_active())
       {
         mon = new MemoryUsageMonitor(
               int(memory_refresh_delay_spinbutton->get_value() * 1000),
               memory_fixed_max_checkbutton->get_active(),
-              memory_usage_tag->get_text());
+              memory_usage_tag->get_text(), plugin_priv);
       }
       else if (swap_usage_radiobutton->get_active())
       {
         mon = new SwapUsageMonitor(
               int(swap_refresh_delay_spinbutton->get_value() * 1000),
               swap_fixed_max_checkbutton->get_active(),
-              swap_usage_tag->get_text());
+              swap_usage_tag->get_text(), plugin_priv);
       }
       else if (load_average_radiobutton->get_active())
       {
@@ -965,7 +975,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
               int(load_average_refresh_delay_spinbutton->get_value() * 1000),
               load_average_fixed_max_checkbutton->get_active(),
               load_average_max_spinbutton->get_value(),
-              load_average_tag->get_text());
+              load_average_tag->get_text(), plugin_priv);
       }
       else if (disk_usage_radiobutton->get_active())
       {
@@ -999,7 +1009,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         mon = new DiskUsageMonitor(mount_dir, show_free,
                   int(disk_usage_refresh_delay_spinbutton->get_value() * 1000),
                                    disk_usage_fixed_max_checkbutton->get_active(),
-                                   disk_usage_tag->get_text());
+                                   disk_usage_tag->get_text(), plugin_priv);
       }
       else if (disk_stats_radiobutton->get_active())
       {
@@ -1042,7 +1052,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
                   int(disk_stats_refresh_delay_spinbutton->get_value() * 1000),
                                    disk_stats_fixed_max_checkbutton->get_active(),
                                    disk_stats_max_spinbutton->get_value(),
-                                   disk_stats_tag->get_text());
+                                   disk_stats_tag->get_text(), plugin_priv);
       }
       else if (network_load_radiobutton->get_active())
       {
@@ -1088,7 +1098,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
                 int(network_load_refresh_delay_spinbutton->get_value() * 1000),
                                network_load_fixed_max_checkbutton->get_active(),
                                      network_load_max_spinbutton->get_value(),
-                                     network_load_tag->get_text(), xfce_plugin);
+                                     network_load_tag->get_text(), plugin_priv);
       }
       else if (temperature_radiobutton->get_active())
       {
@@ -1096,7 +1106,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
                  int(temperature_refresh_delay_spinbutton->get_value() * 1000),
                                 temperature_fixed_max_checkbutton->get_active(),
                                      temperature_max_spinbutton->get_value(),
-                                     temperature_tag->get_text());
+                                     temperature_tag->get_text(), plugin_priv);
       }
       else if (fan_speed_radiobutton->get_active())
       {
@@ -1104,7 +1114,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
                    int(fan_speed_refresh_delay_spinbutton->get_value() * 1000),
                                   fan_fixed_max_checkbutton->get_active(),
                                   fan_max_spinbutton->get_value(),
-                                  fan_speed_tag->get_text());
+                                  fan_speed_tag->get_text(), plugin_priv);
       }
       else if (generic_radiobutton->get_active())
       {
@@ -1242,7 +1252,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
                      int(generic_refresh_delay_spinbutton->get_value() * 1000),
                                  generic_fixed_max_checkbutton->get_active(),
                                  generic_max_spinbutton->get_value(),
-                                 generic_tag->get_text());
+                                 generic_tag->get_text(), plugin_priv);
       }
 
       return mon;
@@ -1371,7 +1381,7 @@ void ChooseMonitorWindow::on_network_interface_name_edited(
 
   // Setting and saving the real value
   NetworkLoadMonitor::set_interface_name(inter_type, new_text);
-  gchar* file = xfce_panel_plugin_save_location(xfce_plugin, true);
+  gchar* file = xfce_panel_plugin_save_location(plugin_priv.xfce_plugin, true);
   if (file)
   {
     XfceRc* settings_w = xfce_rc_simple_open(file, false);
@@ -1414,7 +1424,7 @@ void ChooseMonitorWindow::on_network_interfaces_restore_defaults_button_clicked(
   }
 
   // Updating storage vector and saving
-  gchar* file = xfce_panel_plugin_save_location(xfce_plugin, true);
+  gchar* file = xfce_panel_plugin_save_location(plugin_priv.xfce_plugin, true);
   if (file)
   {
     XfceRc* settings_w = xfce_rc_simple_open(file, false);

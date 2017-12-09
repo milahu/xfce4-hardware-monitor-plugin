@@ -31,12 +31,16 @@ extern "C"
 
 #include "helpers.hpp"
 
+/* No use including plugin.hpp here - plugin.hpp itself includes monitor.hpp
+ * before the Plugin class is declared */
+class Plugin;
 
 class Monitor: noncopyable
 {
 public:
-  Monitor(const Glib::ustring &tag_string, int interval)
-    : measured_value(0), tag(tag_string), update_interval_priv(interval)
+  Monitor(const Glib::ustring &tag_string, int interval, Plugin& plugin)
+    : measured_value(0), tag(tag_string), update_interval_priv(interval),
+      plugin_priv(plugin)
   {
   }
   
@@ -114,6 +118,9 @@ protected:
   double measured_value;
   int update_interval_priv;
 
+  /* This is maintained in order for debug logging */
+  Plugin& plugin_priv;
+
 private:
 
   // Perform actual measurement, for derived classes
@@ -133,8 +140,9 @@ typedef monitor_seq::iterator monitor_iter;
 /* Forward declaration for load_monitors - including the panel header at the top
  * causes glibmm/object.h to complain that X11/Xlib.h has been included ahead
  * of it?? Why is the include tolerated in plugin.hpp then? */
-typedef struct _XfcePanelPlugin        XfcePanelPlugin;
+//typedef struct _XfcePanelPlugin        XfcePanelPlugin;
+class Plugin;
 
-monitor_seq load_monitors(XfceRc *settings_ro, XfcePanelPlugin *panel_plugin);
+monitor_seq load_monitors(XfceRc *settings_ro, Plugin& plugin);
 
 #endif

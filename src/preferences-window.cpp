@@ -1062,7 +1062,7 @@ bool PreferencesWindow::on_closed(GdkEventAny *)
 
 Monitor *PreferencesWindow::run_choose_monitor_window(const Glib::ustring &str)
 {
-  ChooseMonitorWindow chooser(plugin.xfce_plugin, *window);
+  ChooseMonitorWindow chooser(plugin, *window);
 
   return chooser.run(str);
 }
