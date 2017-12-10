@@ -17,7 +17,10 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>    // for max/min[_element]()
+#include <algorithm>  // For max/min[_element]()
+#include <list>
+#include <typeinfo>  // For keeping track of monitor types in the visualisation
+#include <utility>  // For keeping track of monitor types in the visualisation
 
 #include <libgnomecanvasmm/line.h>
 #include <libgnomecanvasmm/point.h>
@@ -267,29 +270,74 @@ void CurveView::do_detach(Monitor *monitor)
 
 void CurveView::do_draw_loop()
 {
-  double max = 0, fixed_max = 0;
+  double max;
+
+  // Monitor maxes maintained as a pair of <normal max>, <fixed max>
+  std::map<Glib::ustring, std::pair<int, int>> monitor_maxes;
+
+  // Monitors collected by type to allow easy access to separated data sets
+  std::map<Glib::ustring, std::list<Curve*>> curves_by_mon_type;
+
   Glib::ustring max_formatted, max_formatted_compact, monitor_data,
-      monitor_data_compact, text_overlay_format_string, tag_string,
+      monitor_data_compact, overlay_text, per_type_overlay_text,
+      text_overlay_format_string, tag_string,
       separator_string = plugin->get_viewer_text_overlay_separator();
   bool graph_max_needed = false, graph_max_compact_needed = false,
       monitor_data_needed = false, monitor_data_compact_needed = false,
       text_overlay_enabled = plugin->get_viewer_text_overlay_enabled();
 
-  /* Obtain maximum value of all curves in the view, separately tracking fixed
-   * maxes incase all monitors are fixed. Graphs with fixed monitors are not
-   * supposed to be scaled, but the text overlay still needs to refer to a max
-   * if there are no normal monitors present */
+  /* Obtain maximum value of all curves in the view on a per monitor type basis,
+   * separately tracking fixed maxes incase all monitors are fixed. Graphs with
+   * fixed monitors are not supposed to be scaled, but the text overlay still
+   * needs to refer to a max if there are no normal monitors present
+   * Priority-wise, non-fixed monitor sources are always reported in preference
+   * to fixed-max sources
+   * On top of this, collect the curves together by monitor type so that they
+   * can be looped over later - easy to do this here while I'm already looping
+   * over everything, rather than maintaining a separate list on
+   * attaching/detaching monitors
+   * Unified maxes are needed even if the text overlay is not enabled */
+  mon_type_iterator it;
+  curves_mon_type_iterator it_mon_type;
+  Glib::ustring mon_type;
   for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
   {
-    if (!(*i)->monitor->fixed_max() && (*i)->get_max_value() > max)
-      max = (*i)->get_max_value();
-    else if ((*i)->monitor->fixed_max() && (*i)->monitor->max() > fixed_max)
-      fixed_max = (*i)->monitor->max();
-  }
-  if (max == 0 && fixed_max > 0)
-    max = fixed_max;
+    // To get the real type, Monitor* must be dereferrenced too...
+    mon_type = typeid(*((*i)->monitor)).name();
 
-  // If the text overlay is enabled, detecting all information required to output
+    // If the monitor type hasn't yet been recorded, zero the maxes
+    it = monitor_maxes.find(mon_type);
+    if (it == monitor_maxes.end())
+      monitor_maxes[mon_type] = std::make_pair(0, 0);
+
+    if (!(*i)->monitor->fixed_max()
+        && (*i)->get_max_value() > monitor_maxes[mon_type].first)
+      monitor_maxes[mon_type].first = (*i)->get_max_value();
+    else if ((*i)->monitor->fixed_max()
+             && (*i)->monitor->max() > monitor_maxes[mon_type].second)
+      monitor_maxes[mon_type].second = (*i)->monitor->max();
+
+    // Record curve in monitor type list
+    it_mon_type = curves_by_mon_type.find(mon_type);
+    if (it_mon_type == curves_by_mon_type.end())
+      curves_by_mon_type[mon_type] = std::list<Curve*>();
+    curves_by_mon_type[mon_type].push_back(*i);
+  }
+
+  /* If a visualisation monitor type only has fixed maxes, then make sure the
+   * max value used is the fixed max
+   * Remember that a map iterator returns a pair of key,value!! */
+  for (mon_type_iterator i = monitor_maxes.begin(), end = monitor_maxes.end();
+       i != end; ++i)
+  {
+    if (i->second.first == 0 && i->second.second > 0)
+      i->second.first = i->second.second;
+  }
+
+  /* I tried to split out the text overlay path from non-text overlay, but as
+   * the visualisation maxes need to be tied to monitor types and not simply
+   * the biggest value across all monitors, keeping everything together in a
+   * type-based loop is still the best way */
   if (text_overlay_enabled)
   {
     text_overlay_format_string = plugin->get_viewer_text_overlay_format_string();
@@ -306,76 +354,110 @@ void CurveView::do_draw_loop()
       graph_max_compact_needed = true;
   }
 
-  for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
+  /* Looping for all monitor types being tracked - seems to be automagically
+   * sorted in alphabetical order??
+   * Curves are both plotted and monitor values collated for the text overlay */
+  for (curves_mon_type_iterator i = curves_by_mon_type.begin(),
+       end = curves_by_mon_type.end(); i != end; ++i)
   {
+    /* Loading up relevant max, at this stage fixed_max is irrelevant -
+     * remember std::map iterator returns a pair itself! */
+    max = monitor_maxes[i->first].first;
+
+    // Debug code
+    /*plugin->debug_log(
+          String::ucompose("CurveView::do_draw_loop: In top curve monitor types"
+                           " loop, monitor type '%1', max %2", i->first, max));*/
+
     if (text_overlay_enabled)
     {
-      /* Using first monitor to obtain the text formatted value (with units) -
-       * this mainly makes sense if all curves belong to the same monitor type */
-      if (graph_max_needed && max_formatted.empty())
-        max_formatted += "Max:" + separator_string +
-            (*i)->monitor->format_value(max, false);
-      if (graph_max_compact_needed && max_formatted_compact.empty())
-        max_formatted_compact += "M:" + (*i)->monitor->format_value(max, true);
-
-      // Collecting a string of monitor data to overlay later
-      if (monitor_data_needed)
-      {
-        if (!(*i)->monitor->tag.empty())
-          tag_string = (*i)->monitor->tag + ":" + separator_string;
-        else
-          tag_string = "";
-
-        if (monitor_data.empty())
-        {
-          monitor_data = tag_string +
-                     (*i)->monitor->format_value((*i)->monitor->value(), false);
-        }
-        else
-        {
-          monitor_data.append(separator_string + tag_string +
-                    (*i)->monitor->format_value((*i)->monitor->value(), false));
-        }
-      }
-      if (monitor_data_compact_needed)
-      {
-        if (!(*i)->monitor->tag.empty())
-          tag_string = (*i)->monitor->tag + ":";
-        else
-          tag_string = "";
-
-        if (monitor_data_compact.empty())
-        {
-          monitor_data_compact = tag_string +
-                      (*i)->monitor->format_value((*i)->monitor->value(), true);
-        }
-        else
-        {
-          monitor_data_compact.append(separator_string + tag_string +
-                     (*i)->monitor->format_value((*i)->monitor->value(), true));
-        }
-      }
+      // Resetting variables
+      monitor_data = monitor_data_compact = max_formatted
+          = max_formatted_compact = "";
     }
 
-    // Drawing the curves with the unified max value
-    (*i)->draw(*canvas, width(), height(), max);
+    for (curve_iterator r = i->second.begin(), end = i->second.end();
+         r != end; ++r)
+    {
+      /* With separating out the monitor curves based on type, the max and
+       * units reported on can be correct */
+      if (text_overlay_enabled)
+      {
+        if (graph_max_needed && max_formatted.empty())
+          max_formatted += "Max:" + separator_string +
+              (*r)->monitor->format_value(max, false);
+        if (graph_max_compact_needed && max_formatted_compact.empty())
+          max_formatted_compact += "M:" + (*r)->monitor->format_value(max, true);
+
+        // Collecting a string of monitor data to overlay later
+        if (monitor_data_needed)
+        {
+          if (!(*r)->monitor->tag.empty())
+            tag_string = (*r)->monitor->tag + ":" + separator_string;
+          else
+            tag_string = "";
+
+          if (monitor_data.empty())
+          {
+            monitor_data = tag_string +
+                (*r)->monitor->format_value((*r)->monitor->value(), false);
+          }
+          else
+          {
+            monitor_data.append(separator_string + tag_string +
+                    (*r)->monitor->format_value((*r)->monitor->value(), false));
+          }
+        }
+        if (monitor_data_compact_needed)
+        {
+          if (!(*r)->monitor->tag.empty())
+            tag_string = (*r)->monitor->tag + ":";
+          else
+            tag_string = "";
+
+          if (monitor_data_compact.empty())
+          {
+            monitor_data_compact = tag_string +
+                (*r)->monitor->format_value((*r)->monitor->value(), true);
+          }
+          else
+          {
+            monitor_data_compact.append(separator_string + tag_string +
+                     (*r)->monitor->format_value((*r)->monitor->value(), true));
+          }
+        }
+      }
+
+      // Drawing the curves with the unified max value
+      (*r)->draw(*canvas, width(), height(), max);
+    }
+
+    if (text_overlay_enabled)
+    {
+      /* Generation of text to overlay. This is now done on a per monitor type
+       * basis so that the maxes and units can be correctly reported on
+       * C++ does not have 'replace all' functionality??? Presumably using regex
+       * would be too slow for here? */
+      per_type_overlay_text = text_overlay_format_string;
+      if (monitor_data_needed)
+        find_and_replace(per_type_overlay_text, monitor_full, monitor_data);
+      if (monitor_data_compact_needed)
+        find_and_replace(per_type_overlay_text, monitor_compact,
+                         monitor_data_compact);
+      if (graph_max_needed)
+        find_and_replace(per_type_overlay_text, graph_max_full, max_formatted);
+      if (graph_max_compact_needed)
+        find_and_replace(per_type_overlay_text, graph_max_compact,
+                         max_formatted_compact);
+      if (overlay_text.empty())
+        overlay_text = per_type_overlay_text;
+      else
+        overlay_text += separator_string + per_type_overlay_text;
+    }
   }
 
-  // Overlaying text of monitor values if desired
   if (text_overlay_enabled)
   {
-    /* Generation of text to overlay - C++ does not have 'replace all'
-     * functionality??? Presumably using regex would be too slow for here? */
-    Glib::ustring overlay_text = text_overlay_format_string;
-    if (monitor_data_needed)
-      find_and_replace(overlay_text, monitor_full, monitor_data);
-    if (monitor_data_compact_needed)
-        find_and_replace(overlay_text, monitor_compact, monitor_data_compact);
-    if (graph_max_needed)
-      find_and_replace(overlay_text, graph_max_full, max_formatted);
-    if (graph_max_compact_needed)
-      find_and_replace(overlay_text, graph_max_compact, max_formatted_compact);
-
     // Checking if overlay is already initialised
     if (!text_overlay)
     {
@@ -415,10 +497,9 @@ void CurveView::do_draw_loop()
     if (text_overlay->property_y() != y)
       text_overlay->property_y() = y;
   }
-
-  // Ensure text is erased if the overlay is disabled
   else
   {
+    // Text overlay not enabled - ensure text is erased
     if (text_overlay && text_overlay->property_text() != "")
       text_overlay->property_text() = "";
   }

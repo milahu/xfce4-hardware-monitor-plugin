@@ -55,6 +55,11 @@ protected:
 
   int size;     // in pixels, width when vertical, else height
 
+  /* Used to locate monitor type of interest in monitor_maxes during
+   * visualisation draw loop */
+  typedef std::map<Glib::ustring, std::pair<int, int>>::iterator
+      mon_type_iterator;
+
   std::auto_ptr<Gnome::Canvas::Canvas> canvas;
 
   sigc::connection draw_timer;

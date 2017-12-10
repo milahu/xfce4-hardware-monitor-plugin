@@ -20,8 +20,6 @@
 #ifndef CURVE_VIEW_HPP
 #define CURVE_VIEW_HPP
 
-#include <list>
-#include <vector>
 #include <memory>
 
 #include <libgnomecanvasmm/canvas.h>
@@ -67,6 +65,10 @@ private:
   typedef std::list<Curve *> curve_sequence;
   typedef curve_sequence::iterator curve_iterator;
   curve_sequence curves;
+
+  // Used to move through curves maintained per monitor type
+  typedef std::map<Glib::ustring, std::list<Curve*>>::iterator
+      curves_mon_type_iterator;
 
   Gnome::Canvas::Text *text_overlay;
 
