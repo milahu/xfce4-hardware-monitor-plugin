@@ -286,7 +286,8 @@ void CurveView::do_draw_loop()
       monitor_data_needed = false, monitor_data_compact_needed = false,
       text_overlay_enabled = plugin->get_viewer_text_overlay_enabled();
 
-  /* Obtain maximum value of all curves in the view on a per monitor type basis,
+  /* Obtain maximum value of all curves in the view on a per monitor type basis
+   * but only when the user wants visualisations to be split by type,
    * separately tracking fixed maxes incase all monitors are fixed. Graphs with
    * fixed monitors are not supposed to be scaled, but the text overlay still
    * needs to refer to a max if there are no normal monitors present
@@ -302,8 +303,12 @@ void CurveView::do_draw_loop()
   Glib::ustring mon_type;
   for (curve_iterator i = curves.begin(), end = curves.end(); i != end; ++i)
   {
-    // To get the real type, Monitor* must be dereferrenced too...
-    mon_type = typeid(*((*i)->monitor)).name();
+    if (plugin->get_viewer_monitor_type_sync_enabled())
+    {
+      // To get the real type, Monitor* must be dereferenced too...
+      mon_type = typeid(*((*i)->monitor)).name();
+    }
+    else mon_type = "All the same";
 
     // If the monitor type hasn't yet been recorded, zero the maxes
     it = monitor_maxes.find(mon_type);

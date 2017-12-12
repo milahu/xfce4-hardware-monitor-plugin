@@ -366,6 +366,21 @@ less than default priority</property>
                                         <property name="column_spacing">5</property>
                                         <property name="row_spacing">5</property>
                                         <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
                                           <object class="GtkLabel" id="cpu_usage_tag_label">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
@@ -450,18 +465,6 @@ taken by the monitor</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
                                           <object class="GtkCheckButton" id="cpu_usage_fixed_max_checkbutton">
                                             <property name="label" translatable="yes">Fixed max (100%)</property>
                                             <property name="visible">True</property>
@@ -475,9 +478,6 @@ is fixed to a maximum value of 100%</property>
                                             <property name="top_attach">1</property>
                                             <property name="bottom_attach">2</property>
                                           </packing>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
                                         </child>
                                       </object>
                                       <packing>
@@ -566,6 +566,18 @@ is fixed to a maximum value of 100%</property>
                                 <property name="column_spacing">5</property>
                                 <property name="row_spacing">5</property>
                                 <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
                                   <object class="GtkLabel" id="load_average_tag_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
@@ -648,18 +660,6 @@ taken by the monitor</property>
                                     <property name="left_attach">1</property>
                                     <property name="right_attach">2</property>
                                   </packing>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
                                 </child>
                                 <child>
                                   <object class="GtkCheckButton" id="load_average_fixed_max_checkbutton">
@@ -846,6 +846,21 @@ value</property>
                                     <property name="column_spacing">5</property>
                                     <property name="row_spacing">5</property>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkLabel" id="disk_usage_tag_label">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
@@ -933,18 +948,6 @@ taken by the monitor</property>
                                       </packing>
                                     </child>
                                     <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
                                       <object class="GtkCheckButton" id="disk_usage_fixed_max_checkbutton">
                                         <property name="label" translatable="yes">Fixed max
 (size of volume)</property>
@@ -961,9 +964,6 @@ on the size of the volume</property>
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                   </object>
                                 </child>
@@ -1122,6 +1122,18 @@ on the size of the volume</property>
                                     <property name="column_spacing">5</property>
                                     <property name="row_spacing">5</property>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkLabel" id="disk_stats_tag_label">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
@@ -1207,18 +1219,6 @@ taken by the monitor</property>
                                         <property name="left_attach">3</property>
                                         <property name="right_attach">4</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                     <child>
                                       <object class="GtkCheckButton" id="disk_stats_fixed_max_checkbutton">
@@ -1337,6 +1337,21 @@ maximum value</property>
                                     <property name="column_spacing">5</property>
                                     <property name="row_spacing">5</property>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkLabel" id="swap_tag_label">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
@@ -1421,18 +1436,6 @@ taken by the monitor</property>
                                       </packing>
                                     </child>
                                     <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
                                       <object class="GtkCheckButton" id="swap_fixed_max_checkbutton">
                                         <property name="label" translatable="yes">Fixed max
 (available swap)</property>
@@ -1449,9 +1452,6 @@ on the amount of swap available</property>
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                   </object>
                                 </child>
@@ -1535,6 +1535,21 @@ on the amount of swap available</property>
                                     <property name="n_columns">4</property>
                                     <property name="column_spacing">5</property>
                                     <property name="row_spacing">5</property>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
                                     <child>
                                       <object class="GtkLabel" id="memory_tag_label">
                                         <property name="visible">True</property>
@@ -1620,18 +1635,6 @@ taken by the monitor</property>
                                       </packing>
                                     </child>
                                     <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
                                       <object class="GtkCheckButton" id="memory_fixed_max_checkbutton">
                                         <property name="label" translatable="yes">Fixed max
 (installed memory)</property>
@@ -1648,9 +1651,6 @@ the amount of RAM available</property>
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                   </object>
                                 </child>
@@ -1830,6 +1830,18 @@ the amount of RAM available</property>
                                             <property name="column_spacing">5</property>
                                             <property name="row_spacing">5</property>
                                             <child>
+                                              <placeholder/>
+                                            </child>
+                                            <child>
+                                              <placeholder/>
+                                            </child>
+                                            <child>
+                                              <placeholder/>
+                                            </child>
+                                            <child>
+                                              <placeholder/>
+                                            </child>
+                                            <child>
                                               <object class="GtkLabel" id="network_load_tag_label">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
@@ -1912,18 +1924,6 @@ taken by the monitor</property>
                                                 <property name="left_attach">3</property>
                                                 <property name="right_attach">4</property>
                                               </packing>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
                                             </child>
                                             <child>
                                               <object class="GtkCheckButton" id="network_load_fixed_max_checkbutton">
@@ -2128,6 +2128,18 @@ is fixed to a user-specified maximum value</property>
                                     <property name="column_spacing">5</property>
                                     <property name="row_spacing">5</property>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkLabel" id="temperature_tag_label">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
@@ -2210,18 +2222,6 @@ taken by the monitor</property>
                                         <property name="left_attach">3</property>
                                         <property name="right_attach">4</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                     <child>
                                       <object class="GtkCheckButton" id="temperature_fixed_max_checkbutton">
@@ -2353,6 +2353,18 @@ value</property>
                                     <property name="column_spacing">5</property>
                                     <property name="row_spacing">5</property>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkLabel" id="fan_speed_tag_label">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
@@ -2435,18 +2447,6 @@ taken by the monitor</property>
                                         <property name="left_attach">3</property>
                                         <property name="right_attach">4</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                     <child>
                                       <object class="GtkCheckButton" id="fan_fixed_max_checkbutton">
@@ -4016,7 +4016,7 @@ view</property>
                   <object class="GtkVBox" id="text_overlay_outer_vbox">
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkLabel" id="Text Overlay">
+                      <object class="GtkLabel" id="text_overlay_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="xalign">0</property>
@@ -4262,6 +4262,53 @@ individual monitor values</property>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkVBox" id="advanced_outer_vbox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="spacing">12</property>
+                    <child>
+                      <object class="GtkExpander" id="advanced_expander">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <child>
+                          <object class="GtkCheckButton" id="monitor_type_sync_checkbutton">
+                            <property name="label" translatable="yes">Monitors of the same type share the same scale
+(takes effect when the monitors next update)</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="tooltip_text" translatable="yes">Maxima are shared for the same type of monitor,
+so a change in the maximum value for one
+network load monitor (e.g.) will result in any other
+network load monitors changing their scale
+appropriately</property>
+                            <property name="active">True</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="advanced_expander_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Advanced&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
               </object>

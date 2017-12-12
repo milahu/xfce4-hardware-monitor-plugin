@@ -146,6 +146,12 @@ PreferencesWindow::PreferencesWindow(Plugin &plugin_, monitor_seq monitors)
       .connect(sigc::mem_fun(*this,
                &PreferencesWindow::on_text_overlay_position_combobox_changed));
 
+  ui->get_widget("monitor_type_sync_checkbutton",
+                 monitor_type_sync_checkbutton);
+  monitor_type_sync_checkbutton->signal_toggled()
+      .connect(sigc::mem_fun(*this,
+               &PreferencesWindow::on_monitor_type_sync_checkbutton_toggled));
+
   ui->get_widget("background_colorbutton", background_colorbutton);
   background_colorbutton->signal_color_set()
     .connect(sigc::mem_fun(*this,
@@ -190,7 +196,7 @@ PreferencesWindow::PreferencesWindow(Plugin &plugin_, monitor_seq monitors)
 
   ui->get_widget("monitor_options", monitor_options);
 
-  
+
   static MonitorColumns mc;
   monitor_store = Gtk::ListStore::create(mc);
   monitor_treeview->set_model(monitor_store);
@@ -260,6 +266,10 @@ PreferencesWindow::PreferencesWindow(Plugin &plugin_, monitor_seq monitors)
     if (position == current_pos)
       text_overlay_position_combobox->set_active(r);
   }
+
+  // Monitor scale sharing per type in the view
+  if (plugin.get_viewer_monitor_type_sync_enabled())
+      monitor_type_sync_checkbutton->set_active();
 
   // Make sure background colorbutton is grayed out
   background_color_radiobutton->toggled();
@@ -939,6 +949,12 @@ void PreferencesWindow::on_text_overlay_position_combobox_changed()
   }
 }
 
+void PreferencesWindow::on_monitor_type_sync_checkbutton_toggled()
+{
+  // Saving
+  save_monitor_type_sync_enabled(monitor_type_sync_checkbutton->get_active());
+}
+
 void PreferencesWindow::on_add_button_clicked()
 {
   Monitor *monitor = run_choose_monitor_window(Glib::ustring());
@@ -1134,6 +1150,37 @@ void PreferencesWindow::save_font_details(Glib::ustring font_details)
     // Unable to obtain writeable config file - informing user and exiting
     std::cerr << _("Unable to obtain writeable config file path in order to"
       " save viewer font in save_font_details!\n");
+  }
+}
+
+void PreferencesWindow::save_monitor_type_sync_enabled(bool enabled)
+{
+  plugin.set_viewer_monitor_type_sync_enabled(enabled);
+
+  // Search for a writeable settings file, create one if it doesnt exist */
+  gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
+
+  if (file)
+  {
+    // Opening setting file
+    XfceRc* settings_w = xfce_rc_simple_open(file, false);
+    g_free(file);
+
+    // Ensuring default group is in focus
+    xfce_rc_set_group(settings_w, NULL);
+
+    // Updating configuration
+    xfce_rc_write_bool_entry(settings_w, "monitor_type_sync_enabled", enabled);
+
+    // Close settings file
+    xfce_rc_close(settings_w);
+  }
+  else
+  {
+    // Unable to obtain writeable config file - informing user and exiting
+    std::cerr << _("Unable to obtain writeable config file path in order to"
+      " save monitor type sync enabled setting in "
+      "save_monitor_type_sync_enabled!\n");
   }
 }
 

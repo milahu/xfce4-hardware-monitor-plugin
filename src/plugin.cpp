@@ -167,7 +167,8 @@ Plugin::Plugin(XfcePanelPlugin *xfce_plugin)
   viewer_text_overlay_separator(" "),
   viewer_text_overlay_font(""),
   viewer_text_overlay_color(0x000000FF),
-  viewer_text_overlay_position(CurveView::top_left)
+  viewer_text_overlay_position(CurveView::top_left),
+  viewer_monitor_type_sync_enabled(true)
 {
   // Search for settings file
   XfceRc* settings_ro = NULL;
@@ -206,6 +207,8 @@ Plugin::Plugin(XfcePanelPlugin *xfce_plugin)
       "viewer_text_overlay_font", viewer_text_overlay_font.c_str());
     viewer_text_overlay_color = xfce_rc_read_int_entry(settings_ro,
       "viewer_text_overlay_color", viewer_text_overlay_color);
+    viewer_monitor_type_sync_enabled = xfce_rc_read_bool_entry(settings_ro,
+      "viewer_monitor_type_sync_enabled", viewer_monitor_type_sync_enabled);
 
     // Enum is validated in set_viewer_text_overlay_position
     CurveView::TextOverlayPosition text_overlay_position =
@@ -566,6 +569,16 @@ bool Plugin::get_viewer_text_overlay_enabled() const
 void Plugin::set_viewer_text_overlay_enabled(bool enabled)
 {
   viewer_text_overlay_enabled = enabled;
+}
+
+bool Plugin::get_viewer_monitor_type_sync_enabled() const
+{
+  return viewer_monitor_type_sync_enabled;
+}
+
+void Plugin::set_viewer_monitor_type_sync_enabled(bool enabled)
+{
+  viewer_monitor_type_sync_enabled = enabled;
 }
 
 const Glib::ustring Plugin::get_viewer_text_overlay_format_string()

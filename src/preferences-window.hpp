@@ -80,6 +80,8 @@ private:
               *monitor_column_options, *monitor_flame_options;
   Gtk::ColorButton *line_colorbutton, *bar_colorbutton, *vbar_colorbutton,
                    *column_colorbutton, *flame_colorbutton;
+
+  Gtk::CheckButton *monitor_type_sync_checkbutton;
   
   class MonitorColumns: public Gtk::TreeModel::ColumnRecord
   {
@@ -141,6 +143,8 @@ private:
   void on_text_overlay_colorbutton_set();
   void on_text_overlay_position_combobox_changed();
 
+  void on_monitor_type_sync_checkbutton_toggled();
+
   void on_add_button_clicked();
   void on_remove_button_clicked();
   void on_change_button_clicked();
@@ -161,6 +165,7 @@ private:
   void connect_monitor_colorbutton(Gtk::ColorButton *colorbutton);
 
   void save_font_details(Glib::ustring font_details);
+  void save_monitor_type_sync_enabled(bool enabled);
   void save_text_overlay_enabled(bool enabled);
   void save_text_overlay_font_details(Glib::ustring font_details);
   void save_text_overlay_format_string(const Glib::ustring format_string);
