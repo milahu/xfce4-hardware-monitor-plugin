@@ -167,7 +167,7 @@ Plugin::Plugin(XfcePanelPlugin *xfce_plugin)
   viewer_text_overlay_separator(" "),
   viewer_text_overlay_font(""),
   viewer_text_overlay_color(0x000000FF),
-  viewer_text_overlay_position(CurveView::top_left),
+  viewer_text_overlay_position(CanvasView::top_left),
   viewer_monitor_type_sync_enabled(true)
 {
   // Search for settings file
@@ -211,10 +211,10 @@ Plugin::Plugin(XfcePanelPlugin *xfce_plugin)
       "viewer_monitor_type_sync_enabled", viewer_monitor_type_sync_enabled);
 
     // Enum is validated in set_viewer_text_overlay_position
-    CurveView::TextOverlayPosition text_overlay_position =
-        static_cast<CurveView::TextOverlayPosition>(
+    CanvasView::TextOverlayPosition text_overlay_position =
+        static_cast<CanvasView::TextOverlayPosition>(
           xfce_rc_read_int_entry(settings_ro, "viewer_text_overlay_position",
-                                 CurveView::top_left));
+                                 CanvasView::top_left));
     set_viewer_text_overlay_position(text_overlay_position);
   }
   
@@ -631,21 +631,21 @@ void Plugin::set_viewer_text_overlay_color(const unsigned int color)
   viewer_text_overlay_color = color;
 }
 
-const CurveView::TextOverlayPosition Plugin::get_viewer_text_overlay_position()
+const CanvasView::TextOverlayPosition Plugin::get_viewer_text_overlay_position()
 {
   return viewer_text_overlay_position;
 }
 
-void Plugin::set_viewer_text_overlay_position(CurveView::TextOverlayPosition
+void Plugin::set_viewer_text_overlay_position(CanvasView::TextOverlayPosition
                                       position)
 {
   // Validating input - an enum does not enforce a range!!
-  if (position < CurveView::top_left ||
-      position >= CurveView::NUM_TEXT_OVERLAY_POSITIONS)
+  if (position < CanvasView::top_left ||
+      position >= CanvasView::NUM_TEXT_OVERLAY_POSITIONS)
   {
     std::cerr << "Plugin::set_viewer_text_overlay_position was called with an "
                  "invalid position: " << position << "!\n";
-    position = CurveView::top_left;
+    position = CanvasView::top_left;
   }
 
   viewer_text_overlay_position = position;

@@ -25,6 +25,7 @@
 #include <memory>
 
 #include <libgnomecanvasmm/canvas.h>
+#include <libgnomecanvasmm/text.h>
 #include <glibmm/ustring.h>
 #include <gtkmm/frame.h>
 
@@ -36,29 +37,52 @@ class Canvas;
 class CanvasView: public View, public sigc::trackable
 {
 public:
+
+  enum TextOverlayPosition {
+     top_left,
+     top_center,
+     top_right,
+     center,
+     bottom_left,
+     bottom_center,
+     bottom_right,
+     NUM_TEXT_OVERLAY_POSITIONS
+  };
+
   CanvasView(bool keeps_history);
   ~CanvasView();
+
+  /* Used to locate monitor type of interest in monitor_maxes during
+   * visualisation draw loop */
+  typedef std::map<Glib::ustring, std::pair<int, int>>::iterator
+      mon_type_iterator;
+
+  static const Glib::ustring text_overlay_position_to_string(
+      TextOverlayPosition position);
 
   static int const draw_interval;
   // for animation, number of drawings to break an update into
   static int const draw_iterations;
-  
+
 protected:
   virtual void do_display();
   virtual void do_update();
   virtual void do_set_background(unsigned int color);
   virtual void do_unset_background();
 
+  /* Included in the header as other compilation units need access to the
+   * definition in order to instantiate the relevant template function
+   * TODO: When I officially move to C++11, implement 'alias templates' as a
+   * form of typedefs that work with template declarations */
+  template <typename T>
+  std::list<std::pair<T*, double>> process_mon_maxes_text_overlay(
+      typename std::list<T*> graph_elements);
+
   int width() const;
   int height() const;
   void resize_canvas();   // resize canvas according to width and height
 
   int size;     // in pixels, width when vertical, else height
-
-  /* Used to locate monitor type of interest in monitor_maxes during
-   * visualisation draw loop */
-  typedef std::map<Glib::ustring, std::pair<int, int>>::iterator
-      mon_type_iterator;
 
   std::auto_ptr<Gnome::Canvas::Canvas> canvas;
 
@@ -67,6 +91,16 @@ protected:
 private:
   bool draw_loop();
   virtual void do_draw_loop() = 0;
+
+  void text_overlay_calc_position(int &x, int &y, TextOverlayPosition position);
+
+  Gnome::Canvas::Text *text_overlay;
+
+  // Text overlay format string substitution codes
+  static const Glib::ustring monitor_full;
+  static const Glib::ustring monitor_compact;
+  static const Glib::ustring graph_max_full;
+  static const Glib::ustring graph_max_compact;
 };
 
 #endif

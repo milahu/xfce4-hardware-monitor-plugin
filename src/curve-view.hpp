@@ -23,13 +23,38 @@
 #include <memory>
 
 #include <libgnomecanvasmm/canvas.h>
+#include <libgnomecanvasmm/line.h>
 #include <libgnomecanvasmm/text.h>
 #include <glibmm/ustring.h>
 
 #include "canvas-view.hpp"
+#include "value-history.hpp"
 
 
-class Curve;
+//
+// class Curve - represents a line curve
+//
+
+class Curve
+{
+public:
+  Curve(Monitor *monitor, unsigned int color);
+
+  void update(unsigned int max_samples);  // Gather info from monitor
+  void draw(Gnome::Canvas::Canvas &canvas,  // Redraw curve on canvas
+      int width, int height, double max);
+  double get_max_value();  // Used to get overall max across curves
+
+  Monitor *monitor;
+
+private:
+  std::auto_ptr<Gnome::Canvas::Line> line;
+
+  ValueHistory value_history;
+  int remaining_draws;
+  unsigned int color;
+};
+
 
 class CurveView: public CanvasView
 {
@@ -39,44 +64,16 @@ public:
   
   static int const pixels_per_sample;
 
-  enum TextOverlayPosition {
-     top_left,
-     top_center,
-     top_right,
-     center,
-     bottom_left,
-     bottom_center,
-     bottom_right,
-     NUM_TEXT_OVERLAY_POSITIONS
-  };
-
-  static const Glib::ustring text_overlay_position_to_string(
-      TextOverlayPosition position);
-
 private:
   virtual void do_update();
   virtual void do_attach(Monitor *monitor);
   virtual void do_detach(Monitor *monitor);
   virtual void do_draw_loop();
 
-  void text_overlay_calc_position(int &x, int &y, TextOverlayPosition position);
-
   // Must be destroyed before the canvas
   typedef std::list<Curve *> curve_sequence;
   typedef curve_sequence::iterator curve_iterator;
   curve_sequence curves;
-
-  // Used to move through curves maintained per monitor type
-  typedef std::map<Glib::ustring, std::list<Curve*>>::iterator
-      curves_mon_type_iterator;
-
-  Gnome::Canvas::Text *text_overlay;
-
-  // Text overlay format string substitution codes
-  static const Glib::ustring monitor_full;
-  static const Glib::ustring monitor_compact;
-  static const Glib::ustring graph_max_full;
-  static const Glib::ustring graph_max_compact;
 };
 
 #endif

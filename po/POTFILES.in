@@ -2,6 +2,7 @@
 # Please keep this file sorted alphabetically.
 xfce4-hardware-monitor-plugin.desktop.in
 src/bar-view.cpp
+src/canvas-view.cpp
 src/choose-monitor-window.cpp
 src/column-view.cpp
 src/curve-view.cpp

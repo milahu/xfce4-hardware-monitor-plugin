@@ -25,11 +25,38 @@
 #include <memory>
 
 #include <libgnomecanvasmm/canvas.h>
+#include <libgnomecanvasmm/rect.h>
+
 #include <glibmm/ustring.h>
 
 #include "canvas-view.hpp"
 
-class Bar;
+//
+// class Bar - represents a single bar graph
+//
+
+class Bar
+{
+public:
+  Bar(Monitor *monitor, unsigned int fill_color, bool horizontal = false);
+  ~Bar();
+
+  void draw(Gnome::Canvas::Canvas &canvas,
+      Plugin *plugin, int width, int height, int no, int total,
+      double time_offset, double max);
+  double get_max_value();
+  void update();
+
+  Monitor *monitor;
+
+private:
+  typedef std::vector<Gnome::Canvas::Rect *> box_sequence;
+  box_sequence boxes;
+
+  double old_value, new_value;
+  bool horizontal;
+  unsigned int fill_color;
+};
 
 class BarView: public CanvasView
 {

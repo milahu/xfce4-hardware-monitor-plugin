@@ -25,12 +25,39 @@
 #include <memory>
 
 #include <libgnomecanvasmm/canvas.h>
+#include <libgnomecanvasmm/pixbuf.h>
+
 #include <glibmm/ustring.h>
 
 #include "canvas-view.hpp"
+#include "value-history.hpp"
 
 
-class ColumnGraph;
+//
+// class ColumnGraph - represents the columns in a column diagram
+//
+
+class ColumnGraph
+{
+public:
+  ColumnGraph(Monitor *monitor, unsigned int color);
+
+  void update(unsigned int max_samples);  // Gather info from monitor
+  void draw(Gnome::Canvas::Canvas &canvas,  // Redraw columns on canvas
+      Plugin *plugin, int width, int height, double max);
+  double get_max_value();  // Used to get overall max across columns
+
+  Monitor *monitor;
+
+private:
+  // A pixbuf is used for the columns
+  std::auto_ptr<Gnome::Canvas::Pixbuf> columns;
+
+  ValueHistory value_history;
+  int remaining_draws;
+  unsigned int color;
+};
+
 
 class ColumnView: public CanvasView
 {

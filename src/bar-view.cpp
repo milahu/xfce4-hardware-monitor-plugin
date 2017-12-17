@@ -21,39 +21,10 @@
 #include <cmath>    // for ceil/floor
 #include <algorithm>    // for max/min
 
-#include <libgnomecanvasmm/rect.h>
-
 #include "bar-view.hpp"
 #include "plugin.hpp"
 #include "monitor.hpp"
 
-
-//
-// class Bar - represents a single bar graph
-//
-
-class Bar
-{
-public:
-  Bar(Monitor *monitor, unsigned int fill_color, bool horizontal = false);
-  ~Bar();
-
-  void draw(Gnome::Canvas::Canvas &canvas,
-      Plugin *plugin, int width, int height, int no, int total,
-      double time_offset, double max);
-  double get_max_value();
-  void update();
-
-  Monitor *monitor;
-  
-private:
-  typedef std::vector<Gnome::Canvas::Rect *> box_sequence;
-  box_sequence boxes;
-
-  double old_value, new_value;
-  bool horizontal;
-  unsigned int fill_color;
-};
 
 Bar::Bar(Monitor *m, unsigned int c, bool horizontal)
   : monitor(m), old_value(0), new_value(0), fill_color(c)

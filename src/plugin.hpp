@@ -85,8 +85,8 @@ public:
   void set_viewer_text_overlay_font(const Glib::ustring font_details);
   const unsigned int get_viewer_text_overlay_color() const;
   void set_viewer_text_overlay_color(const unsigned int color);
-  const CurveView::TextOverlayPosition get_viewer_text_overlay_position();
-  void set_viewer_text_overlay_position(CurveView::TextOverlayPosition
+  const CanvasView::TextOverlayPosition get_viewer_text_overlay_position();
+  void set_viewer_text_overlay_position(CanvasView::TextOverlayPosition
                                         position);
 
   /* Force update allows for this to be called to essentially reload the view
@@ -144,7 +144,7 @@ private:
   Glib::ustring viewer_text_overlay_format_string, viewer_text_overlay_separator,
                 viewer_text_overlay_font;
   unsigned int viewer_text_overlay_color;
-  CurveView::TextOverlayPosition viewer_text_overlay_position;
+  CanvasView::TextOverlayPosition viewer_text_overlay_position;
 
   unsigned int background_color;
   int viewer_size, next_color;

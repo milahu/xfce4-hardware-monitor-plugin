@@ -31,7 +31,7 @@
 #include "gui-helpers.hpp"
 #include "plugin.hpp"
 #include "monitor.hpp"
-#include "curve-view.hpp"
+#include "canvas-view.hpp"
 #include "i18n.hpp"
 
 
@@ -253,15 +253,15 @@ PreferencesWindow::PreferencesWindow(Plugin &plugin_, monitor_seq monitors)
   monitor_treeview->get_selection()->unselect_all();
 
   // Populating text overlay position combobox and selecting the correct position
-  CurveView::TextOverlayPosition current_pos, position =
+  CanvasView::TextOverlayPosition current_pos, position =
       plugin.get_viewer_text_overlay_position();
   store_iter i;
-  for (int r = 0; r < CurveView::NUM_TEXT_OVERLAY_POSITIONS; ++r)
+  for (int r = 0; r < CanvasView::NUM_TEXT_OVERLAY_POSITIONS; ++r)
   {
-    current_pos = static_cast<CurveView::TextOverlayPosition>(r);
+    current_pos = static_cast<CanvasView::TextOverlayPosition>(r);
 
     i = text_overlay_position_store->append();
-    (*i)[topc.position] = CurveView::text_overlay_position_to_string(current_pos);
+    (*i)[topc.position] = CanvasView::text_overlay_position_to_string(current_pos);
 
     if (position == current_pos)
       text_overlay_position_combobox->set_active(r);
@@ -919,7 +919,7 @@ void PreferencesWindow::on_text_overlay_position_combobox_changed()
   int position = text_overlay_position_combobox->get_active_row_number();
 
   plugin.set_viewer_text_overlay_position(
-        static_cast<CurveView::TextOverlayPosition>(position));
+        static_cast<CanvasView::TextOverlayPosition>(position));
 
   // Search for a writeable settings file, create one if it doesnt exist */
   gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);

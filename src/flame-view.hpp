@@ -26,12 +26,42 @@
 #include <memory>
 
 #include <libgnomecanvasmm/canvas.h>
+#include <libgnomecanvasmm/pixbuf.h>
+
 #include <glibmm/ustring.h>
 
 #include "canvas-view.hpp"
 
 
-class Flame;
+//
+// class Flame - represents a flame layer
+//
+
+class Flame
+{
+public:
+  Flame(Monitor *monitor, unsigned int color);
+
+  void burn(double overall_max);
+  double get_max_value();
+  void update(Gnome::Canvas::Canvas &canvas,
+        Plugin *plugin, int width, int height, int no, int total);
+
+  Monitor *monitor;
+
+private:
+  std::auto_ptr<Gnome::Canvas::Pixbuf> flame;
+
+  double value, max;
+
+  std::vector<unsigned char> fuel;
+  int next_refuel;
+  int cooling;      // cooling factor
+
+  void recompute_fuel(double overall_max);
+  unsigned int color;
+};
+
 
 class FlameView: public CanvasView
 {

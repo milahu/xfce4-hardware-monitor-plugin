@@ -21,43 +21,12 @@
 #include <cmath>
 #include <vector>
 
-#include <libgnomecanvasmm/pixbuf.h>
-
 #include "pixbuf-drawing.hpp"
 
 #include "flame-view.hpp"
 #include "plugin.hpp"
 #include "monitor.hpp"
 
-
-//
-// class Flame - represents a flame layer
-//
-
-class Flame
-{
-public:
-  Flame(Monitor *monitor, unsigned int color);
-
-  void burn(double overall_max);
-  double get_max_value();
-  void update(Gnome::Canvas::Canvas &canvas,
-        Plugin *plugin, int width, int height, int no, int total);
-  
-  Monitor *monitor;
-  
-private:
-  std::auto_ptr<Gnome::Canvas::Pixbuf> flame;
-
-  double value, max;
-
-  std::vector<unsigned char> fuel;
-  int next_refuel;
-  int cooling;      // cooling factor
-
-  void recompute_fuel(double overall_max);
-  unsigned int color;
-};
 
 Flame::Flame(Monitor *m, unsigned int c)
   : monitor(m), value(0), next_refuel(0), color(c)
