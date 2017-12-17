@@ -345,18 +345,21 @@ void PreferencesWindow::viewer_type_listener(const Glib::ustring viewer_type,
     bar_radiobutton->property_active() = enable;
     size_outer_vbox->property_visible() = enable;
     monitor_bar_options->property_visible() = enable;
+    text_overlay_outer_vbox->property_visible() = enable;
   }
   else if (viewer_type == "vbar")
   {
     vbar_radiobutton->property_active() = enable;
     size_outer_vbox->property_visible() = enable;
     monitor_vbar_options->property_visible() = enable;
+    text_overlay_outer_vbox->property_visible() = enable;
   }
   else if (viewer_type == "column")
   {
     column_radiobutton->property_active() = enable;
     size_outer_vbox->property_visible() = enable;
     monitor_column_options->property_visible() = enable;
+    text_overlay_outer_vbox->property_visible() = enable;
   }
   else if (viewer_type == "text")
   {
@@ -368,6 +371,7 @@ void PreferencesWindow::viewer_type_listener(const Glib::ustring viewer_type,
     flame_radiobutton->property_active() = enable;
     size_outer_vbox->property_visible() = enable;
     monitor_flame_options->property_visible() = enable;
+    text_overlay_outer_vbox->property_visible() = enable;
   }
 
   /* Actually changing the viewer type - background color use etc is set
