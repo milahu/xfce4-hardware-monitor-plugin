@@ -313,17 +313,15 @@ void FlameView::do_detach(Monitor *monitor)
 
 void FlameView::do_draw_loop()
 {
-  double max = 0;
+  /* Generating list of flames with correct maxima (unified and potentially
+   * grouped by monitor type) to then draw, and triggering processing of text
+   * overlay on the CanvasView if the user desires */
+  std::list<std::pair<Flame*, double>> flames_and_maxes =
+      process_mon_maxes_text_overlay(flames);
 
-  /* Obtain maximum value of all flames in the view, ignoring any monitors with
-   * fixed maxes (their visualisations are not supposed to be scaled) */
-  for (flame_iterator i = flames.begin(), end = flames.end(); i != end; ++i)
-  {
-    if (!(*i)->monitor->fixed_max() && (*i)->get_max_value() > max)
-      max = (*i)->get_max_value();
-  }
-
-  // Drawing flames with the unified max value
-  for (flame_iterator i = flames.begin(), end = flames.end(); i != end; ++i)
-    (*i)->burn(max);
+  /* Looping for all flames to draw - in the std::pair, first is the Flame,
+   * second is the max */
+  for (std::list<std::pair<Flame*, double>>::iterator i =
+       flames_and_maxes.begin(), end = flames_and_maxes.end(); i != end; ++i)
+    i->first->burn(i->second);
 }

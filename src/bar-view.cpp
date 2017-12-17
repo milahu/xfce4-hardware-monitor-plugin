@@ -287,19 +287,18 @@ void BarView::do_draw_loop()
   int total = bars.size();
   int no = 0;
 
-  double max = 0;
+  /* Generating list of bars with correct maxima (unified and potentially
+   * grouped by monitor type) to then draw, and triggering processing of text
+   * overlay on the CanvasView if the user desires */
+  std::list<std::pair<Bar*, double>> bars_and_maxes =
+      process_mon_maxes_text_overlay(bars);
 
-  /* Obtain maximum value of all columns in the view, ignoring any monitors with
-   * fixed maxes (their visualisations are not supposed to be scaled) */
-  for (bar_iterator i = bars.begin(), end = bars.end(); i != end; ++i)
-  {
-    if (!(*i)->monitor->fixed_max() && (*i)->get_max_value() > max)
-      max = (*i)->get_max_value();
-  }
-
-  // Drawing bars with the unified max value
-  for (bar_iterator i = bars.begin(), end = bars.end(); i != end; ++i)
-    (*i)->draw(*canvas, plugin, width(), height(), no++, total, time_offset, max);
+  /* Looping for all bars to draw - in the std::pair, first is the Bar,
+   * second is the max */
+  for (std::list<std::pair<Bar*, double>>::iterator i = bars_and_maxes.begin(),
+       end = bars_and_maxes.end(); i != end; ++i)
+    i->first->draw(*canvas, plugin, width(), height(), no++, total, time_offset,
+                   i->second);
 
   ++draws_since_update;
 }

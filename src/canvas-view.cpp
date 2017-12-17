@@ -27,6 +27,7 @@
 #include "plugin.hpp"
 
 #include "bar-view.hpp"
+#include "column-view.hpp"
 #include "curve-view.hpp"
 #include "flame-view.hpp"
 
@@ -481,6 +482,7 @@ template class std::list<std::pair<Bar*, double>> CanvasView::process_mon_maxes_
     typename std::list<Bar*> graph_elements);
 template class std::list<std::pair<Curve*, double>> CanvasView::process_mon_maxes_text_overlay(
     typename std::list<Curve*> graph_elements);
+template class std::list<std::pair<ColumnGraph*, double>> CanvasView::process_mon_maxes_text_overlay(
+    typename std::list<ColumnGraph*> graph_elements);
 template class std::list<std::pair<Flame*, double>> CanvasView::process_mon_maxes_text_overlay(
     typename std::list<Flame*> graph_elements);
-

@@ -242,17 +242,15 @@ void ColumnView::do_detach(Monitor *monitor)
 
 void ColumnView::do_draw_loop()
 {
-  double max = 0;
+  /* Generating list of columns with correct maxima (unified and potentially
+   * grouped by monitor type) to then draw, and triggering processing of text
+   * overlay on the CanvasView if the user desires */
+  std::list<std::pair<ColumnGraph*, double>> columns_and_maxes =
+      process_mon_maxes_text_overlay(columns);
 
-  /* Obtain maximum value of all columns in the view, ignoring any monitors with
-   * fixed maxes (their graphs are not supposed to be scaled) */
-  for (column_iterator i = columns.begin(), end = columns.end(); i != end; ++i)
-  {
-    if (!(*i)->monitor->fixed_max() && (*i)->get_max_value() > max)
-      max = (*i)->get_max_value();
-  }
-
-  // Drawing the columns with the unified max value
-  for (column_iterator i = columns.begin(), end = columns.end(); i != end; ++i)
-    (*i)->draw(*canvas, plugin, width(), height(), max);
+  /* Looping for all columns to draw - in the std::pair, first is the
+   * ColumnGraph, second is the max */
+  for (std::list<std::pair<ColumnGraph*, double>>::iterator i =
+       columns_and_maxes.begin(), end = columns_and_maxes.end(); i != end; ++i)
+    i->first->draw(*canvas, plugin, width(), height(), i->second);
 }
