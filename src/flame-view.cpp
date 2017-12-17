@@ -41,8 +41,13 @@ void Flame::update(Gnome::Canvas::Canvas &canvas,
     Glib::RefPtr<Gdk::Pixbuf> p =
       Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, width, height);
     p->fill(color & 0xFFFFFF00);
-    
-    flame.reset(new Gnome::Canvas::Pixbuf(*canvas.root(), 0, 0, p));
+
+    /* Make sure the new Gnome Canvas pixbuff is lower to bottom in the canvas'
+     * 'z-order' so that the new text overlay is actually an overlay */
+    Gnome::Canvas::Pixbuf *gc_pixbuff =
+        new Gnome::Canvas::Pixbuf(*canvas.root(), 0, 0, p);
+    gc_pixbuff->lower_to_bottom();
+    flame.reset(gc_pixbuff);
   }
   else
   {

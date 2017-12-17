@@ -74,29 +74,32 @@ void Bar::draw(Gnome::Canvas::Canvas &canvas,
 { 
   unsigned int outline_color = outlineified(fill_color);
 
-  // calculate parameters
+  // Calculate parameters
   int box_size;
-  // use min_spacing at least, except for last box which doesn't need spacing
+
+  // Use min_spacing at least, except for last box which doesn't need spacing
   int total_no_boxes;
   double box_spacing;
 
-  if (this->horizontal) {
+  if (this->horizontal)
+  {
     box_size = 3;
     int const min_spacing = 2;
     total_no_boxes = (width + min_spacing) / (box_size + min_spacing);
     box_spacing = (double(width) - box_size * total_no_boxes) / (total_no_boxes - 1);
   }
-  else {
-    // Assume that a vertical view has limited space, thus the number of boxes
-    // is hardcoded
+  else
+  {
+    /* Assume that a vertical view has limited space, thus the number of boxes
+     * is hardcoded */
     total_no_boxes = 5;
     box_spacing = 2;
     int const total_no_spacings = total_no_boxes - 1;
-    box_size = int(double(height - (total_no_spacings * box_spacing)) / total_no_boxes);
+    box_size = int(double(height -
+                          (total_no_spacings * box_spacing)) / total_no_boxes);
   }
   
-  
-  // don't attain new value immediately
+  // Don't attain new value immediately
   double value = old_value * (1 - time_offset) + new_value * time_offset;
 
   if (max <= 0)
@@ -115,23 +118,32 @@ void Bar::draw(Gnome::Canvas::Canvas &canvas,
   if (alpha == 0)   // x.0 should give an opaque last box
     alpha = 1;
   
-  // trim/expand boxes list
+  /* Trim/expand boxes list, lower to bottom in the canvas' 'z-order' so that
+   * the new text overlay is actually an overlay */
   while (boxes.size() < no_boxes)
-    boxes.push_back(new Gnome::Canvas::Rect(*canvas.root()));
-  while (boxes.size() > no_boxes) {
+  {
+    Gnome::Canvas::Rect *rect = new Gnome::Canvas::Rect(*canvas.root());
+    rect->lower_to_bottom();
+    boxes.push_back(rect);
+  }
+  while (boxes.size() > no_boxes)
+  {
     delete boxes.back();
     boxes.pop_back();
   }
 
   double coord = this->horizontal ? 0 : height;
-  // update parameters, starting from left
+
+  // Update parameters, starting from left
   for (box_sequence::iterator i = boxes.begin(), end = boxes.end(); i != end;
-       ++i) {
+       ++i)
+  {
     Gnome::Canvas::Rect &rect = **i;
     rect.property_fill_color_rgba() = fill_color;
     rect.property_outline_color_rgba() = outline_color;
     
-    if (this->horizontal) {
+    if (this->horizontal)
+    {
       rect.property_x1() = coord;
       rect.property_x2() = coord + box_size;
       rect.property_y1() = double(height) * no / total + 1;
@@ -139,7 +151,8 @@ void Bar::draw(Gnome::Canvas::Canvas &canvas,
       
       coord += box_size + box_spacing;
     }
-    else {
+    else
+    {
       rect.property_x1() = double(width) * no / total + 1;
       rect.property_x2() = double(width) * (no + 1) / total - 1;
       rect.property_y1() = coord;
@@ -149,8 +162,9 @@ void Bar::draw(Gnome::Canvas::Canvas &canvas,
     }
   }
 
-  // tint last box
-  if (!boxes.empty()) {
+  // Tint last box
+  if (!boxes.empty())
+  {
     Gnome::Canvas::Rect &last = *boxes.back();
     last.property_fill_color_rgba()
       = (fill_color & 0xffffff00) |

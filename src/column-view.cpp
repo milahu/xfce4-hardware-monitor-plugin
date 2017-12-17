@@ -121,7 +121,14 @@ void ColumnGraph::draw(Gnome::Canvas::Canvas &canvas, Plugin *plugin, int width,
   
   // Update columns
   if (columns.get() == 0)
-    columns.reset(new Gnome::Canvas::Pixbuf(*canvas.root(), 0, 0, pixbuf));
+  {
+    /* Make sure the new Gnome Canvas pixbuff is lower to bottom in the canvas'
+     * 'z-order' so that the new text overlay is actually an overlay */
+    Gnome::Canvas::Pixbuf *gc_pixbuff =
+        new Gnome::Canvas::Pixbuf(*canvas.root(), 0, 0, pixbuf);
+    gc_pixbuff->lower_to_bottom();
+    columns.reset(gc_pixbuff);
+  }
   else
     columns->property_pixbuf() = pixbuf;
 }
