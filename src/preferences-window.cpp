@@ -268,8 +268,8 @@ PreferencesWindow::PreferencesWindow(Plugin &plugin_, monitor_seq monitors)
   }
 
   // Monitor scale sharing per type in the view
-  if (plugin.get_viewer_monitor_type_sync_enabled())
-      monitor_type_sync_checkbutton->set_active();
+  monitor_type_sync_checkbutton->set_active(
+        plugin.get_viewer_monitor_type_sync_enabled());
 
   // Make sure background colorbutton is grayed out
   background_color_radiobutton->toggled();
