@@ -35,6 +35,9 @@ extern "C"
  * before the Plugin class is declared */
 class Plugin;
 
+/* Before thinking about adding more setters, remember that monitors aren't
+ * reconfigured after instantiation but replaced - so there is no need for the
+ * ability to change things in place on monitor instances */
 class Monitor: noncopyable
 {
 public:
@@ -99,9 +102,6 @@ public:
 
   // Save information about the monitor
   virtual void save(XfceRc *settings_w) = 0;
-
-  virtual void set_fixed_max(bool fixed_max) = 0;
-  virtual void set_update_interval(int interval) = 0;
 
   /* If other is watching the same thing as this monitor, it might be
    * a good idea to sync maxima with it */

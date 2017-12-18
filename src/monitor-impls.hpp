@@ -64,8 +64,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual double max();
   virtual void save(XfceRc *settings_w);
-  virtual void set_fixed_max(bool fixed_max);
-  virtual void set_update_interval(int interval);
 
   virtual int update_interval();
 
@@ -105,8 +103,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual double max();
   virtual void save(XfceRc *settings_w);
-  virtual void set_fixed_max(bool fixed_max);
-  virtual void set_update_interval(int interval);
   virtual int update_interval();
 
   /* The default interval between updates in milliseconds, for the monitor type
@@ -134,9 +130,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual double max();
   virtual void save(XfceRc *settings_w);
-  virtual void set_fixed_max(bool fixed_max);
-  virtual void set_max(double max);
-  virtual void set_update_interval(int interval);
   virtual int update_interval();
 
   /* The default interval between updates in milliseconds, for the monitor type
@@ -167,8 +160,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual double max();
   virtual void save(XfceRc *settings_w);
-  virtual void set_fixed_max(bool fixed_max);
-  virtual void set_update_interval(int interval);
   virtual int update_interval();
 
   /* The default interval between updates in milliseconds, for the monitor type
@@ -197,8 +188,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual double max();  // Fixed at size of the relevant volume
   virtual void save(XfceRc *settings_w);
-  virtual void set_fixed_max(bool fixed_max);
-  virtual void set_update_interval(int interval);
   virtual int update_interval();
 
   /* The default interval between updates in milliseconds, for the monitor type
@@ -247,9 +236,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual double max();
   virtual void save(XfceRc *settings_w);
-  virtual void set_fixed_max(bool fixed_max);
-  virtual void set_max(double max);
-  virtual void set_update_interval(int interval);
   virtual int update_interval();
 
   /* The default interval between updates in milliseconds, for the monitor type
@@ -334,9 +320,6 @@ public:
   */
 
   virtual void save(XfceRc *settings_w);
-  virtual void set_fixed_max(bool fixed_max);
-  virtual void set_max(double max);
-  virtual void set_update_interval(int interval);
   virtual int update_interval();
 
   /* The default interval between updates in milliseconds, for the monitor type
@@ -414,9 +397,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual double max();
   virtual void save(XfceRc *settings_w);
-  virtual void set_fixed_max(bool fixed_max);
-  virtual void set_max(double max);
-  virtual void set_update_interval(int interval);
   virtual int update_interval();
 
   /* The default interval between updates in milliseconds, for the monitor type
@@ -448,9 +428,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual double max();
   virtual void save(XfceRc *settings_w);
-  virtual void set_fixed_max(bool fixed_max);
-  virtual void set_max(double max);
-  virtual void set_update_interval(int interval);
   virtual int update_interval();
 
   /* The default interval between updates in milliseconds, for the monitor type
@@ -498,9 +475,6 @@ public:
   virtual Glib::ustring get_short_name();
   virtual double max();
   virtual void save(XfceRc *settings_w);
-  virtual void set_fixed_max(bool fixed_max);
-  virtual void set_max(double max);
-  virtual void set_update_interval(int interval);
   virtual int update_interval();
 
   /* The default interval between updates in milliseconds, for the monitor type

@@ -656,16 +656,6 @@ void CpuUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
-void CpuUsageMonitor::set_fixed_max(bool fixed_max)
-{
-  fixed_max_priv = fixed_max;
-}
-
-void CpuUsageMonitor::set_update_interval(int interval)
-{
-  update_interval_priv = interval;
-}
-
 int CpuUsageMonitor::update_interval()
 {
   return update_interval_priv;
@@ -742,16 +732,6 @@ void SwapUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
-}
-
-void SwapUsageMonitor::set_fixed_max(bool fixed_max)
-{
-  fixed_max_priv = fixed_max;
-}
-
-void SwapUsageMonitor::set_update_interval(int interval)
-{
-  update_interval_priv = interval;
 }
 
 int SwapUsageMonitor::update_interval()
@@ -850,21 +830,6 @@ void LoadAverageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
-void LoadAverageMonitor::set_fixed_max(bool fixed_max)
-{
-  fixed_max_priv = fixed_max;
-}
-
-void LoadAverageMonitor::set_max(double max)
-{
-  max_value = max;
-}
-
-void LoadAverageMonitor::set_update_interval(int interval)
-{
-  update_interval_priv = interval;
-}
-
 int LoadAverageMonitor::update_interval()
 {
   return update_interval_priv;
@@ -939,16 +904,6 @@ void MemoryUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
-}
-
-void MemoryUsageMonitor::set_fixed_max(bool fixed_max)
-{
-  fixed_max_priv = fixed_max;
-}
-
-void MemoryUsageMonitor::set_update_interval(int interval)
-{
-  update_interval_priv = interval;
 }
 
 int MemoryUsageMonitor::update_interval()
@@ -1052,16 +1007,6 @@ void DiskUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
-}
-
-void DiskUsageMonitor::set_fixed_max(bool fixed_max)
-{
-  fixed_max_priv = fixed_max;
-}
-
-void DiskUsageMonitor::set_update_interval(int interval)
-{
-  update_interval_priv = interval;
 }
 
 int DiskUsageMonitor::update_interval()
@@ -1385,21 +1330,6 @@ void DiskStatsMonitor::save(XfceRc *settings_w)
   /*plugin_priv.debug_log(
         String::ucompose("XFCE4 Hardware Monitor Plugin: DiskStatsMonitor::save "
                          "ran - current max value: %1", max_value));*/
-}
-
-void DiskStatsMonitor::set_fixed_max(bool fixed_max)
-{
-  fixed_max_priv = fixed_max;
-}
-
-void DiskStatsMonitor::set_max(double max)
-{
-  max_value = max;
-}
-
-void DiskStatsMonitor::set_update_interval(int interval)
-{
-  update_interval_priv = interval;
 }
 
 Glib::ustring DiskStatsMonitor::stat_to_string(const DiskStatsMonitor::Stat &stat,
@@ -2106,24 +2036,9 @@ void NetworkLoadMonitor::save_interfaces(XfceRc *settings_w)
                       interface_type_names[wireless_third].c_str());
 }
 
-void NetworkLoadMonitor::set_fixed_max(bool fixed_max)
-{
-  fixed_max_priv = fixed_max;
-}
-
 void NetworkLoadMonitor::set_interface_name(InterfaceType type, const Glib::ustring interface_name)
 {
   interface_type_names[type] = interface_name;
-}
-
-void NetworkLoadMonitor::set_max(double max)
-{
-  max_value = max;
-}
-
-void NetworkLoadMonitor::set_update_interval(int interval)
-{
-  update_interval_priv = interval;
 }
 
 int NetworkLoadMonitor::update_interval()
@@ -2342,21 +2257,6 @@ void TemperatureMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
 }
 
-void TemperatureMonitor::set_fixed_max(bool fixed_max)
-{
-  fixed_max_priv = fixed_max;
-}
-
-void TemperatureMonitor::set_max(double max)
-{
-  max_value = max;
-}
-
-void TemperatureMonitor::set_update_interval(int interval)
-{
-  update_interval_priv = interval;
-}
-
 int TemperatureMonitor::update_interval()
 {
   return update_interval_priv;
@@ -2428,16 +2328,6 @@ double FanSpeedMonitor::max()
   return max_value;
 }
 
-void FanSpeedMonitor::set_fixed_max(bool fixed_max)
-{
-  fixed_max_priv = fixed_max;
-}
-
-void FanSpeedMonitor::set_max(double max)
-{
-  max_value = max;
-}
-
 void FanSpeedMonitor::save(XfceRc *settings_w)
 {
     // Fetching assigned settings group
@@ -2462,11 +2352,6 @@ void FanSpeedMonitor::save(XfceRc *settings_w)
     xfce_rc_write_entry(settings_w, "max", "0");
 
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
-}
-
-void FanSpeedMonitor::set_update_interval(int interval)
-{
-  update_interval_priv = interval;
 }
 
 int FanSpeedMonitor::update_interval()
@@ -2702,21 +2587,6 @@ void GenericMonitor::save(XfceRc *settings_w)
     xfce_rc_write_entry(settings_w, "max", "0");
 
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
-}
-
-void GenericMonitor::set_fixed_max(bool fixed_max)
-{
-  fixed_max_priv = fixed_max;
-}
-
-void GenericMonitor::set_max(double max)
-{
-  max_value = max;
-}
-
-void GenericMonitor::set_update_interval(int interval)
-{
-  update_interval_priv = interval;
 }
 
 int GenericMonitor::update_interval()
