@@ -177,11 +177,11 @@ std::list<std::pair<T*, double>> CanvasView::process_mon_maxes_text_overlay(
       monitor_data_needed = false, monitor_data_compact_needed = false,
       text_overlay_enabled = plugin->get_viewer_text_overlay_enabled();
 
-  /* Obtain maximum value of all curves/flames/bars etc in the view on a per monitor type basis
-   * but only when the user wants visualisations to be split by type,
-   * separately tracking fixed maxes incase all monitors are fixed. Graphs with
-   * fixed monitors are not supposed to be scaled, but the text overlay still
-   * needs to refer to a max if there are no normal monitors present
+  /* Obtain maximum value of all curves/flames/bars etc in the view on a per
+   * monitor type basis but only when the user wants visualisations to be split
+   * by type, separately tracking fixed maxes incase all monitors are fixed.
+   * Graphs with fixed monitors are not supposed to be scaled, but the text
+   * overlay still needs to refer to a max if there are no normal monitors present
    * Priority-wise, non-fixed monitor sources are always reported in preference
    * to fixed-max sources
    * On top of this, collect the curves together by monitor type so that they
@@ -326,8 +326,7 @@ std::list<std::pair<T*, double>> CanvasView::process_mon_maxes_text_overlay(
         }
       }
 
-      // Drawing the curves with the unified max value
-      //(*r)->draw(*canvas, width(), height(), max);
+      // Recording max per monitor
       elems_and_maxes.push_back(std::make_pair(*r, max));
     }
 
@@ -350,7 +349,13 @@ std::list<std::pair<T*, double>> CanvasView::process_mon_maxes_text_overlay(
                          max_formatted_compact);
       if (overlay_text.empty())
         overlay_text = per_type_overlay_text;
-      else
+
+      /* Overlay text is already present. If the user has only fixed text (i.e.
+       * no substitution variables), outputting the full text again per monitor
+       * type would result in the fixed text being duped - so in this case, make
+       * sure to only output once */
+      else if (monitor_data_needed || monitor_data_compact_needed
+               || graph_max_needed || graph_max_compact_needed)
         overlay_text += separator_string + per_type_overlay_text;
     }
   }
