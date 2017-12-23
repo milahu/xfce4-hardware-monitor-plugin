@@ -87,6 +87,8 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
   ui->get_widget("cpu_usage_fixed_max_checkbutton",
                  cpu_usage_fixed_max_checkbutton);
   ui->get_widget("cpu_usage_tag_entry", cpu_tag);
+  ui->get_widget("cpu_usage_text_overlay_checkbutton",
+                 cpu_usage_text_overlay_checkbutton);
 
   ui->get_widget("load_average_radiobutton", load_average_radiobutton);
   ui->get_widget("load_average_options", load_average_options);
@@ -98,6 +100,8 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
                  load_average_fixed_max_checkbutton);
   ui->get_widget("load_average_max_spinbutton", load_average_max_spinbutton);
   ui->get_widget("load_average_tag_entry", load_average_tag);
+  ui->get_widget("load_average_text_overlay_checkbutton",
+                 load_average_text_overlay_checkbutton);
 
   ui->get_widget("disk_usage_radiobutton", disk_usage_radiobutton);
   ui->get_widget("disk_usage_options", disk_usage_options);
@@ -110,6 +114,8 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
   ui->get_widget("disk_usage_fixed_max_checkbutton",
                  disk_usage_fixed_max_checkbutton);
   ui->get_widget("disk_usage_tag_entry", disk_usage_tag);
+  ui->get_widget("disk_usage_text_overlay_checkbutton",
+                 disk_usage_text_overlay_checkbutton);
 
   ui->get_widget("disk_stats_radiobutton", disk_stats_radiobutton);
   ui->get_widget("disk_stats_options", disk_stats_options);
@@ -124,6 +130,8 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
   ui->get_widget("disk_stats_max_spinbutton",
                  disk_stats_max_spinbutton);
   ui->get_widget("disk_stats_tag_entry", disk_stats_tag);
+  ui->get_widget("disk_stats_text_overlay_checkbutton",
+                 disk_stats_text_overlay_checkbutton);
 
   ui->get_widget("swap_usage_radiobutton", swap_usage_radiobutton);
   ui->get_widget("swap_usage_options", swap_usage_options);
@@ -132,6 +140,7 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
                  swap_refresh_delay_default_button);
   ui->get_widget("swap_fixed_max_checkbutton", swap_fixed_max_checkbutton);
   ui->get_widget("swap_tag_entry", swap_usage_tag);
+  ui->get_widget("swap_text_overlay_checkbutton", swap_text_overlay_checkbutton);
 
   ui->get_widget("memory_usage_radiobutton", memory_usage_radiobutton);
   ui->get_widget("memory_usage_options", memory_usage_options);
@@ -141,6 +150,8 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
                  memory_refresh_delay_default_button);
   ui->get_widget("memory_fixed_max_checkbutton", memory_fixed_max_checkbutton);
   ui->get_widget("memory_tag_entry", memory_usage_tag);
+  ui->get_widget("memory_text_overlay_checkbutton",
+                 memory_text_overlay_checkbutton);
 
   ui->get_widget("network_load_radiobutton", network_load_radiobutton);
   ui->get_widget("network_load_options", network_load_options);
@@ -155,6 +166,8 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
                  network_load_fixed_max_checkbutton);
   ui->get_widget("network_load_max_spinbutton", network_load_max_spinbutton);
   ui->get_widget("network_load_tag_entry", network_load_tag);
+  ui->get_widget("network_load_text_overlay_checkbutton",
+                 network_load_text_overlay_checkbutton);
 
   /* Need special code here to set the desired stock icon as GTK Builder doesn't
    * support setting a stock icon but custom text, and as soon as you change the
@@ -180,6 +193,8 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
                  temperature_fixed_max_checkbutton);
   ui->get_widget("temperature_max_spinbutton", temperature_max_spinbutton);
   ui->get_widget("temperature_tag_entry", temperature_tag);
+  ui->get_widget("temperature_text_overlay_checkbutton",
+                 temperature_text_overlay_checkbutton);
 
   ui->get_widget("fan_speed_radiobutton", fan_speed_radiobutton);
   ui->get_widget("fan_speed_box", fan_speed_box);
@@ -192,6 +207,7 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
   ui->get_widget("fan_fixed_max_checkbutton", fan_fixed_max_checkbutton);
   ui->get_widget("fan_max_spinbutton", fan_max_spinbutton);
   ui->get_widget("fan_speed_tag_entry", fan_speed_tag);
+  ui->get_widget("fan_text_overlay_checkbutton", fan_text_overlay_checkbutton);
 
   ui->get_widget("generic_radiobutton", generic_radiobutton);
   ui->get_widget("generic_box", generic_box);
@@ -225,6 +241,8 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
   ui->get_widget("generic_fixed_max_checkbutton", generic_fixed_max_checkbutton);
   ui->get_widget("generic_max_spinbutton", generic_max_spinbutton);
   ui->get_widget("generic_tag_entry", generic_tag);
+  ui->get_widget("generic_text_overlay_checkbutton",
+                 generic_text_overlay_checkbutton);
 
   cpu_usage_radiobutton->signal_toggled()
     .connect(sigc::mem_fun(*this, &ChooseMonitorWindow::
@@ -316,15 +334,18 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
   cpu_usage_refresh_delay_spinbutton->set_value(
         CpuUsageMonitor::update_interval_default / 1000);
   cpu_usage_fixed_max_checkbutton->set_active(true);
+  cpu_usage_text_overlay_checkbutton->set_active(true);
 
   load_average_refresh_delay_spinbutton->set_value(
         LoadAverageMonitor::update_interval_default / 1000);
   load_average_fixed_max_checkbutton->set_active(false);
   load_average_max_spinbutton->set_value(0);
+  load_average_text_overlay_checkbutton->set_active(true);
 
   disk_usage_refresh_delay_spinbutton->set_value(
         DiskUsageMonitor::update_interval_default / 1000);
   disk_usage_fixed_max_checkbutton->set_active(true);
+  disk_usage_text_overlay_checkbutton->set_active(true);
 
   /* Setup disk statistics device name combobox - no column packing needed here
    * since this seems to be done automatically when a text entry is included */
@@ -359,14 +380,17 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
         DiskStatsMonitor::update_interval_default / 1000);
   disk_stats_fixed_max_checkbutton->set_active(false);
   disk_stats_max_spinbutton->set_value(0);
+  disk_stats_text_overlay_checkbutton->set_active(true);
 
   swap_refresh_delay_spinbutton->set_value(
         SwapUsageMonitor::update_interval_default / 1000);
   swap_fixed_max_checkbutton->set_active(true);
+  swap_text_overlay_checkbutton->set_active(true);
 
   memory_refresh_delay_spinbutton->set_value(
         MemoryUsageMonitor::update_interval_default / 1000);
   memory_fixed_max_checkbutton->set_active(true);
+  memory_text_overlay_checkbutton->set_active(true);
 
   // Setup network interface type combobox
   static NetworkInterfaceTypeCols nitc;
@@ -435,6 +459,7 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
         NetworkLoadMonitor::update_interval_default / 1000);
   network_load_fixed_max_checkbutton->set_active(false);
   network_load_max_spinbutton->set_value(0);
+  network_load_text_overlay_checkbutton->set_active(true);
 
 #if !HAVE_LIBSENSORS            // No sensors support, no options for it
   device_notebook->get_nth_page(3)->hide();
@@ -476,6 +501,7 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
         TemperatureMonitor::update_interval_default / 1000);
   temperature_fixed_max_checkbutton->set_active(false);
   temperature_max_spinbutton->set_value(0);
+  temperature_text_overlay_checkbutton->set_active(true);
 
   // Setup fan combobox
   static SensorsCols fsc;
@@ -512,11 +538,13 @@ ChooseMonitorWindow::ChooseMonitorWindow(Plugin& plugin, Gtk::Window &parent)
         FanSpeedMonitor::update_interval_default / 1000);
   fan_fixed_max_checkbutton->set_active(false);
   fan_max_spinbutton->set_value(0);
+  fan_text_overlay_checkbutton->set_active(true);
 
   generic_refresh_delay_spinbutton->set_value(
         GenericMonitor::update_interval_default / 1000);
   generic_fixed_max_checkbutton->set_active(false);
   generic_max_spinbutton->set_value(0);
+  generic_text_overlay_checkbutton->set_active(true);
 
   /* Fix border on help linkbutton - border is specified in the glade config, yet
    * it is ignored?? */
@@ -554,6 +582,8 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
                     tag = xfce_rc_read_entry(settings_ro, "tag", "");
       int update_interval = xfce_rc_read_int_entry(settings_ro,
                                                    "update_interval", -1);
+      bool add_to_text_overlay = xfce_rc_read_bool_entry(
+            settings_ro, "add_to_text_overlay", true);
 
       /* Floats are not supported by XFCE configuration code, so need to
        * unserialise the double */
@@ -569,6 +599,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         device_notebook->set_current_page(1);
         memory_usage_radiobutton->set_active();
         memory_usage_tag->set_text(tag);
+        memory_text_overlay_checkbutton->set_active(add_to_text_overlay);
 
         // Enforcing default update interval when it isn't present
         if (update_interval == -1)
@@ -583,6 +614,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         device_notebook->set_current_page(0);
         load_average_radiobutton->set_active();
         load_average_tag->set_text(tag);
+        load_average_text_overlay_checkbutton->set_active(add_to_text_overlay);
 
         // Enforcing default update interval when it isn't present
         if (update_interval == -1)
@@ -605,6 +637,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
           "show_free", false);
         show_free_checkbutton->set_active(show_free);
         disk_usage_tag->set_text(tag);
+        disk_usage_text_overlay_checkbutton->set_active(add_to_text_overlay);
 
         // Enforcing default update interval when it isn't present
         if (update_interval == -1)
@@ -657,6 +690,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         disk_stats_stat_combobox->set_active(stat);
 
         disk_stats_tag->set_text(tag);
+        disk_stats_text_overlay_checkbutton->set_active(add_to_text_overlay);
 
         // Enforcing default update interval when it isn't present
         if (update_interval == -1)
@@ -678,6 +712,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         device_notebook->set_current_page(1);
         swap_usage_radiobutton->set_active();
         swap_usage_tag->set_text(tag);
+        swap_text_overlay_checkbutton->set_active(add_to_text_overlay);
 
         // Enforcing default update interval when it isn't present
         if (update_interval == -1)
@@ -786,6 +821,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
          * populated when this form is instantiated */
 
         network_load_tag->set_text(tag);
+        network_load_text_overlay_checkbutton->set_active(add_to_text_overlay);
 
         // Enforcing default update interval when it isn't present
         if (update_interval == -1)
@@ -809,6 +845,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
                                                     "temperature_no", 0);
         temperature_combobox->set_active(temperature_no);
         temperature_tag->set_text(tag);
+        temperature_text_overlay_checkbutton->set_active(add_to_text_overlay);
 
         // Enforcing default update interval when it isn't present
         if (update_interval == -1)
@@ -872,6 +909,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         generic_units_short_entry->set_text(units_short);
 
         generic_tag->set_text(tag);
+        generic_text_overlay_checkbutton->set_active(add_to_text_overlay);
 
         // Enforcing default update interval when it isn't present
         if (update_interval == -1)
@@ -913,6 +951,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
         cpu_usage_fixed_max_checkbutton->set_active(fixed_max);
 
         cpu_tag->set_text(tag);
+        cpu_usage_text_overlay_checkbutton->set_active(add_to_text_overlay);
       }
 
       xfce_rc_close(settings_ro);
@@ -946,28 +985,32 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
                 int(cpu_usage_refresh_delay_spinbutton->get_value() * 1000),
                 cpu_usage_incl_low_checkbutton->get_active(),
                 cpu_usage_incl_iowait_checkbutton->get_active(),
-                cpu_tag->get_text(), plugin_priv);
+                cpu_tag->get_text(),
+                cpu_usage_text_overlay_checkbutton->get_active(), plugin_priv);
         else
           mon = new CpuUsageMonitor(
                 cpu_usage_fixed_max_checkbutton->get_active(),
                 int(cpu_usage_refresh_delay_spinbutton->get_value() * 1000),
                 cpu_usage_incl_low_checkbutton->get_active(),
                 cpu_usage_incl_iowait_checkbutton->get_active(),
-                cpu_tag->get_text(), plugin_priv);
+                cpu_tag->get_text(),
+                cpu_usage_text_overlay_checkbutton->get_active(), plugin_priv);
       }
       else if (memory_usage_radiobutton->get_active())
       {
         mon = new MemoryUsageMonitor(
               int(memory_refresh_delay_spinbutton->get_value() * 1000),
               memory_fixed_max_checkbutton->get_active(),
-              memory_usage_tag->get_text(), plugin_priv);
+              memory_usage_tag->get_text(),
+              memory_text_overlay_checkbutton->get_active(), plugin_priv);
       }
       else if (swap_usage_radiobutton->get_active())
       {
         mon = new SwapUsageMonitor(
               int(swap_refresh_delay_spinbutton->get_value() * 1000),
               swap_fixed_max_checkbutton->get_active(),
-              swap_usage_tag->get_text(), plugin_priv);
+              swap_usage_tag->get_text(),
+              swap_text_overlay_checkbutton->get_active(), plugin_priv);
       }
       else if (load_average_radiobutton->get_active())
       {
@@ -975,7 +1018,8 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
               int(load_average_refresh_delay_spinbutton->get_value() * 1000),
               load_average_fixed_max_checkbutton->get_active(),
               load_average_max_spinbutton->get_value(),
-              load_average_tag->get_text(), plugin_priv);
+              load_average_tag->get_text(),
+              load_average_text_overlay_checkbutton->get_active(), plugin_priv);
       }
       else if (disk_usage_radiobutton->get_active())
       {
@@ -1008,8 +1052,9 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
 
         mon = new DiskUsageMonitor(mount_dir, show_free,
                   int(disk_usage_refresh_delay_spinbutton->get_value() * 1000),
-                                   disk_usage_fixed_max_checkbutton->get_active(),
-                                   disk_usage_tag->get_text(), plugin_priv);
+                  disk_usage_fixed_max_checkbutton->get_active(),
+                  disk_usage_tag->get_text(),
+                  disk_usage_text_overlay_checkbutton->get_active(), plugin_priv);
       }
       else if (disk_stats_radiobutton->get_active())
       {
@@ -1050,9 +1095,11 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
 
         mon = new DiskStatsMonitor(device_name, stat,
                   int(disk_stats_refresh_delay_spinbutton->get_value() * 1000),
-                                   disk_stats_fixed_max_checkbutton->get_active(),
-                                   disk_stats_max_spinbutton->get_value(),
-                                   disk_stats_tag->get_text(), plugin_priv);
+                  disk_stats_fixed_max_checkbutton->get_active(),
+                  disk_stats_max_spinbutton->get_value(),
+                  disk_stats_tag->get_text(),
+                  disk_stats_text_overlay_checkbutton->get_active(),
+                  plugin_priv);
       }
       else if (network_load_radiobutton->get_active())
       {
@@ -1096,25 +1143,27 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
 
         mon = new NetworkLoadMonitor(interface_type, dir,
                 int(network_load_refresh_delay_spinbutton->get_value() * 1000),
-                               network_load_fixed_max_checkbutton->get_active(),
-                                     network_load_max_spinbutton->get_value(),
-                                     network_load_tag->get_text(), plugin_priv);
+                network_load_fixed_max_checkbutton->get_active(),
+                network_load_max_spinbutton->get_value(),
+                network_load_tag->get_text(),
+                network_load_text_overlay_checkbutton->get_active(), plugin_priv);
       }
       else if (temperature_radiobutton->get_active())
       {
         mon = new TemperatureMonitor(temperature_combobox->get_active_row_number(),
-                 int(temperature_refresh_delay_spinbutton->get_value() * 1000),
-                                temperature_fixed_max_checkbutton->get_active(),
-                                     temperature_max_spinbutton->get_value(),
-                                     temperature_tag->get_text(), plugin_priv);
+                int(temperature_refresh_delay_spinbutton->get_value() * 1000),
+                temperature_fixed_max_checkbutton->get_active(),
+                temperature_max_spinbutton->get_value(),
+                temperature_tag->get_text(),
+                temperature_text_overlay_checkbutton->get_active(), plugin_priv);
       }
       else if (fan_speed_radiobutton->get_active())
       {
         mon = new FanSpeedMonitor(fan_speed_combobox->get_active_row_number(),
-                   int(fan_speed_refresh_delay_spinbutton->get_value() * 1000),
-                                  fan_fixed_max_checkbutton->get_active(),
-                                  fan_max_spinbutton->get_value(),
-                                  fan_speed_tag->get_text(), plugin_priv);
+                int(fan_speed_refresh_delay_spinbutton->get_value() * 1000),
+                fan_fixed_max_checkbutton->get_active(),
+                fan_max_spinbutton->get_value(), fan_speed_tag->get_text(),
+                fan_text_overlay_checkbutton->get_active(), plugin_priv);
       }
       else if (generic_radiobutton->get_active())
       {
@@ -1252,7 +1301,9 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
                      int(generic_refresh_delay_spinbutton->get_value() * 1000),
                                  generic_fixed_max_checkbutton->get_active(),
                                  generic_max_spinbutton->get_value(),
-                                 generic_tag->get_text(), plugin_priv);
+                                 generic_tag->get_text(),
+                                 generic_text_overlay_checkbutton->get_active(),
+                                 plugin_priv);
       }
 
       return mon;

@@ -83,6 +83,8 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
           tag = xfce_rc_read_entry(settings_ro, "tag", "");
       int update_interval = xfce_rc_read_int_entry(settings_ro,
                                                    "update_interval", -1);
+      bool add_to_text_overlay = xfce_rc_read_bool_entry(
+            settings_ro, "add_to_text_overlay", true);
 
       /* Floats are not supported by XFCE configuration code, so need to
        * unstringify the double */
@@ -124,13 +126,15 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
         {
           monitors.push_back(new CpuUsageMonitor(fixed_max, incl_low_prio,
                                                  incl_iowait, update_interval,
-                                                 tag, plugin));
+                                                 tag, add_to_text_overlay,
+                                                 plugin));
         }
         else
         {
           monitors.push_back(new CpuUsageMonitor(cpu_no, fixed_max,
                                                  incl_low_prio, incl_iowait,
-                                                 update_interval, tag, plugin));
+                                                 update_interval, tag,
+                                                 add_to_text_overlay, plugin));
         }
       }
       else if (type == "memory_usage")
@@ -140,7 +144,8 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
           update_interval = MemoryUsageMonitor::update_interval_default;
 
         monitors.push_back(new MemoryUsageMonitor(update_interval, fixed_max,
-                                                  tag, plugin));
+                                                  tag, add_to_text_overlay,
+                                                  plugin));
       }
       else if (type == "swap_usage")
       {
@@ -149,7 +154,8 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
           update_interval = SwapUsageMonitor::update_interval_default;
 
         monitors.push_back(new SwapUsageMonitor(update_interval, fixed_max,
-                                                tag, plugin));
+                                                tag, add_to_text_overlay,
+                                                plugin));
       }
       else if (type == "load_average")
       {
@@ -158,7 +164,8 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
           update_interval = LoadAverageMonitor::update_interval_default;
 
         monitors.push_back(new LoadAverageMonitor(update_interval, fixed_max,
-                                                  max, tag, plugin));
+                                                  max, tag, add_to_text_overlay,
+                                                  plugin));
       }
       else if (type == "disk_usage")
       {
@@ -177,7 +184,7 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
         // Creating disk usage monitor
         monitors.push_back(new DiskUsageMonitor(mount_dir, show_free,
                                                 update_interval, fixed_max,
-                                                tag, plugin));
+                                                tag, add_to_text_overlay, plugin));
       }
       else if (type == "disk_statistics")
       {
@@ -196,7 +203,7 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
         // Creating disk statistics monitor
         monitors.push_back(new DiskStatsMonitor(device_name, stat,
                                                 update_interval, fixed_max, max,
-                                                tag, plugin));
+                                                tag, add_to_text_overlay, plugin));
 
         // Debug code
         /*
@@ -293,7 +300,8 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
         // Creating network load monitor
         monitors.push_back(new NetworkLoadMonitor(inter_type, inter_direction,
                                                   update_interval, fixed_max,
-                                                  max, tag, plugin));
+                                                  max, tag, add_to_text_overlay,
+                                                  plugin));
 
         // Debug code
         /*
@@ -315,7 +323,8 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
         // Creating temperature monitor
         monitors.push_back(new TemperatureMonitor(temperature_no,
                                                   update_interval, fixed_max,
-                                                  max, tag, plugin));
+                                                  max, tag, add_to_text_overlay,
+                                                  plugin));
       }
       else if (type == "fan_speed")
       {
@@ -328,7 +337,8 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
 
         // Creating fan monitor
         monitors.push_back(new FanSpeedMonitor(fan_no, update_interval,
-                                               fixed_max, max, tag, plugin));
+                                               fixed_max, max, tag,
+                                               add_to_text_overlay, plugin));
       }
 
       else if (type == "generic")
@@ -375,7 +385,8 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
                                               data_source_name_long,
                                               data_source_name_short, units_long,
                                               units_short, update_interval,
-                                              fixed_max, max, tag, plugin));
+                                              fixed_max, max, tag,
+                                              add_to_text_overlay, plugin));
       }
 
       // Saving the monitor's settings root
@@ -388,7 +399,8 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
 
   // Always start with a CpuUsageMonitor
   if (monitors.empty())
-    monitors.push_back(new CpuUsageMonitor(true, false, false, 1000, "", plugin));
+    monitors.push_back(new CpuUsageMonitor(true, false, false, 1000, "", true,
+                                           plugin));
 
   return monitors;
 }
@@ -538,8 +550,9 @@ int const CpuUsageMonitor::update_interval_default = 1000;
 
 CpuUsageMonitor::CpuUsageMonitor(bool fixed_max, bool incl_low_prio,
                                  bool incl_iowait, int interval,
-                                 const Glib::ustring &tag_string, Plugin& plugin)
-  : Monitor(tag_string, interval, plugin), cpu_no(all_cpus),
+                                 const Glib::ustring &tag_string,
+                                 bool add_to_text_overlay, Plugin& plugin)
+  : Monitor(tag_string, add_to_text_overlay, interval, plugin), cpu_no(all_cpus),
     fixed_max_priv(fixed_max), incl_low_prio_priv(incl_low_prio),
     incl_iowait_priv(incl_iowait), total_time(0), nice_time(0), idle_time(0),
     iowait_time(0)
@@ -547,8 +560,9 @@ CpuUsageMonitor::CpuUsageMonitor(bool fixed_max, bool incl_low_prio,
 
 CpuUsageMonitor::CpuUsageMonitor(int cpu, bool fixed_max, bool incl_low_prio,
                                  bool incl_iowait, int interval,
-                                 const Glib::ustring &tag_string, Plugin& plugin)
-  : Monitor(tag_string, interval, plugin), cpu_no(cpu),
+                                 const Glib::ustring &tag_string,
+                                 bool add_to_text_overlay, Plugin& plugin)
+  : Monitor(tag_string, add_to_text_overlay, interval, plugin), cpu_no(cpu),
     fixed_max_priv(fixed_max), incl_low_prio_priv(incl_low_prio),
     incl_iowait_priv(incl_iowait), total_time(0), nice_time(0), idle_time(0),
     iowait_time(0)
@@ -654,6 +668,8 @@ void CpuUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+  xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
+                           add_to_text_overlay);
 }
 
 int CpuUsageMonitor::update_interval()
@@ -669,8 +685,8 @@ int const SwapUsageMonitor::update_interval_default = 10 * 1000;
 
 SwapUsageMonitor::SwapUsageMonitor(int interval, bool fixed_max,
                                    const Glib::ustring &tag_string,
-                                   Plugin& plugin)
-  : Monitor(tag_string, interval, plugin), max_value(0),
+                                   bool add_to_text_overlay, Plugin& plugin)
+  : Monitor(tag_string, add_to_text_overlay, interval, plugin), max_value(0),
     fixed_max_priv(fixed_max)
 {
 }
@@ -732,6 +748,8 @@ void SwapUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+  xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
+                           add_to_text_overlay);
 }
 
 int SwapUsageMonitor::update_interval()
@@ -747,8 +765,8 @@ int const LoadAverageMonitor::update_interval_default = 30 * 1000;
 
 LoadAverageMonitor::LoadAverageMonitor(int interval, bool fixed_max, double max,
                                        const Glib::ustring &tag_string,
-                                       Plugin& plugin)
-  : Monitor(tag_string, interval, plugin), max_value(max),
+                                       bool add_to_text_overlay, Plugin& plugin)
+  : Monitor(tag_string, add_to_text_overlay, interval, plugin), max_value(max),
     fixed_max_priv(fixed_max)
 {
 }
@@ -828,6 +846,8 @@ void LoadAverageMonitor::save(XfceRc *settings_w)
     xfce_rc_write_entry(settings_w, "max", "0");
 
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+  xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
+                           add_to_text_overlay);
 }
 
 int LoadAverageMonitor::update_interval()
@@ -843,8 +863,9 @@ int const MemoryUsageMonitor::update_interval_default = 10 * 1000;
 
 MemoryUsageMonitor::MemoryUsageMonitor(int interval, bool fixed_max,
                                        const Glib::ustring &tag_string,
-                                       Plugin& plugin)
-  : Monitor(tag_string, interval, plugin), max_value(0), fixed_max_priv(fixed_max)
+                                       bool add_to_text_overlay, Plugin& plugin)
+  : Monitor(tag_string, add_to_text_overlay, interval, plugin), max_value(0),
+    fixed_max_priv(fixed_max)
 {
 }
 
@@ -904,6 +925,8 @@ void MemoryUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+  xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
+                           add_to_text_overlay);
 }
 
 int MemoryUsageMonitor::update_interval()
@@ -920,8 +943,8 @@ int const DiskUsageMonitor::update_interval_default = 60 * 1000;
 DiskUsageMonitor::DiskUsageMonitor(const std::string &dir, bool free,
                                    int interval, bool fixed_max,
                                    const Glib::ustring &tag_string,
-                                   Plugin& plugin)
-  : Monitor(tag_string, interval, plugin), max_value(0),
+                                   bool add_to_text_overlay, Plugin& plugin)
+  : Monitor(tag_string, add_to_text_overlay, interval, plugin), max_value(0),
     fixed_max_priv(fixed_max), mount_dir(dir), show_free(free)
 {
 }
@@ -1007,6 +1030,8 @@ void DiskUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+  xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
+                           add_to_text_overlay);
 }
 
 int DiskUsageMonitor::update_interval()
@@ -1032,10 +1057,11 @@ DiskStatsMonitor::DiskStatsMonitor(const Glib::ustring &device_name,
                                    const Stat &stat_to_monitor,
                                    int interval, bool fixed_max, double max,
                                    const Glib::ustring &tag_string,
-                                   Plugin& plugin)
-  : Monitor(tag_string, interval, plugin), device_name(device_name),
-    stat_to_monitor(stat_to_monitor), previous_value(-1), max_value(max),
-    fixed_max_priv(fixed_max), time_stamp_secs(0), time_stamp_usecs(0)
+                                   bool add_to_text_overlay, Plugin& plugin)
+  : Monitor(tag_string, add_to_text_overlay, interval, plugin),
+    device_name(device_name), stat_to_monitor(stat_to_monitor),
+    previous_value(-1), max_value(max), fixed_max_priv(fixed_max),
+    time_stamp_secs(0), time_stamp_usecs(0)
 {
 }
 
@@ -1325,6 +1351,8 @@ void DiskStatsMonitor::save(XfceRc *settings_w)
 
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+  xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
+                           add_to_text_overlay);
 
   // Debug code
   /*plugin_priv.debug_log(
@@ -1442,8 +1470,8 @@ bool NetworkLoadMonitor::interface_names_configured = false;
 NetworkLoadMonitor::NetworkLoadMonitor(InterfaceType &inter_type, Direction dir,
                                        int interval, bool fixed_max, double max,
                                        const Glib::ustring &tag_string,
-                                       Plugin& plugin)
-  : Monitor(tag_string, interval, plugin), max_value(max),
+                                       bool add_to_text_overlay, Plugin& plugin)
+  : Monitor(tag_string, add_to_text_overlay, interval, plugin), max_value(max),
     fixed_max_priv(fixed_max), byte_count(0), time_stamp_secs(0),
     time_stamp_usecs(0), interface_type(inter_type), direction(dir)
 {
@@ -1989,6 +2017,8 @@ void NetworkLoadMonitor::save(XfceRc *settings_w)
 
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+  xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
+                           add_to_text_overlay);
 
   // Debug code
   /*plugin_priv.debug_log(
@@ -2171,9 +2201,9 @@ int const TemperatureMonitor::update_interval_default = 20 * 1000;
 TemperatureMonitor::TemperatureMonitor(int no, int interval, bool fixed_max,
                                        double max,
                                        const Glib::ustring &tag_string,
-                                       Plugin& plugin)
-  : Monitor(tag_string, interval, plugin), sensors_no(no), max_value(max),
-    fixed_max_priv(fixed_max)
+                                       bool add_to_text_overlay, Plugin& plugin)
+  : Monitor(tag_string, add_to_text_overlay, interval, plugin), sensors_no(no),
+    max_value(max), fixed_max_priv(fixed_max)
 {
   Sensors::FeatureInfo info
     = Sensors::instance().get_temperature_features()[sensors_no];
@@ -2255,6 +2285,8 @@ void TemperatureMonitor::save(XfceRc *settings_w)
     xfce_rc_write_entry(settings_w, "max", "0");
 
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+  xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
+                           add_to_text_overlay);
 }
 
 int TemperatureMonitor::update_interval()
@@ -2269,10 +2301,10 @@ int TemperatureMonitor::update_interval()
 int const FanSpeedMonitor::update_interval_default = 20 * 1000;
 
 FanSpeedMonitor::FanSpeedMonitor(int no, int interval, bool fixed_max,
-                                 double max,
-                                 const Glib::ustring &tag_string, Plugin& plugin)
-  : Monitor(tag_string, interval, plugin), sensors_no(no), max_value(max),
-    fixed_max_priv(fixed_max)
+                                 double max, const Glib::ustring &tag_string,
+                                 bool add_to_text_overlay, Plugin& plugin)
+  : Monitor(tag_string, add_to_text_overlay, interval, plugin), sensors_no(no),
+    max_value(max), fixed_max_priv(fixed_max)
 {
   Sensors::FeatureInfo info
     = Sensors::instance().get_fan_features()[sensors_no];
@@ -2352,6 +2384,8 @@ void FanSpeedMonitor::save(XfceRc *settings_w)
     xfce_rc_write_entry(settings_w, "max", "0");
 
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+  xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
+                           add_to_text_overlay);
 }
 
 int FanSpeedMonitor::update_interval()
@@ -2375,10 +2409,10 @@ GenericMonitor::GenericMonitor(const Glib::ustring &file_path,
                                const Glib::ustring &units_long,
                                const Glib::ustring &units_short,
                                int interval, bool fixed_max, double max,
-                               const Glib::ustring &tag_string, Plugin& plugin)
-  : Monitor(tag_string, interval, plugin), max_value(max),
-    fixed_max_priv(fixed_max),
-    previous_value(std::numeric_limits<double>::min()),
+                               const Glib::ustring &tag_string,
+                               bool add_to_text_overlay, Plugin& plugin)
+  : Monitor(tag_string, add_to_text_overlay, interval, plugin), max_value(max),
+    fixed_max_priv(fixed_max), previous_value(std::numeric_limits<double>::min()),
     file_path(file_path), value_from_contents(value_from_contents),
     follow_change(follow_change), dir(dir),
     data_source_name_long(data_source_name_long),
@@ -2587,6 +2621,8 @@ void GenericMonitor::save(XfceRc *settings_w)
     xfce_rc_write_entry(settings_w, "max", "0");
 
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
+  xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
+                           add_to_text_overlay);
 }
 
 int GenericMonitor::update_interval()

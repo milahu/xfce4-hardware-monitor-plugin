@@ -278,8 +278,10 @@ std::list<std::pair<T*, double>> CanvasView::process_mon_maxes_text_overlay(
          r != end; ++r)
     {
       /* With separating out the monitor curves based on type, the max and
-       * units reported on can be correct */
-      if (text_overlay_enabled)
+       * units reported on can be correct
+       * Only reporting on the monitor in the text overlay if configured to do
+       * so */
+      if (text_overlay_enabled && (*r)->monitor->add_to_text_overlay)
       {
         if (graph_max_needed && max_formatted.empty())
           max_formatted += "Max:" + separator_string +
@@ -380,9 +382,9 @@ std::list<std::pair<T*, double>> CanvasView::process_mon_maxes_text_overlay(
     else if (text_overlay->property_text() != overlay_text)
       text_overlay->property_text() = overlay_text;
 
-    /* Setting/fixing changed font and colour - doing it here since the CurveView
-     * updates so frequently that its not worth also setting it directly from the
-     * UI etc */
+    /* Setting/fixing changed font and colour - doing it here since the
+     * CanvasView updates so frequently that its not worth also setting it
+     * directly from the UI etc */
     Glib::ustring font_details = plugin->get_viewer_text_overlay_font();
     if (font_details.empty())
       font_details = "Sans 8";

@@ -41,9 +41,11 @@ class Plugin;
 class Monitor: noncopyable
 {
 public:
-  Monitor(const Glib::ustring &tag_string, int interval, Plugin& plugin)
-    : measured_value(0), tag(tag_string), update_interval_priv(interval),
-      plugin_priv(plugin)
+  Monitor(const Glib::ustring &tag_string, bool add_to_text_overlay,
+          int interval, Plugin& plugin)
+    : measured_value(0), tag(tag_string),
+      add_to_text_overlay(add_to_text_overlay),
+      update_interval_priv(interval), plugin_priv(plugin)
   {
   }
   
@@ -78,6 +80,10 @@ public:
    * to identify the data source when its value is output in the optional text
    * overlay in the CurveView */
   Glib::ustring tag;
+
+  /* Allow user to define whether this monitor's data is included in the
+   * visualisation text overlay or not */
+  bool add_to_text_overlay;
 
   // The max value that the monitor may attain
   virtual double max() = 0;

@@ -97,11 +97,16 @@ private:
              *swap_usage_tag;
   Gtk::CheckButton *cpu_usage_incl_low_checkbutton,
     *cpu_usage_incl_iowait_checkbutton, *cpu_usage_fixed_max_checkbutton,
-    *load_average_fixed_max_checkbutton, *show_free_checkbutton,
-    *disk_usage_fixed_max_checkbutton, *disk_stats_fixed_max_checkbutton,
-    *swap_fixed_max_checkbutton, *memory_fixed_max_checkbutton,
-    *network_load_fixed_max_checkbutton, *temperature_fixed_max_checkbutton,
-    *fan_fixed_max_checkbutton, *generic_fixed_max_checkbutton;
+    *cpu_usage_text_overlay_checkbutton, *load_average_fixed_max_checkbutton,
+    *load_average_text_overlay_checkbutton, *show_free_checkbutton,
+    *disk_usage_fixed_max_checkbutton, *disk_usage_text_overlay_checkbutton,
+    *disk_stats_fixed_max_checkbutton, *disk_stats_text_overlay_checkbutton,
+    *swap_fixed_max_checkbutton, *swap_text_overlay_checkbutton,
+    *memory_fixed_max_checkbutton, *memory_text_overlay_checkbutton,
+    *network_load_fixed_max_checkbutton, *network_load_text_overlay_checkbutton,
+    *temperature_fixed_max_checkbutton, *temperature_text_overlay_checkbutton,
+    *fan_fixed_max_checkbutton, *fan_text_overlay_checkbutton,
+    *generic_fixed_max_checkbutton, *generic_text_overlay_checkbutton;
 
   Gtk::ComboBox *disk_stats_device_combobox, *disk_stats_stat_combobox;
 
