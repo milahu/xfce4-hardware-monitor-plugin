@@ -834,7 +834,7 @@ Monitor *ChooseMonitorWindow::run(const Glib::ustring &mon_dir)
 
         // Debug code
         /*std::cerr << "XFCE4 Hardware Monitor Plugin: ChooseMonitorWindow::run, "
-                     "network load monitor max value: " << max << "\n";*/
+                     "network load monitor max value: " << max << std::endl;*/
       }
       else if (type == "temperature")
       {
@@ -1396,7 +1396,7 @@ void ChooseMonitorWindow::on_network_interface_name_edited(
 {
   // Debug code
   /*std::cout << "Network interface name edit detected: path: " << path <<
-               ", new_text: " << new_text << "\n";*/
+               ", new_text: " << new_text << std::endl;*/
 
   // Obtaining interface type from path
   int inter_type_num = 0;

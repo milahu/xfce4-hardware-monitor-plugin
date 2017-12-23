@@ -50,14 +50,14 @@ void Curve::draw(Gnome::Canvas::Canvas &canvas, int width, int height,
 {
   // Debug code
   /*std::cout << "Curve::draw: Called, remaining_draws: " << remaining_draws
-            << " (" << monitor->get_short_name() << ")\n";*/
+            << " (" << monitor->get_short_name() << ")" << std::endl;*/
 
   if (remaining_draws <= 0)
     return;
 
   // Debug code
   /*std::cout << "Curve::draw: remaining_draws passed (monitor "
-            << monitor->get_short_name() << ")\n";*/
+            << monitor->get_short_name() << ")" << std::endl;*/
 
   --remaining_draws;
   
@@ -111,7 +111,7 @@ void Curve::draw(Gnome::Canvas::Canvas &canvas, int width, int height,
     // Debug code
     /*std::cout << "x: " << x << ", y: " << y << ", width of canvas: " << width
               << ", time offset: " << time_offset << " (monitor "
-              << monitor->get_short_name() << "\n";*/
+              << monitor->get_short_name() << std::endl;*/
 
     x -= CurveView::pixels_per_sample;
   } while (++vi != vend);
@@ -119,7 +119,7 @@ void Curve::draw(Gnome::Canvas::Canvas &canvas, int width, int height,
   line->property_points() = points;
 
   // Debug code
-  //std::cout << "In CurveView::draw!\n" << color << "\n";
+  //std::cout << "In CurveView::draw!\n" << color << std::endl;
 }
 
 double Curve::get_max_value()

@@ -142,7 +142,7 @@ void save_monitors(Plugin *plugin)
 gboolean size_changed(XfcePanelPlugin* xfce_plugin, gint size, Plugin* plugin)
 {
   // Debug code
-  std::cout << "Size changed event detected: " << size << "\n";
+  std::cout << "Size changed event detected: " << size << std::endl;
 
   return true;
 }
@@ -298,7 +298,8 @@ Plugin::Plugin(XfcePanelPlugin *xfce_plugin)
 Plugin::~Plugin()
 {
   // Debug code
-  //std::cerr << "XFCE4 Hardware Monitor Plugin: Plugin destructor running...\n";
+  /*std::cerr << "XFCE4 Hardware Monitor Plugin: Plugin destructor running..."
+              << std::endl;*/
 
   timer.disconnect();
   
@@ -335,7 +336,7 @@ void Plugin::viewer_type_listener(const Glib::ustring viewer_type,
                                   bool force_update)
 {
   // Debug code
-  //std::cout << "Plugin::viewer_type_listener called!\n";
+  //std::cout << "Plugin::viewer_type_listener called!" << std::endl;
 
   /* Setting viewer type, force_update allows resetting the view even when the
    * type is already correct */
@@ -526,7 +527,7 @@ void Plugin::set_viewer_size(const int size)
   /*
   // Debug code
   std::cout << "Size information: " << req_size.width << "x"
-    << req_size.height << "\n";
+            << req_size.height << std::endl;
   */
 
   // Make sure on every call that the viewer size is being honoured
@@ -548,7 +549,7 @@ void Plugin::set_viewer_size(const int size)
   viewer_size = size;
 
   // Debug code
-  //std::cout << "Viewer size set to " << viewer_size << "\n";
+  //std::cout << "Viewer size set to " << viewer_size << std::endl;
 }
 
 const Glib::ustring Plugin::get_viewer_font()
@@ -888,7 +889,7 @@ void Plugin::debug_log(const Glib::ustring &msg)
 
       // Debug code
       std::cerr << "XFCE4 Hardware Monitor Plugin: Debug log file created at "
-                << file->get_path() << "\n";
+                << file->get_path() << std::endl;
   }
 
   debug_log_stream->write(String::ucompose("%1\n", msg));

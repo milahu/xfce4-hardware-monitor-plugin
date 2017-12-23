@@ -1200,7 +1200,7 @@ double DiskStatsMonitor::do_measure()
   }
 
   // Debug code
-  //std::cerr << "Returning value: " << val << "\n";
+  //std::cerr << "Returning value: " << val << std::endl;
 
   return val;
 }
@@ -1305,10 +1305,11 @@ DiskStatsMonitor::parse_disk_stats()
 
     /* Debug code
     std::cout << "Parsing device '" << device_name << "' stats...\nMatch count:"
-              << match_info.get_match_count() << "\n";
-    std::cout << "1: '" << match_info.fetch(1) << "', 2: '" << match_info.fetch(2) << "'\n";
-    std::cout << "single_device_stats: '" << single_device_stats << "'\n";
-    */
+              << match_info.get_match_count() << std::endl;
+    std::cout << "1: '" << match_info.fetch(1) << "', 2: '"
+              << match_info.fetch(2) << "'" << std::endl;
+    std::cout << "single_device_stats: '" << single_device_stats << "'"
+              << std::endl;*/
 
     for (int i = 4; i<match_info.get_match_count(); ++i)
     {
@@ -1329,7 +1330,7 @@ DiskStatsMonitor::parse_disk_stats()
       device_parsed_stats.push_back(stat);
 
       // Debug code
-      //std::cout << "Stat number " << i << " value: " << stat << "\n";
+      //std::cout << "Stat number " << i << " value: " << stat << std::endl;
     }
     parsed_stats[device_name] = device_parsed_stats;
   }
@@ -1795,7 +1796,7 @@ double NetworkLoadMonitor::do_measure()
 
   // Debug code
   /*std::cout << "NetworkLoadMonitor::do_measure: val: " << val <<
-    ", max_value: " << max_value << "\n";*/
+    ", max_value: " << max_value << std::endl;*/
 
   return val;
 }
@@ -1823,9 +1824,9 @@ Glib::ustring NetworkLoadMonitor::get_interface_name(InterfaceType type,
   configure_interface_names(xfce_plugin);
 
   // Debug code
- /* std::cout << "get_interface_name called for " << interface_type_to_string(type,
-                                                                            false)
-            << ", returning " << interface_type_names[type] << "\n";*/
+  /* std::cout << "get_interface_name called for "
+               << interface_type_to_string(type, false)
+               << ", returning " << interface_type_names[type] << std::endl;*/
 
   // Returning requested interface name
   return interface_type_names[type];
@@ -1888,7 +1889,7 @@ bool NetworkLoadMonitor::interface_exists(const Glib::ustring &interface_name)
   {
     // Debug code
     /*std::cout << "Device to search for: " << interface_name << ", device "
-                 "compared with: " << devices[i] << "\n";*/
+                 "compared with: " << devices[i] <<  << std::endl;*/
 
     if (interface_name == devices[i])
     {

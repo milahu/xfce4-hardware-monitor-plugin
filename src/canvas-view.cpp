@@ -69,7 +69,7 @@ void CanvasView::do_display()
 void CanvasView::do_update()
 {
   // Debug code
-  //std::cout << "In CanvasView::do_update!\n";
+  //std::cout << "In CanvasView::do_update!" << std::endl;
 
   // Size is maintained in plugin
   size = plugin->get_viewer_size();
@@ -113,7 +113,9 @@ int CanvasView::width() const
    * orientation) */
 
   // Debug code
-  //std::cout << "CanvasView::width: " << ((plugin->horizontal()) ? size : plugin->get_size()) << "\n";
+  /*std::cout << "CanvasView::width: "
+              << ((plugin->horizontal()) ? size : plugin->get_size())
+              << std::endl;*/
 
   if (plugin->horizontal())
     return size;
@@ -124,7 +126,9 @@ int CanvasView::width() const
 int CanvasView::height() const
 {
   // Debug code
-  //std::cout << "CanvasView::height: " << ((plugin->horizontal()) ? plugin->get_size() : size) << "\n";
+  /*std::cout << "CanvasView::height: "
+              << ((plugin->horizontal()) ? plugin->get_size() : size)
+              << std::endl;*/
 
   if (plugin->horizontal())
     return plugin->get_size();
@@ -145,7 +149,7 @@ void CanvasView::resize_canvas()
   }
 
   // Debug code
-  //std::cout << "In CanvasView::resize_canvas!\n" << w << "|" << h << "\n";
+  //std::cout << "In CanvasView::resize_canvas!\n" << w << "|" << h << std::endl;
 }
 
 bool CanvasView::draw_loop()
