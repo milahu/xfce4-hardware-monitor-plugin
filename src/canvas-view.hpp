@@ -54,7 +54,7 @@ public:
 
   /* Used to locate monitor type of interest in monitor_maxes during
    * visualisation draw loop */
-  typedef std::map<Glib::ustring, std::pair<int, int>>::iterator
+  typedef std::map<Glib::ustring, std::pair<double, double>>::iterator
       mon_type_iterator;
 
   static const Glib::ustring text_overlay_position_to_string(

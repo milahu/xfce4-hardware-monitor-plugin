@@ -30,6 +30,7 @@
 #include "column-view.hpp"
 #include "curve-view.hpp"
 #include "flame-view.hpp"
+#include "ucompose.hpp"
 
 
 int const CanvasView::draw_interval = 100;
@@ -164,7 +165,7 @@ std::list<std::pair<T*, double>> CanvasView::process_mon_maxes_text_overlay(
    * initialised */
 
   // Monitor maxes maintained as a pair of <normal max>, <fixed max>
-  std::map<Glib::ustring, std::pair<int, int>> monitor_maxes;
+  std::map<Glib::ustring, std::pair<double, double>> monitor_maxes;
 
   // Monitors collected by type to allow easy access to separated data sets
   typename std::map<Glib::ustring, std::list<T*>> elems_by_mon_type;
@@ -212,7 +213,19 @@ std::list<std::pair<T*, double>> CanvasView::process_mon_maxes_text_overlay(
       monitor_maxes[mon_type].first = (*i)->get_max_value();
     else if ((*i)->monitor->fixed_max()
              && (*i)->monitor->max() > monitor_maxes[mon_type].second)
+    {
+      // Debug code
+      /*std::cout << "CanvasView::process_mon_maxes_text_overlay: Monitor "
+                << (*i)->monitor->get_short_name() << ", fixed max detected and "
+                   "new max value of " << (*i)->monitor->max() << std::endl;*/
+
       monitor_maxes[mon_type].second = (*i)->monitor->max();
+
+      // Debug code
+      /*std::cout << "CanvasView::process_mon_maxes_text_overlay: "
+                "monitor_maxes[mon_type].second: "
+                << monitor_maxes[mon_type].second << std::endl;*/
+    }
 
     // Record curve in monitor type list
     it_mon_type = elems_by_mon_type.find(mon_type);
@@ -264,8 +277,9 @@ std::list<std::pair<T*, double>> CanvasView::process_mon_maxes_text_overlay(
 
     // Debug code
     /*plugin->debug_log(
-          String::ucompose("CurveView::do_draw_loop: In top curve monitor types"
-                           " loop, monitor type '%1', max %2", i->first, max));*/
+          String::ucompose("CanvasView::process_mon_maxes_text_overlay: In top "
+                           "curve monitor types loop, monitor type '%1', max %2",
+                           i->first, max));*/
 
     if (text_overlay_enabled)
     {

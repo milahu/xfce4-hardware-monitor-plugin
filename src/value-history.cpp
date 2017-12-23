@@ -44,7 +44,7 @@ void ValueHistory::update(unsigned int max_samples, bool &new_value)
 
   // Debug code
   /*std::cout << "ValueHistory::update: Called (monitor "
-            << monitor->get_short_name() << ")\n";*/
+            << monitor->get_short_name() << ")" << std::endl;*/
     
   if (waits_remaining <= 0) {
     new_value = true;
@@ -52,7 +52,8 @@ void ValueHistory::update(unsigned int max_samples, bool &new_value)
 
     // Debug code
     /*std::cout << "ValueHistory::update: Measurement made (monitor "
-              << monitor->get_short_name() << ")\n";*/
+              << monitor->get_short_name() << "), current max " << max_value
+              << std::endl;*/
 
     // Fetching new measurement
     double measurement = monitor->value();
@@ -62,6 +63,10 @@ void ValueHistory::update(unsigned int max_samples, bool &new_value)
     {
       max_value = measurement;
       max_count = 1;
+
+      // Debug code
+      /*std::cout << "ValueHistory::update: Max value updated to " << max_value
+                << std::endl;*/
     }
     else if (measurement == max_value)
       ++max_count;
@@ -93,14 +98,14 @@ void ValueHistory::update(unsigned int max_samples, bool &new_value)
 
         // Debug code
         /*std::cout << "ValueHistory::update: Dropping samples, dropping "
-        "max detected: " << max_value << ", count: " << max_count << "\n";*/
+        "max detected: " << max_value << ", count: " << max_count << std::endl;*/
 
         max_value = *std::max_element(values.begin(), values.end());
         max_count = std::count(values.begin(), values.end(), max_value);
 
         // Debug code
         /*std::cout << "New max: " << max_value << ", new count: " <<
-          max_count << "\n";*/
+          max_count << std::endl;*/
       }
     }
   }

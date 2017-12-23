@@ -969,6 +969,10 @@ double DiskUsageMonitor::do_measure()
       v = (fsusage.blocks - fsusage.bfree) * fsusage.block_size;
   }
 
+  // Debug code
+  /*std::cout << "In DiskUsageMonitor::do_measure, returning " << v
+            << ", max_value " << max_value << std::endl;*/
+
   return v;
 }
 

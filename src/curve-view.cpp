@@ -126,6 +126,13 @@ double Curve::get_max_value()
 {
   /* Used as part of determination of the max value for all curves in
    * the view */
+
+  // Debug code
+  // To get the real type, Monitor* must be dereferenced too...
+  /*std::cout << "In Curve::get_max_value! Monitor type "
+            << monitor->get_short_name() << ", max: "
+            << value_history.get_max_value() << std::endl;*/
+
   return value_history.get_max_value();
 }
 
