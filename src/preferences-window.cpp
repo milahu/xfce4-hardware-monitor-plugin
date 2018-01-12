@@ -22,6 +22,7 @@
 #include <sigc++/bind.h>
 
 #include <cassert>
+#include <cmath>  // For rounding
 #include <iostream>
 
 #include <gtkmm/linkbutton.h>
@@ -43,7 +44,7 @@ void PreferencesWindow::connect_monitor_colorbutton(Gtk::ColorButton
       colorbutton));
 }
 
-PreferencesWindow::PreferencesWindow(Plugin &plugin_, monitor_seq monitors)
+PreferencesWindow::PreferencesWindow(Plugin &plugin_, monitor_seq monitors)  // NOLINT - considers lots of members not initialised due to get_widget calls
   : plugin(plugin_)
 {
   // Now we are forced to use top-level widgets this is much more over the top...
@@ -330,7 +331,7 @@ namespace
 /* Originally gconf callbacks
  * This code is separated out from the radiobutton toggling code as the
  * PreferencesWindow constructor needs to set up the UI via this too */
-void PreferencesWindow::viewer_type_listener(const Glib::ustring viewer_type,
+void PreferencesWindow::viewer_type_listener(const Glib::ustring &viewer_type,
                                              bool enable)
 {
   if (viewer_type == "curve")
@@ -415,7 +416,7 @@ void PreferencesWindow::size_listener(int viewer_size)
 // This works with more than one font button now
 void PreferencesWindow::font_listener(Gtk::CheckButton *checkbutton,
                                       Gtk::FontButton *font_button,
-                                      const Glib::ustring viewer_font)
+                                      const Glib::ustring &viewer_font)
 {
   if (viewer_font.empty())
     checkbutton->set_active(false);
@@ -487,8 +488,9 @@ namespace
   }
 }
 
-void PreferencesWindow::sync_conf_with_colorbutton(Glib::ustring settings_dir,
-  Glib::ustring setting_name, Gtk::ColorButton *button)
+void PreferencesWindow::sync_conf_with_colorbutton(
+    const Glib::ustring &settings_dir, const Glib::ustring &setting_name,
+    Gtk::ColorButton *button)
 {
 
   // Search for a writeable settings file, create one if it doesnt exist
@@ -796,8 +798,8 @@ void PreferencesWindow::on_size_scale_changed()
   // Preventing further callbacks firing
   size_scale_cb.block();
 
-  // Adding 0.5 to current scale value??
-  int i = int(size_scale->get_value() + 0.5);
+  // Rounding up scale
+  int i = lround(size_scale->get_value());
   size_scale->set_value(i);
 
   /* Saving pixel value of scale
@@ -868,20 +870,20 @@ void PreferencesWindow::on_text_overlay_checkbutton_toggled()
   save_text_overlay_enabled(active);
 }
 
-bool PreferencesWindow::on_text_overlay_format_string_focus_out(GdkEventFocus *event)
+bool PreferencesWindow::on_text_overlay_format_string_focus_out(GdkEventFocus *event)  // NOLINT - unused parameter
 {
   save_text_overlay_format_string(text_overlay_format_string_entry->get_text());
 
   // Allow event to propagate
-  return FALSE;
+  return FALSE;  // NOLINT - interacting with C code so FALSE is fine?
 }
 
-bool PreferencesWindow::on_text_overlay_separator_focus_out(GdkEventFocus *event)
+bool PreferencesWindow::on_text_overlay_separator_focus_out(GdkEventFocus *event)  // NOLINT - unused parameter
 {
   save_text_overlay_separator(text_overlay_separator_entry->get_text());
 
   // Allow event to propagate
-  return FALSE;
+  return FALSE;  // NOLINT - interacting with C code so FALSE is fine?
 }
 
 void PreferencesWindow::on_text_overlay_font_checkbutton_toggled()
@@ -1074,7 +1076,7 @@ void PreferencesWindow::on_close_button_clicked()
   window->hide();
 }
 
-bool PreferencesWindow::on_closed(GdkEventAny *)
+bool PreferencesWindow::on_closed(GdkEventAny *)  // NOLINT - unused parameter
 {
   window->hide();
   return false;
@@ -1087,13 +1089,13 @@ Monitor *PreferencesWindow::run_choose_monitor_window(const Glib::ustring &str)
   return chooser.run(str);
 }
 
-void PreferencesWindow::add_to_monitors_list(Monitor *mon)
+void PreferencesWindow::add_to_monitors_list(Monitor *monitor)
 {
   MonitorColumns mc;
   
   store_iter i = monitor_store->append();
-  (*i)[mc.name] = mon->get_name();
-  (*i)[mc.monitor] = mon;
+  (*i)[mc.name] = monitor->get_name();
+  (*i)[mc.monitor] = monitor;
       
   monitor_treeview->get_selection()->select(i);
 }
@@ -1127,7 +1129,7 @@ int PreferencesWindow::pixels_to_size_scale(int pixels)
   return min_i;
 }
 
-void PreferencesWindow::save_font_details(Glib::ustring font_details)
+void PreferencesWindow::save_font_details(const Glib::ustring &font_details)
 {
   plugin.set_viewer_font(font_details);
 
@@ -1188,7 +1190,8 @@ void PreferencesWindow::save_monitor_type_sync_enabled(bool enabled)
   }
 }
 
-void PreferencesWindow::save_text_overlay_font_details(Glib::ustring font_details)
+void PreferencesWindow::save_text_overlay_font_details(
+    const Glib::ustring &font_details)
 {
   plugin.set_viewer_text_overlay_font(font_details);
 
@@ -1249,7 +1252,8 @@ void PreferencesWindow::save_text_overlay_enabled(bool enabled)
   }
 }
 
-void PreferencesWindow::save_text_overlay_format_string(const Glib::ustring format_string)
+void PreferencesWindow::save_text_overlay_format_string(
+    const Glib::ustring &format_string)
 {
   plugin.set_viewer_text_overlay_format_string(format_string);
 
@@ -1281,7 +1285,8 @@ void PreferencesWindow::save_text_overlay_format_string(const Glib::ustring form
   }
 }
 
-void PreferencesWindow::save_text_overlay_separator(const Glib::ustring separator)
+void PreferencesWindow::save_text_overlay_separator(
+    const Glib::ustring &separator)
 {
   plugin.set_viewer_text_overlay_separator(separator);
 

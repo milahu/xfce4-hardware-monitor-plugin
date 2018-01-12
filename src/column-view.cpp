@@ -26,8 +26,8 @@
 #include "pixbuf-drawing.hpp"
 
 
-ColumnGraph::ColumnGraph(Monitor *m, unsigned int c)
-  : monitor(m), value_history(m), remaining_draws(0), color(c)
+ColumnGraph::ColumnGraph(Monitor *monitor_, unsigned int color_)
+  : monitor(monitor_), value_history(monitor_), remaining_draws(0), color(color_)
 {
 }
 
@@ -40,8 +40,8 @@ void ColumnGraph::update(unsigned int max_samples)
     remaining_draws = CanvasView::draw_iterations;
 }
 
-void ColumnGraph::draw(Gnome::Canvas::Canvas &canvas, Plugin *plugin, int width,
-                       int height, double max)
+void ColumnGraph::draw(Gnome::Canvas::Canvas &canvas, int width, int height,
+                       double max)
 {
   if (remaining_draws <= 0)
     return;
@@ -77,7 +77,7 @@ void ColumnGraph::draw(Gnome::Canvas::Canvas &canvas, Plugin *plugin, int width,
    * the monitor has a fixed max (variable maxes should not normally be used
    * with monitors like the CPU usage monitor, although the user can configure
    * this nowadays) */
-  if (monitor->fixed_max())
+  if (monitor->has_fixed_max())
       max = monitor->max();
 
   if (max <= 0)
@@ -145,10 +145,10 @@ double ColumnGraph::get_max_value()
 // class ColumnView
 //
 
-int const ColumnView::pixels_per_sample = 2;
+int const ColumnView::pixels_per_sample = 2;  // NOLINT - thinks static initialisation is a dupe declaration
 
-ColumnView::ColumnView()
-  : CanvasView(true)
+ColumnView::ColumnView(Plugin &plugin_)
+  : CanvasView(true, plugin_)
 {
 }
 
@@ -179,7 +179,7 @@ void ColumnView::do_attach(Monitor *monitor)
   Glib::ustring dir = monitor->get_settings_dir();
 
   // Search for settings file
-  gchar* file = xfce_panel_plugin_lookup_rc_file(plugin->xfce_plugin);
+  gchar* file = xfce_panel_plugin_lookup_rc_file(plugin.xfce_plugin);
 
   if (file)
   {
@@ -192,7 +192,7 @@ void ColumnView::do_attach(Monitor *monitor)
     if (xfce_rc_has_entry(settings_ro, "color"))
     {
       color = xfce_rc_read_int_entry(settings_ro, "color",
-        plugin->get_fg_color());
+        plugin.get_fg_color());
       color_missing = false;
     }
 
@@ -205,10 +205,10 @@ void ColumnView::do_attach(Monitor *monitor)
   if (color_missing)
   {
     // Setting color
-    color = plugin->get_fg_color();
+    color = plugin.get_fg_color();
 
     // Search for a writeable settings file, create one if it doesnt exist
-    file = xfce_panel_plugin_save_location(plugin->xfce_plugin, true);
+    file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
 
     if (file)
     {
@@ -244,7 +244,7 @@ void ColumnView::do_detach(Monitor *monitor)
       return;
     }
 
-  g_assert_not_reached();
+  g_assert_not_reached();  // NOLINT
 }
 
 void ColumnView::do_draw_loop()
@@ -259,5 +259,5 @@ void ColumnView::do_draw_loop()
    * ColumnGraph, second is the max */
   for (std::list<std::pair<ColumnGraph*, double>>::iterator i =
        columns_and_maxes.begin(), end = columns_and_maxes.end(); i != end; ++i)
-    i->first->draw(*canvas, plugin, width(), height(), i->second);
+    i->first->draw(*canvas, width(), height(), i->second);
 }

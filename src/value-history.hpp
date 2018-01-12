@@ -27,7 +27,7 @@ class Monitor;
 class ValueHistory 
 {
 public:
-  ValueHistory(Monitor *monitor);
+  ValueHistory(Monitor *monitor_);
 
   // perform a measurement if needed, new_value is set to true if it was
   void update(unsigned int max_samples, bool &new_value);

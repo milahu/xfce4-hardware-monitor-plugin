@@ -49,7 +49,7 @@ public:
      NUM_TEXT_OVERLAY_POSITIONS
   };
 
-  CanvasView(bool keeps_history);
+  CanvasView(bool keeps_history, Plugin &plugin_);
   ~CanvasView();
 
   /* Used to locate monitor type of interest in monitor_maxes during

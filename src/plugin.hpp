@@ -51,7 +51,7 @@ class View;
 class Plugin: public Gtk::EventBox
 {
 public:
-  Plugin(XfcePanelPlugin *xfce_plugin);
+  Plugin(XfcePanelPlugin *xfce_plugin_);
   ~Plugin();
 
   Gtk::Container &get_container();
@@ -59,7 +59,7 @@ public:
   unsigned int get_fg_color();  // return varying foreground colours
   int get_size() const;   // in pixels
   bool horizontal() const;  // whether we're in horizontal mode
-  void set_view(View *view);  // use this view to monitor
+  void set_view(View *view_);  // use this view to monitor
 
   /* The following have been created to access properties that used to
    * be publically available through GConf, but are private data in the
@@ -70,19 +70,19 @@ public:
   int get_viewer_size() const;
   void set_viewer_size(const int size);
   const Glib::ustring get_viewer_font();
-  void set_viewer_font(const Glib::ustring font_details);
+  void set_viewer_font(const Glib::ustring &font_details);
   bool get_viewer_monitor_type_sync_enabled() const;
   void set_viewer_monitor_type_sync_enabled(bool enabled);
   bool get_viewer_text_overlay_enabled() const;
   void set_viewer_text_overlay_enabled(bool enabled);
   const Glib::ustring get_viewer_text_overlay_format_string();
-  void set_viewer_text_overlay_format_string(const Glib::ustring format_string);
+  void set_viewer_text_overlay_format_string(const Glib::ustring &format_string);
   const Glib::ustring get_viewer_text_overlay_separator() const;
-  void set_viewer_text_overlay_separator(const Glib::ustring separator);
+  void set_viewer_text_overlay_separator(const Glib::ustring &separator);
   bool get_viewer_text_overlay_use_font() const;
   void set_viewer_text_overlay_use_font(bool enabled);
   const Glib::ustring get_viewer_text_overlay_font();
-  void set_viewer_text_overlay_font(const Glib::ustring font_details);
+  void set_viewer_text_overlay_font(const Glib::ustring &font_details);
   const unsigned int get_viewer_text_overlay_color() const;
   void set_viewer_text_overlay_color(const unsigned int color);
   const CanvasView::TextOverlayPosition get_viewer_text_overlay_position();
@@ -92,7 +92,7 @@ public:
   /* Force update allows for this to be called to essentially reload the view
    * e.g. when line colour is updated, despite the fact the viewer type hasn't
    * changed */
-  void viewer_type_listener(const Glib::ustring viewer_type,
+  void viewer_type_listener(const Glib::ustring &viewer_type,
                             bool force_update=false);
 
   void background_color_listener(unsigned int background_color);

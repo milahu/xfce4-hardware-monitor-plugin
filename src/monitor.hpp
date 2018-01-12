@@ -88,9 +88,6 @@ public:
   // The max value that the monitor may attain
   virtual double max() = 0;
 
-  // Indicate whether the monitor's max is fixed or not
-  virtual bool fixed_max() = 0;
-
   /* Convert float to string which represents an actual number with the
    * appropriate unit */
   virtual Glib::ustring format_value(double val, bool compact = false) = 0;
@@ -100,6 +97,9 @@ public:
 
   // Return a short name
   virtual Glib::ustring get_short_name() = 0;
+
+  // Indicate whether the monitor's max is fixed or not
+  virtual bool has_fixed_max() = 0;
 
   /* The interval between updates in milliseconds, user configurable
    * The default value is static per monitor implementation as you can't have

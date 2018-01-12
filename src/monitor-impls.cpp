@@ -237,9 +237,9 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
           else if (inter == "slip")
             inter_type = NetworkLoadMonitor::serial_link;
 
-          // In the original form, only one wireless interface was available
-          else if (inter == "wlan")
-            inter_type = NetworkLoadMonitor::wireless_first;
+          /* In the original form, only one wireless interface was available.
+           * Final option is 'wlan', doing it this way to satisfy clang */
+          else inter_type = NetworkLoadMonitor::wireless_first;
 
           // Search for a writeable settings file, create one if it doesnt exist
           gchar* file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
@@ -260,7 +260,7 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
           else
           {
             // Unable to obtain writeable config file - informing user
-            std::cerr << _("Unable to obtain writeable config file path in order"
+            std::cerr << _("Unable to obtain writeable config file path in order"  // NOLINT
                            " to remove deprecated configuration in "
                            "load_monitors!\n");
           }
@@ -285,7 +285,7 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
             inter_direction >= NetworkLoadMonitor::NUM_DIRECTIONS)
         {
           std::cerr << Glib::ustring::compose(
-                         _("Network monitor for interface '%1' is being loaded "
+                         _("Network monitor for interface '%1' is being loaded "  // NOLINT
                            "with an invalid direction (%2) - resetting to all "
                            "data!\n"),
             NetworkLoadMonitor::interface_type_to_string(inter_type, false),
@@ -368,7 +368,7 @@ load_monitors(XfceRc *settings_ro, Plugin& plugin)
             dir >= GenericMonitor::NUM_DIRECTIONS)
         {
           std::cerr << Glib::ustring::compose(
-                         _("Generic Monitor %1 associated with file '%2' is "
+                         _("Generic Monitor %1 associated with file '%2' is "  // NOLINT
                            "being loaded with an invalid value change direction "
                            "(%3) - resetting to positive!\n"),
                          data_source_name_long, file_path, dir);
@@ -429,7 +429,7 @@ T &operator <<(T& os, const Precision &p)
 
 Precision precision(int n)
 {
-  Precision p;
+  Precision p;  // NOLINT - initialisation is done just below...
   p.n = n;
   return p;
 }
@@ -437,7 +437,7 @@ Precision precision(int n)
 // for getting max no. of decimal digits
 Precision decimal_digits(double val, int n)
 {
-  Precision p;
+  Precision p;  // NOLINT - initialisation is done just below...
 
   if (val == 0)
     p.n = 1;
@@ -453,7 +453,7 @@ Precision decimal_digits(double val, int n)
   return p;
 }
 
-Glib::ustring format_duration_to_string(long duration)
+Glib::ustring format_duration_to_string(int64_t duration)
 {
   /* This is intended to summarise a user-customisable time period for long
    * monitor descriptions, breaking millisecond duration into hours, minutes,
@@ -485,7 +485,7 @@ Glib::ustring format_duration_to_string(long duration)
   {
     if (hours == 1)
       return "h";
-    else if (minutes == 1)
+    else if (minutes == 1)  // NOLINT - else after return, happy with this
       return "m";
     else
       return "s";
@@ -494,7 +494,7 @@ Glib::ustring format_duration_to_string(long duration)
     return duration_string;
 }
 
-Glib::ustring format_bytes_per_duration(long duration, int expected_duration,
+Glib::ustring format_bytes_per_duration(int64_t duration, int expected_duration,
                                         double bytes, bool compact)
 {
   Glib::ustring format;
@@ -517,7 +517,7 @@ Glib::ustring format_bytes_per_duration(long duration, int expected_duration,
     return String::ucompose(format, decimal_digits(val, 3), val,
                    compact ? "" : format_duration_to_string(expected_duration));
   }
-  else if (val >= 1024 * 1024)
+  else if (val >= 1024 * 1024)  // NOLINT - else after return, happy with this
   {
     val /= 1024 * 1024;
     format = compact ? _("%1M%2") : "%1 MB/%2";
@@ -544,27 +544,27 @@ Glib::ustring format_bytes_per_duration(long duration, int expected_duration,
 // class CpuUsageMonitor
 //
 // Static initialisation
-int const CpuUsageMonitor::max_no_cpus = GLIBTOP_NCPU;
-int const CpuUsageMonitor::update_interval_default = 1000;
+int const CpuUsageMonitor::max_no_cpus = GLIBTOP_NCPU;  // NOLINT - thinks static initialisation is a dupe declaration
+int const CpuUsageMonitor::update_interval_default = 1000;  // NOLINT - thinks static initialisation is a dupe declaration
 
 
-CpuUsageMonitor::CpuUsageMonitor(bool fixed_max, bool incl_low_prio,
-                                 bool incl_iowait, int interval,
+CpuUsageMonitor::CpuUsageMonitor(bool fixed_max_, bool incl_low_prio_,
+                                 bool incl_iowait_, int interval,
                                  const Glib::ustring &tag_string,
                                  bool add_to_text_overlay, Plugin& plugin)
   : Monitor(tag_string, add_to_text_overlay, interval, plugin), cpu_no(all_cpus),
-    fixed_max_priv(fixed_max), incl_low_prio_priv(incl_low_prio),
-    incl_iowait_priv(incl_iowait), total_time(0), nice_time(0), idle_time(0),
+    fixed_max(fixed_max_), incl_low_prio(incl_low_prio_),
+    incl_iowait(incl_iowait_), total_time(0), nice_time(0), idle_time(0),
     iowait_time(0)
 {}
 
-CpuUsageMonitor::CpuUsageMonitor(int cpu, bool fixed_max, bool incl_low_prio,
-                                 bool incl_iowait, int interval,
+CpuUsageMonitor::CpuUsageMonitor(int cpu_no_, bool fixed_max_, bool incl_low_prio_,
+                                 bool incl_iowait_, int interval,
                                  const Glib::ustring &tag_string,
                                  bool add_to_text_overlay, Plugin& plugin)
-  : Monitor(tag_string, add_to_text_overlay, interval, plugin), cpu_no(cpu),
-    fixed_max_priv(fixed_max), incl_low_prio_priv(incl_low_prio),
-    incl_iowait_priv(incl_iowait), total_time(0), nice_time(0), idle_time(0),
+  : Monitor(tag_string, add_to_text_overlay, interval, plugin), cpu_no(cpu_no_),
+    fixed_max(fixed_max_), incl_low_prio(incl_low_prio_),
+    incl_iowait(incl_iowait_), total_time(0), nice_time(0), idle_time(0),
     iowait_time(0)
 {
   if (cpu_no < 0 || cpu_no >= max_no_cpus)
@@ -573,7 +573,7 @@ CpuUsageMonitor::CpuUsageMonitor(int cpu, bool fixed_max, bool incl_low_prio,
 
 double CpuUsageMonitor::do_measure()
 {
-  glibtop_cpu cpu;
+  glibtop_cpu cpu;  // NOLINT - initialisation just below...
 
   glibtop_get_cpu(&cpu);
 
@@ -607,44 +607,37 @@ double CpuUsageMonitor::do_measure()
 
   // Count nice and iowait if the user desires
   double res = double(dtotal - didle);
-  if (!incl_low_prio_priv)
+  if (!incl_low_prio)
     res -= double(dnice);
-  if (!incl_iowait_priv)
+  if (!incl_iowait)
     res -= double(diowait);
   res /= double(dtotal);
 
-  if (res > 0)
-    return res;
-  else
-    return 0;
+  return (res > 0) ? res : 0;
 }
 
-bool CpuUsageMonitor::fixed_max()
-{
-  return fixed_max_priv;
-}
-
-Glib::ustring CpuUsageMonitor::format_value(double val, bool compact)
+Glib::ustring CpuUsageMonitor::format_value(double val, bool compact)  // NOLINT - unused parameter
 {
   return String::ucompose(_("%1%%"), precision(1), 100 * val);
 }
 
 Glib::ustring CpuUsageMonitor::get_name()
 {
-  if (cpu_no == all_cpus)
-    return _("All processors");
-  else
-    return String::ucompose(_("Processor no. %1"), cpu_no + 1);
+  return (cpu_no == all_cpus) ? _("All processors")
+                         : String::ucompose(_("Processor no. %1"), cpu_no + 1);
 }
 
 Glib::ustring CpuUsageMonitor::get_short_name()
 {
-  if (cpu_no == all_cpus)
-    // must be short
-    return _("CPU");
-  else
-    // note to translators: %1 is the cpu no, e.g. "CPU 1"
-    return String::ucompose(_("CPU %1"), cpu_no + 1);
+  /* Must be short
+   * Note to translators: %1 is the cpu no, e.g. "CPU 1" */
+  return (cpu_no == all_cpus) ? _("CPU") : String::ucompose(_("CPU %1"),
+                                                            cpu_no + 1);
+}
+
+bool CpuUsageMonitor::has_fixed_max()
+{
+  return fixed_max;
 }
 
 double CpuUsageMonitor::max()
@@ -662,11 +655,11 @@ void CpuUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "type", "cpu_usage");
   xfce_rc_write_int_entry(settings_w, "cpu_no", cpu_no);
   xfce_rc_write_bool_entry(settings_w, "include_low_priority",
-                           incl_low_prio_priv);
+                           incl_low_prio);
   xfce_rc_write_bool_entry(settings_w, "include_iowait",
-                           incl_iowait_priv);
+                           incl_iowait);
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
                            add_to_text_overlay);
@@ -681,35 +674,26 @@ int CpuUsageMonitor::update_interval()
 // class SwapUsageMonitor
 //
 // Static initialisation
-int const SwapUsageMonitor::update_interval_default = 10 * 1000;
+int const SwapUsageMonitor::update_interval_default = 10 * 1000;  // NOLINT - thinks static initialisation is redundant...
 
-SwapUsageMonitor::SwapUsageMonitor(int interval, bool fixed_max,
+SwapUsageMonitor::SwapUsageMonitor(int interval, bool fixed_max_,
                                    const Glib::ustring &tag_string,
                                    bool add_to_text_overlay, Plugin& plugin)
   : Monitor(tag_string, add_to_text_overlay, interval, plugin), max_value(0),
-    fixed_max_priv(fixed_max)
+    fixed_max(fixed_max_)
 {
 }
 
 double SwapUsageMonitor::do_measure()
 {
-  glibtop_swap swp;
+  glibtop_swap swp;  // NOLINT - initialised just below...
 
   glibtop_get_swap(&swp);
 
   // User-specified max is not allowed here, so this is fine
   max_value = swp.total;
 
-  if (swp.total > 0)
-    return swp.used;
-  else
-    return 0;
-
-}
-
-bool SwapUsageMonitor::fixed_max()
-{
-  return fixed_max_priv;
+  return (swp.total > 0) ? swp.used : 0;
 }
 
 Glib::ustring SwapUsageMonitor::format_value(double val, bool compact)
@@ -732,6 +716,11 @@ Glib::ustring SwapUsageMonitor::get_short_name()
   return _("Swap");
 }
 
+bool SwapUsageMonitor::has_fixed_max()
+{
+  return fixed_max;
+}
+
 double SwapUsageMonitor::max()
 {
   return max_value;
@@ -746,7 +735,7 @@ void SwapUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "swap_usage");
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
                            add_to_text_overlay);
@@ -761,26 +750,26 @@ int SwapUsageMonitor::update_interval()
 // class LoadAverageMonitor
 //
 // Static initialisation
-int const LoadAverageMonitor::update_interval_default = 30 * 1000;
+int const LoadAverageMonitor::update_interval_default = 30 * 1000;  // NOLINT - thinks static initialisation is redundant...
 
-LoadAverageMonitor::LoadAverageMonitor(int interval, bool fixed_max, double max,
+LoadAverageMonitor::LoadAverageMonitor(int interval, bool fixed_max_, double max,
                                        const Glib::ustring &tag_string,
                                        bool add_to_text_overlay, Plugin& plugin)
   : Monitor(tag_string, add_to_text_overlay, interval, plugin), max_value(max),
-    fixed_max_priv(fixed_max)
+    fixed_max(fixed_max_)
 {
 }
 
 double LoadAverageMonitor::do_measure()
 {
-  glibtop_loadavg loadavg;
+  glibtop_loadavg loadavg;  // NOLINT - initialised just below...
 
   glibtop_get_loadavg (&loadavg);
 
   double val = loadavg.loadavg[0];
 
   // Only alter max_value if the monitor doesn't have a user-specified fixed max
-  if (!fixed_max_priv)
+  if (!fixed_max)
   {
     max_value *= max_decay; // reduce gradually
 
@@ -791,18 +780,10 @@ double LoadAverageMonitor::do_measure()
       max_value = val * 1.05;
   }
 
-  if (max_value > 0)
-    return val;
-  else
-    return 0;
+  return (max_value > 0) ? val : 0;
 }
 
-bool LoadAverageMonitor::fixed_max()
-{
-  return fixed_max_priv;
-}
-
-Glib::ustring LoadAverageMonitor::format_value(double val, bool compact)
+Glib::ustring LoadAverageMonitor::format_value(double val, bool compact)  // NOLINT - unused parameter
 {
   return String::ucompose("%1", precision(1), val);
 }
@@ -817,6 +798,11 @@ Glib::ustring LoadAverageMonitor::get_short_name()
   // note to translators: short for "load average" - it has nothing to do with
   // loading data
   return _("Load");
+}
+
+bool LoadAverageMonitor::has_fixed_max()
+{
+  return fixed_max;
 }
 
 double LoadAverageMonitor::max()
@@ -837,7 +823,7 @@ void LoadAverageMonitor::save(XfceRc *settings_w)
   /* Only save the max if it is a user-set fixed max, otherwise effectively
    * reset it
    * No support for floats - stringifying */
-  if (fixed_max_priv)
+  if (fixed_max)
   {
     Glib::ustring setting = String::ucompose("%1", max_value);
     xfce_rc_write_entry(settings_w, "max", setting.c_str());
@@ -859,34 +845,26 @@ int LoadAverageMonitor::update_interval()
 // class MemoryUsageMonitor
 //
 // Static initialisation
-int const MemoryUsageMonitor::update_interval_default = 10 * 1000;
+int const MemoryUsageMonitor::update_interval_default = 10 * 1000;  // NOLINT - thinks static initialisation is redundant...
 
-MemoryUsageMonitor::MemoryUsageMonitor(int interval, bool fixed_max,
+MemoryUsageMonitor::MemoryUsageMonitor(int interval, bool fixed_max_,
                                        const Glib::ustring &tag_string,
                                        bool add_to_text_overlay, Plugin& plugin)
   : Monitor(tag_string, add_to_text_overlay, interval, plugin), max_value(0),
-    fixed_max_priv(fixed_max)
+    fixed_max(fixed_max_)
 {
 }
 
 double MemoryUsageMonitor::do_measure()
 {
-  glibtop_mem mem;
+  glibtop_mem mem;  // NOLINT - initialisation just below...
 
   glibtop_get_mem (&mem);
 
   // User-specified max is not allowed here, so this is fine
   max_value = mem.total;
 
-  if (mem.total > 0)
-    return mem.used - (mem.buffer + mem.cached);
-  else
-    return 0;
-}
-
-bool MemoryUsageMonitor::fixed_max()
-{
-  return fixed_max_priv;
+  return (mem.total > 0) ? mem.used - (mem.buffer + mem.cached) : 0;
 }
 
 Glib::ustring MemoryUsageMonitor::format_value(double val, bool compact)
@@ -909,6 +887,11 @@ Glib::ustring MemoryUsageMonitor::get_short_name()
   return _("Mem.");
 }
 
+bool MemoryUsageMonitor::has_fixed_max()
+{
+  return fixed_max;
+}
+
 double MemoryUsageMonitor::max()
 {
   return max_value;
@@ -923,7 +906,7 @@ void MemoryUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_set_group(settings_w, dir.c_str());
   xfce_rc_write_entry(settings_w, "type", "memory_usage");
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
                            add_to_text_overlay);
@@ -938,20 +921,20 @@ int MemoryUsageMonitor::update_interval()
 // class DiskUsageMonitor
 //
 // Static initialisation
-int const DiskUsageMonitor::update_interval_default = 60 * 1000;
+int const DiskUsageMonitor::update_interval_default = 60 * 1000;  // NOLINT - thinks static initialisation is a dupe declaration...
 
-DiskUsageMonitor::DiskUsageMonitor(const std::string &dir, bool free,
-                                   int interval, bool fixed_max,
+DiskUsageMonitor::DiskUsageMonitor(const std::string &mount_dir, bool show_free,
+                                   int interval, bool fixed_max_,
                                    const Glib::ustring &tag_string,
                                    bool add_to_text_overlay, Plugin& plugin)
   : Monitor(tag_string, add_to_text_overlay, interval, plugin), max_value(0),
-    fixed_max_priv(fixed_max), mount_dir(dir), show_free(free)
+    fixed_max(fixed_max_), mount_dir(mount_dir), show_free(show_free)
 {
 }
 
 double DiskUsageMonitor::do_measure()
 {
-  glibtop_fsusage fsusage;
+  glibtop_fsusage fsusage;  // NOLINT - initialised just below...
 
   glibtop_get_fsusage(&fsusage, mount_dir.c_str());
 
@@ -976,11 +959,6 @@ double DiskUsageMonitor::do_measure()
   return v;
 }
 
-bool DiskUsageMonitor::fixed_max()
-{
-  return fixed_max_priv;
-}
-
 Glib::ustring DiskUsageMonitor::format_value(double val, bool compact)
 {
   Glib::ustring format;
@@ -990,7 +968,7 @@ Glib::ustring DiskUsageMonitor::format_value(double val, bool compact)
     format = compact ? _("%1G") : _("%1 GB");
     return String::ucompose(format, decimal_digits(val, 3), val);
   }
-  else if (val >= 1024 * 1024) {
+  else if (val >= 1024 * 1024) {  // NOLINT - doesn't like all the returns
     val /= 1024 * 1024;
     format = compact ? _("%1M") : _("%1 MB");
     return String::ucompose(format, decimal_digits(val, 3), val);
@@ -1016,6 +994,11 @@ Glib::ustring DiskUsageMonitor::get_short_name()
   return String::ucompose("%1", mount_dir);
 }
 
+bool DiskUsageMonitor::has_fixed_max()
+{
+  return fixed_max;
+}
+
 double DiskUsageMonitor::max()
 {
   return max_value;
@@ -1032,7 +1015,7 @@ void DiskUsageMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "mount_dir", mount_dir.c_str());
   xfce_rc_write_bool_entry(settings_w, "show_free", show_free);
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max);
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
   xfce_rc_write_bool_entry(settings_w, "add_to_text_overlay",
                            add_to_text_overlay);
@@ -1047,25 +1030,25 @@ int DiskUsageMonitor::update_interval()
 // class DiskStatsMonitor
 //
 // Static initialisation
-const Glib::ustring& DiskStatsMonitor::diskstats_path = "/proc/diskstats";
+const Glib::ustring& DiskStatsMonitor::diskstats_path = "/proc/diskstats";  // NOLINT - could throw, supposed redundant declaration
 
 /* Used for working out read/write data rate - apparently the kernel always
  * considers this the sector size for a volume:
  * https://serverfault.com/questions/238033/measuring-total-bytes-written-under-linux#comment669172_239010measures volume sectors */
-const int DiskStatsMonitor::SECTOR_SIZE = 512;
+const int DiskStatsMonitor::SECTOR_SIZE = 512;  // NOLINT - supposed redundant declaration
 
-int const DiskStatsMonitor::update_interval_default = 1000;
+int const DiskStatsMonitor::update_interval_default = 1000;  // NOLINT - supposed redundant declaration
 
 // No stats allow for negative values, so using that to detect no previous value
 DiskStatsMonitor::DiskStatsMonitor(const Glib::ustring &device_name,
                                    const Stat &stat_to_monitor,
-                                   int interval, bool fixed_max, double max,
+                                   int interval, bool fixed_max_, double max,
                                    const Glib::ustring &tag_string,
                                    bool add_to_text_overlay, Plugin& plugin)
   : Monitor(tag_string, add_to_text_overlay, interval, plugin),
     device_name(device_name), stat_to_monitor(stat_to_monitor),
-    previous_value(-1), max_value(max), fixed_max_priv(fixed_max),
-    time_stamp_secs(0), time_stamp_usecs(0)
+    previous_value(-1), max_value(max), fixed_max(fixed_max_),
+    time_difference(0), time_stamp_secs(0), time_stamp_usecs(0)
 {
 }
 
@@ -1088,12 +1071,12 @@ bool DiskStatsMonitor::convert_to_rate()
 std::vector<Glib::ustring> DiskStatsMonitor::current_device_names()
 {
   // Fetching current disk stats
-  std::map<Glib::ustring, std::vector<unsigned long int> > parsed_stats =
+  std::map<Glib::ustring, std::vector<uint64_t> > parsed_stats =
       parse_disk_stats();
 
   // Generating sorted list of available devices
   std::vector<Glib::ustring> devices_list;
-  for (std::map<Glib::ustring, std::vector<unsigned long int> >::iterator it
+  for (std::map<Glib::ustring, std::vector<uint64_t> >::iterator it
        = parsed_stats.begin(); it != parsed_stats.end(); ++it)
   {
     devices_list.push_back(it->first);
@@ -1118,9 +1101,9 @@ double DiskStatsMonitor::do_measure()
 
   /* Returning 0 if device is not available - this is not an error since the
    * device may be hotpluggable */
-  std::map<Glib::ustring, std::vector<unsigned long int> > disk_stats =
+  std::map<Glib::ustring, std::vector<uint64_t> > disk_stats =
       parse_disk_stats();
-  std::map<Glib::ustring, std::vector<unsigned long int> >::iterator it =
+  std::map<Glib::ustring, std::vector<uint64_t> >::iterator it =
       disk_stats.find(device_name);
   if (it == disk_stats.end())
   {
@@ -1171,7 +1154,7 @@ double DiskStatsMonitor::do_measure()
      * sample
      * Time of call used to get at a precise data rate, like the network load
      * monitor does - every rate measurement should be precise */
-    struct timeval tv;
+    struct timeval tv;  // NOLINT - initialised just below...
     if (gettimeofday(&tv, 0) == 0) {
       time_difference =
         (tv.tv_sec - time_stamp_secs) * 1000 +
@@ -1188,7 +1171,7 @@ double DiskStatsMonitor::do_measure()
   }
 
   // Only altering the max_value if there is no user-specified fixed max
-  if (!fixed_max_priv)
+  if (!fixed_max)
   {
     /* Note - max_value is no longer used to determine the graph max for
      * Curves - the actual maxima stored in the ValueHistories are used */
@@ -1205,11 +1188,6 @@ double DiskStatsMonitor::do_measure()
   return val;
 }
 
-bool DiskStatsMonitor::fixed_max()
-{
-  return fixed_max_priv;
-}
-
 Glib::ustring DiskStatsMonitor::format_value(double val, bool compact)
 {
   // For read and write data rates, return in appropriate scaled units
@@ -1219,7 +1197,7 @@ Glib::ustring DiskStatsMonitor::format_value(double val, bool compact)
     return format_bytes_per_duration(time_difference, update_interval_priv, val,
                                    compact);
   }
-  else
+  else  // NOLINT - doesn't like mulitple returns
   {
     /* Remember users can define the monitoring interval, so the time unit must
      * be calculated specially */
@@ -1242,12 +1220,17 @@ Glib::ustring DiskStatsMonitor::get_short_name()
   return device_name + "-" + stat_to_string(stat_to_monitor, true);
 }
 
+bool DiskStatsMonitor::has_fixed_max()
+{
+  return fixed_max;
+}
+
 double DiskStatsMonitor::max()
 {
   return max_value;
 }
 
-std::map<Glib::ustring, std::vector<unsigned long int> >
+std::map<Glib::ustring, std::vector<uint64_t> >
 DiskStatsMonitor::parse_disk_stats()
 {
   Glib::ustring device_stats;
@@ -1262,19 +1245,19 @@ DiskStatsMonitor::parse_disk_stats()
     std::cerr << Glib::ustring::compose(_("Unable to parse disk stats from '%1' "
                                           "due to error '%2'\n"),
                                         "/proc/diskstats", e.what());
-    return std::map<Glib::ustring, std::vector<unsigned long int> >();
+    return std::map<Glib::ustring, std::vector<uint64_t> >();
   }
 
   /* Preparing regex to use in splitting out stats
    * Example line:
    *    8      16 sdb 16710337 4656786 7458292624 49395796 15866670 4083490 5442473656 53095516 0 24513196 102484768 */
   Glib::RefPtr<Glib::Regex> split_stats_regex = Glib::Regex::create(
-        "^\\s+(\\d+)\\s+(\\d+)\\s([\\w-]+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s"
+        "^\\s+(\\d+)\\s+(\\d+)\\s([\\w-]+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s"  // NOLINT - C++11
         "(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)$",
         Glib::REGEX_OPTIMIZE);
 
   // Splitting out stats into devices
-  std::map<Glib::ustring, std::vector<unsigned long int> > parsed_stats;
+  std::map<Glib::ustring, std::vector<uint64_t> > parsed_stats;
   std::stringstream device_stats_stream(device_stats);
   Glib::ustring device_name, single_dev_stats;
   Glib::MatchInfo match_info;
@@ -1300,7 +1283,7 @@ DiskStatsMonitor::parse_disk_stats()
      * Source data is stored in kernel source include/linux/genhd.h dis_stats
      * struct, printing out to file is done in block/genhd.c:diskstats_show,
      * some are actually unsigned ints */
-    std::vector<unsigned long int> device_parsed_stats;
+    std::vector<uint64_t> device_parsed_stats;
     device_name = match_info.fetch(3);
 
     /* Debug code
@@ -1313,7 +1296,7 @@ DiskStatsMonitor::parse_disk_stats()
 
     for (int i = 4; i<match_info.get_match_count(); ++i)
     {
-      unsigned long int stat = 0;
+      uint64_t stat = 0;
 
       /* Stringstreams are not trivially reusable! Hence creating a new one
        * each time... */
@@ -1348,11 +1331,11 @@ void DiskStatsMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "type", "disk_statistics");
   xfce_rc_write_entry(settings_w, "disk_stats_device", device_name.c_str());
   xfce_rc_write_int_entry(settings_w, "disk_stats_stat", int(stat_to_monitor));
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max);
 
   /* Only save the max if it is a user-set fixed max, otherwise effectively
    * reset it */
-  xfce_rc_write_int_entry(settings_w, "max", fixed_max_priv ? int(max_value) : 0);
+  xfce_rc_write_int_entry(settings_w, "max", fixed_max ? int(max_value) : 0);
 
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
@@ -1370,7 +1353,7 @@ Glib::ustring DiskStatsMonitor::stat_to_string(const DiskStatsMonitor::Stat &sta
 {
   Glib::ustring stat_str;
 
-  switch(stat)
+  switch(stat)  // NOLINT - complains about NUM_STATS not being handled...
   {
     case num_reads_completed:
       if (short_ver)
@@ -1466,19 +1449,21 @@ int DiskStatsMonitor::update_interval()
  * non-declaration statements here either, so can't directly populate the
  * defaults vector... the main type names vector isn't initialised here as the
  * associated function loads and saves settings */
-int const NetworkLoadMonitor::update_interval_default = 1000;
-std::vector<Glib::ustring> NetworkLoadMonitor::interface_type_names = std::vector<Glib::ustring>(NUM_INTERFACE_TYPES);
-std::vector<Glib::ustring> NetworkLoadMonitor::interface_type_names_default = initialise_default_interface_names();
+int const NetworkLoadMonitor::update_interval_default = 1000;  // NOLINT - static initialisation considered a dupe declaration
+std::vector<Glib::ustring> NetworkLoadMonitor::interface_type_names = std::vector<Glib::ustring>(NUM_INTERFACE_TYPES);  // NOLINT - may throw
+std::vector<Glib::ustring> NetworkLoadMonitor::interface_type_names_default = initialise_default_interface_names();  // NOLINT - may throw
 
-bool NetworkLoadMonitor::interface_names_configured = false;
+bool NetworkLoadMonitor::interface_names_configured = false;  // NOLINT - static initialisation considered dupe declaration...
 
-NetworkLoadMonitor::NetworkLoadMonitor(InterfaceType &inter_type, Direction dir,
-                                       int interval, bool fixed_max, double max,
+NetworkLoadMonitor::NetworkLoadMonitor(InterfaceType &interface_type,
+                                       Direction dir, int interval,
+                                       bool fixed_max_, double max,
                                        const Glib::ustring &tag_string,
                                        bool add_to_text_overlay, Plugin& plugin)
   : Monitor(tag_string, add_to_text_overlay, interval, plugin), max_value(max),
-    fixed_max_priv(fixed_max), byte_count(0), time_stamp_secs(0),
-    time_stamp_usecs(0), interface_type(inter_type), direction(dir)
+    fixed_max(fixed_max_), byte_count(0), time_stamp_secs(0),
+    time_stamp_usecs(0), time_difference(0), interface_type(interface_type),
+    direction(dir)
 {
 }
 
@@ -1711,7 +1696,7 @@ const Glib::ustring NetworkLoadMonitor::direction_to_string(const Direction dire
 {
   Glib::ustring direction_str;
 
-  switch(direction)
+  switch(direction)  // NOLINT - complains about NUM_DIRECTIONS not being handled...
   {
     case all_data:
       direction_str = _("All data");
@@ -1731,7 +1716,7 @@ const Glib::ustring NetworkLoadMonitor::direction_to_string(const Direction dire
 
 double NetworkLoadMonitor::do_measure()
 {
-  glibtop_netload netload;
+  glibtop_netload netload;  // NOLINT - initialised just below...
 
   /* Obtaining interface name - this can change after monitor is instantiated
    * hence fetching each time */
@@ -1758,7 +1743,7 @@ double NetworkLoadMonitor::do_measure()
   byte_count = measured_bytes;
 
   // Only altering max_value if there is no user-specified max
-  if (!fixed_max_priv)
+  if (!fixed_max)
   {
     /* Note - max_value is no longer used to determine the graph max for
      * Curves and Columns - the actual maxima stored in the ValueHistories are
@@ -1785,7 +1770,7 @@ double NetworkLoadMonitor::do_measure()
   }
 
   // Calculate time difference in msecs between last sample and current sample
-  struct timeval tv;
+  struct timeval tv;  // NOLINT - initialised just below...
   if (gettimeofday(&tv, 0) == 0) {
     time_difference =
       (tv.tv_sec - time_stamp_secs) * 1000 +
@@ -1799,11 +1784,6 @@ double NetworkLoadMonitor::do_measure()
     ", max_value: " << max_value << std::endl;*/
 
   return val;
-}
-
-bool NetworkLoadMonitor::fixed_max()
-{
-  return fixed_max_priv;
 }
 
 Glib::ustring NetworkLoadMonitor::format_value(double val, bool compact)
@@ -1861,6 +1841,11 @@ Glib::ustring NetworkLoadMonitor::get_short_name()
   return str;
 }
 
+bool NetworkLoadMonitor::has_fixed_max()
+{
+  return fixed_max;
+}
+
 std::vector<Glib::ustring> NetworkLoadMonitor::initialise_default_interface_names()
 {
   std::vector<Glib::ustring> inter_type_names_default = std::
@@ -1878,7 +1863,7 @@ std::vector<Glib::ustring> NetworkLoadMonitor::initialise_default_interface_name
 
 bool NetworkLoadMonitor::interface_exists(const Glib::ustring &interface_name)
 {
-  glibtop_netlist buf;
+  glibtop_netlist buf;  // NOLINT - initialised just below...
   char **devices;
   int i;
   bool found_device = false;
@@ -1906,7 +1891,7 @@ const Glib::ustring NetworkLoadMonitor::interface_type_to_string(const Interface
 {
   Glib::ustring interface_type_str;
 
-  switch(type)
+  switch(type)  // NOLINT - NUM_INTERFACE_TYPES not taken into account...
   {
     case ethernet_first:
       if (short_ver)
@@ -2014,11 +1999,11 @@ void NetworkLoadMonitor::save(XfceRc *settings_w)
   xfce_rc_write_int_entry(settings_w, "interface_type", int(interface_type));
   xfce_rc_write_int_entry(settings_w, "interface_direction",
     int(direction));
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max);
 
   /* Only save the max if it is a user-set fixed max, otherwise effectively
    * reset it */
-  xfce_rc_write_int_entry(settings_w, "max", fixed_max_priv ? int(max_value) : 0);
+  xfce_rc_write_int_entry(settings_w, "max", fixed_max ? int(max_value) : 0);
 
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
   xfce_rc_write_entry(settings_w, "tag", tag.c_str());
@@ -2071,7 +2056,7 @@ void NetworkLoadMonitor::save_interfaces(XfceRc *settings_w)
                       interface_type_names[wireless_third].c_str());
 }
 
-void NetworkLoadMonitor::set_interface_name(InterfaceType type, const Glib::ustring interface_name)
+void NetworkLoadMonitor::set_interface_name(InterfaceType type, const Glib::ustring &interface_name)
 {
   interface_type_names[type] = interface_name;
 }
@@ -2115,7 +2100,7 @@ Sensors &Sensors::instance()
   return s;
 }
 
-Sensors::FeatureInfoSequence Sensors::get_features(std::string base)
+Sensors::FeatureInfoSequence Sensors::get_features(const std::string &base)
 {
   FeatureInfoSequence vec;
 
@@ -2137,7 +2122,7 @@ Sensors::FeatureInfoSequence Sensors::get_features(std::string base)
   char *desc = sensors_get_label(chip, feature);
   if (desc) {
     info.description = desc;
-    std::free(desc);
+    std::free(desc);  // NOLINT - C library, so free etc
   }
 
   vec.push_back(info);
@@ -2184,10 +2169,7 @@ double Sensors::get_value(int chip_no, int feature_no)
 
   double res;
 
-  if (sensors_get_value(&chips[chip_no], feature_no, &res) == 0)
-    return res;
-  else
-    return 0;
+  return (sensors_get_value(&chips[chip_no], feature_no, &res) == 0) ? res : 0;
 #else
   return 0;
 #endif
@@ -2199,16 +2181,16 @@ double Sensors::get_value(int chip_no, int feature_no)
 // class TemperatureMonitor
 //
 // Static initialisation
-double const Sensors::invalid_max = -1000000;
+double const Sensors::invalid_max = -1000000;  // NOLINT - static initialisation is supposedly a duplicate declaration...
 
-int const TemperatureMonitor::update_interval_default = 20 * 1000;
+int const TemperatureMonitor::update_interval_default = 20 * 1000;  // NOLINT - static initialisation is supposedly a duplicate declaration...
 
-TemperatureMonitor::TemperatureMonitor(int no, int interval, bool fixed_max,
+TemperatureMonitor::TemperatureMonitor(int no, int interval, bool fixed_max_,
                                        double max,
                                        const Glib::ustring &tag_string,
                                        bool add_to_text_overlay, Plugin& plugin)
   : Monitor(tag_string, add_to_text_overlay, interval, plugin), sensors_no(no),
-    max_value(max), fixed_max_priv(fixed_max)
+    max_value(max), fixed_max(fixed_max_)
 {
   Sensors::FeatureInfo info
     = Sensors::instance().get_temperature_features()[sensors_no];
@@ -2227,19 +2209,13 @@ double TemperatureMonitor::do_measure()
   double val = Sensors::instance().get_value(chip_no, feature_no);
 
   // Only altering max_value if there is no user-specified max
-  if (!fixed_max_priv && val > max_value)
+  if (!fixed_max && val > max_value)
     max_value = val;
 
   return val;
 }
 
-bool TemperatureMonitor::fixed_max()
-{
-  return fixed_max_priv;
-}
-
-
-Glib::ustring TemperatureMonitor::format_value(double val, bool compact)
+Glib::ustring TemperatureMonitor::format_value(double val, bool compact)  // NOLINT - unused parameters
 {
   // %2 contains the degree sign (the following 'C' stands for Celsius)
   return String::ucompose(_("%1%2C"), decimal_digits(val, 3), val, "\xc2\xb0");
@@ -2247,18 +2223,21 @@ Glib::ustring TemperatureMonitor::format_value(double val, bool compact)
 
 Glib::ustring TemperatureMonitor::get_name()
 {
-  if (!description.empty())
-    // %2 is a descriptive string from sensors.conf
-    return String::ucompose(_("Temperature %1: \"%2\""),
-          sensors_no + 1, description);
-  else
-    return String::ucompose(_("Temperature %1"), sensors_no + 1);
+  // %2 is a descriptive string from sensors.conf
+  return (!description.empty()) ?
+        String::ucompose(_("Temperature %1: \"%2\""), sensors_no + 1, description)
+      : String::ucompose(_("Temperature %1"), sensors_no + 1);
 }
 
 Glib::ustring TemperatureMonitor::get_short_name()
 {
   // short for "temperature", %1 is sensor no.
   return String::ucompose(_("Temp. %1"), sensors_no + 1);
+}
+
+bool TemperatureMonitor::has_fixed_max()
+{
+  return fixed_max;
 }
 
 double TemperatureMonitor::max()
@@ -2276,12 +2255,12 @@ void TemperatureMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "type", "temperature");
   xfce_rc_write_int_entry(settings_w, "temperature_no", sensors_no);
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max);
 
   /* Only save the max if it is a user-set fixed max, otherwise effectively
    * reset it
    * No support for floats - stringifying */
-  if (fixed_max_priv)
+  if (fixed_max)
   {
     Glib::ustring setting = String::ucompose("%1", max_value);
     xfce_rc_write_entry(settings_w, "max", setting.c_str());
@@ -2303,13 +2282,13 @@ int TemperatureMonitor::update_interval()
 // class FanSpeedMonitor
 //
 // Static initialisation
-int const FanSpeedMonitor::update_interval_default = 20 * 1000;
+int const FanSpeedMonitor::update_interval_default = 20 * 1000;  // NOLINT - static initialisation treated as duplicate declaration...
 
-FanSpeedMonitor::FanSpeedMonitor(int no, int interval, bool fixed_max,
+FanSpeedMonitor::FanSpeedMonitor(int no, int interval, bool fixed_max_,
                                  double max, const Glib::ustring &tag_string,
                                  bool add_to_text_overlay, Plugin& plugin)
   : Monitor(tag_string, add_to_text_overlay, interval, plugin), sensors_no(no),
-    max_value(max), fixed_max_priv(fixed_max)
+    max_value(max), fixed_max(fixed_max_)
 {
   Sensors::FeatureInfo info
     = Sensors::instance().get_fan_features()[sensors_no];
@@ -2328,18 +2307,13 @@ double FanSpeedMonitor::do_measure()
   double val = Sensors::instance().get_value(chip_no, feature_no);
 
   // Only altering max value if there is no user-specified max
-  if (!fixed_max_priv && val > max_value)
+  if (!fixed_max && val > max_value)
     max_value = val;
 
   return val;
 }
 
-bool FanSpeedMonitor::fixed_max()
-{
-  return fixed_max_priv;
-}
-
-Glib::ustring FanSpeedMonitor::format_value(double val, bool compact)
+Glib::ustring FanSpeedMonitor::format_value(double val, bool compact)  // NOLINT - unused parameter
 {
   // rpm is rotations per minute
   return String::ucompose(_("%1 rpm"), val, val);
@@ -2347,17 +2321,20 @@ Glib::ustring FanSpeedMonitor::format_value(double val, bool compact)
 
 Glib::ustring FanSpeedMonitor::get_name()
 {
-  if (!description.empty())
-    // %2 is a descriptive string from sensors.conf
-    return String::ucompose(_("Fan %1 speed: \"%2\""),
-          sensors_no + 1, description);
-  else
-    return String::ucompose(_("Fan %1 speed"), sensors_no + 1);
+  // %2 is a descriptive string from sensors.conf
+  return (!description.empty()) ?
+        String::ucompose(_("Fan %1 speed: \"%2\""), sensors_no + 1, description)
+      : String::ucompose(_("Fan %1 speed"), sensors_no + 1);
 }
 
 Glib::ustring FanSpeedMonitor::get_short_name()
 {
   return String::ucompose(_("Fan %1"), sensors_no + 1);
+}
+
+bool FanSpeedMonitor::has_fixed_max()
+{
+  return fixed_max;
 }
 
 double FanSpeedMonitor::max()
@@ -2375,12 +2352,12 @@ void FanSpeedMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "type", "fan_speed");
   xfce_rc_write_int_entry(settings_w, "fan_no", sensors_no);
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max);
 
   /* Only save the max if it is a user-set fixed max, otherwise effectively
    * reset it
    * No support for floats - stringifying */
-  if (fixed_max_priv)
+  if (fixed_max)
   {
     Glib::ustring setting = String::ucompose("%1", max_value);
     xfce_rc_write_entry(settings_w, "max", setting.c_str());
@@ -2402,27 +2379,27 @@ int FanSpeedMonitor::update_interval()
 // class GenericMonitor
 //
 // Static initialisation
-int const GenericMonitor::update_interval_default = 1000;
+int const GenericMonitor::update_interval_default = 1000;  // NOLINT - static initialisation treated as duplicate declaration...
 
-GenericMonitor::GenericMonitor(const Glib::ustring &file_path,
-                               const bool value_from_contents,
+GenericMonitor::GenericMonitor(const Glib::ustring &file_path_,
+                               const bool value_from_contents_,
                                const Glib::ustring &regex_string,
-                               const bool follow_change,
-                               const ValueChangeDirection dir,
-                               const Glib::ustring &data_source_name_long,
-                               const Glib::ustring &data_source_name_short,
-                               const Glib::ustring &units_long,
-                               const Glib::ustring &units_short,
-                               int interval, bool fixed_max, double max,
+                               const bool follow_change_,
+                               const ValueChangeDirection dir_,
+                               const Glib::ustring &data_source_name_long_,
+                               const Glib::ustring &data_source_name_short_,
+                               const Glib::ustring &units_long_,
+                               const Glib::ustring &units_short_,
+                               int interval, bool fixed_max_, double max,
                                const Glib::ustring &tag_string,
                                bool add_to_text_overlay, Plugin& plugin)
   : Monitor(tag_string, add_to_text_overlay, interval, plugin), max_value(max),
-    fixed_max_priv(fixed_max), previous_value(std::numeric_limits<double>::min()),
-    file_path(file_path), value_from_contents(value_from_contents),
-    follow_change(follow_change), dir(dir),
-    data_source_name_long(data_source_name_long),
-    data_source_name_short(data_source_name_short), units_long(units_long),
-    units_short(units_short)
+    fixed_max(fixed_max_), previous_value(std::numeric_limits<double>::min()),
+    file_path(file_path_), value_from_contents(value_from_contents_),
+    follow_change(follow_change_), dir(dir_),
+    data_source_name_long(data_source_name_long_),
+    data_source_name_short(data_source_name_short_), units_long(units_long_),
+    units_short(units_short_)
 {
   // Compiling regex if provided (at this stage its already been validated)
   if (regex_string != "")
@@ -2511,7 +2488,7 @@ double GenericMonitor::do_measure()
     }
   }
 
-  double return_value;
+  double return_value = 0;
   if (follow_change)
   {
     /* User has requested to diff the data to make a rate of change
@@ -2522,7 +2499,7 @@ double GenericMonitor::do_measure()
     /* Returning desired stat, based on whether the user wants only positive
      * changes, negative changes, or both reported (these are intended for views
      * that don't have a negative axis) */
-    switch (dir)
+    switch (dir)  // NOLINT - NUM_DIRECTIONS not accounted for...
     {
       case positive:
         return_value = val - previous_value;
@@ -2545,7 +2522,7 @@ double GenericMonitor::do_measure()
     return_value = val;
 
   // Only altering max_value if there is no user-specified fixed max
-  if (!fixed_max_priv)
+  if (!fixed_max)
   {
     /* Note - max_value is no longer used to determine the graph max for
    * Curves and Columns - the actual maxima stored in the ValueHistories are
@@ -2565,11 +2542,6 @@ double GenericMonitor::do_measure()
   return return_value;
 }
 
-bool GenericMonitor::fixed_max()
-{
-  return fixed_max_priv;
-}
-
 Glib::ustring GenericMonitor::format_value(double val, bool compact)
 {
   return Glib::ustring::compose("%1%2", val,
@@ -2585,6 +2557,11 @@ Glib::ustring GenericMonitor::get_name()
 Glib::ustring GenericMonitor::get_short_name()
 {
   return data_source_name_short;
+}
+
+bool GenericMonitor::has_fixed_max()
+{
+  return fixed_max;
 }
 
 double GenericMonitor::max()
@@ -2612,12 +2589,12 @@ void GenericMonitor::save(XfceRc *settings_w)
   xfce_rc_write_entry(settings_w, "units_long", units_long.c_str());
   xfce_rc_write_entry(settings_w, "units_short", units_short.c_str());
   xfce_rc_write_int_entry(settings_w, "update_interval", update_interval());
-  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max_priv);
+  xfce_rc_write_bool_entry(settings_w, "fixed_max", fixed_max);
 
   /* Only save the max if it is a user-set fixed max, otherwise effectively
    * reset it
    * No support for floats - stringifying */
-  if (fixed_max_priv)
+  if (fixed_max)
   {
     Glib::ustring setting = String::ucompose("%1", max_value);
     xfce_rc_write_entry(settings_w, "max", setting.c_str());

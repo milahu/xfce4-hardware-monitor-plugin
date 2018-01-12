@@ -33,17 +33,17 @@
 #include "ucompose.hpp"
 
 
-int const CanvasView::draw_interval = 100;
-int const CanvasView::draw_iterations = 10;
+int const CanvasView::draw_interval = 100;  // NOLINT - thinks static initialisation is redundant?
+int const CanvasView::draw_iterations = 10;  // NOLINT - thinks static initialisation is redundant?
 
 // Text overlay format string substitution codes
-const Glib::ustring CanvasView::monitor_full = "%M";
-const Glib::ustring CanvasView::monitor_compact = "%m";
-const Glib::ustring CanvasView::graph_max_full = "%A";
-const Glib::ustring CanvasView::graph_max_compact = "%a";
+const Glib::ustring CanvasView::monitor_full = "%M";  // NOLINT - intialisation may throw
+const Glib::ustring CanvasView::monitor_compact = "%m";  // NOLINT - intialisation may throw
+const Glib::ustring CanvasView::graph_max_full = "%A";  // NOLINT - intialisation may throw
+const Glib::ustring CanvasView::graph_max_compact = "%a";  // NOLINT - intialisation may throw
 
-CanvasView::CanvasView(bool keeps_history)
-  : View(keeps_history), text_overlay(NULL)
+CanvasView::CanvasView(bool keeps_history, Plugin &plugin_)
+  : View(keeps_history, plugin_), text_overlay(NULL), size(0)
 {
 }
 
@@ -57,7 +57,7 @@ void CanvasView::do_display()
 {
   // canvas creation magic
   canvas.reset(new Gnome::Canvas::CanvasAA);
-  plugin->get_container().add(*canvas);
+  plugin.get_container().add(*canvas);
 
   draw_timer = Glib::signal_timeout()
     .connect(sigc::mem_fun(*this, &CanvasView::draw_loop), draw_interval);
@@ -72,11 +72,11 @@ void CanvasView::do_update()
   //std::cout << "In CanvasView::do_update!" << std::endl;
 
   // Size is maintained in plugin
-  size = plugin->get_viewer_size();
+  size = plugin.get_viewer_size();
 
   /* Ensure that the widget's requested size is being honoured on every
    * call */
-  plugin->set_viewer_size(size);
+  plugin.set_viewer_size(size);
 
   // Ensure the canvas is shown
   resize_canvas();
@@ -117,10 +117,7 @@ int CanvasView::width() const
               << ((plugin->horizontal()) ? size : plugin->get_size())
               << std::endl;*/
 
-  if (plugin->horizontal())
-    return size;
-  else
-    return plugin->get_size();
+  return (plugin.horizontal()) ? size : plugin.get_size();
 }
 
 int CanvasView::height() const
@@ -130,10 +127,7 @@ int CanvasView::height() const
               << ((plugin->horizontal()) ? plugin->get_size() : size)
               << std::endl;*/
 
-  if (plugin->horizontal())
-    return plugin->get_size();
-  else
-    return size;
+  return (plugin.horizontal()) ? plugin.get_size(): size;
 }
 
 void CanvasView::resize_canvas()
@@ -177,10 +171,10 @@ std::list<std::pair<T*, double>> CanvasView::process_mon_maxes_text_overlay(
   Glib::ustring max_formatted, max_formatted_compact, monitor_data,
       monitor_data_compact, overlay_text, per_type_overlay_text,
       text_overlay_format_string, tag_string,
-      separator_string = plugin->get_viewer_text_overlay_separator();
+      separator_string = plugin.get_viewer_text_overlay_separator();
   bool graph_max_needed = false, graph_max_compact_needed = false,
       monitor_data_needed = false, monitor_data_compact_needed = false,
-      text_overlay_enabled = plugin->get_viewer_text_overlay_enabled();
+      text_overlay_enabled = plugin.get_viewer_text_overlay_enabled();
 
   /* Obtain maximum value of all curves/flames/bars etc in the view on a per
    * monitor type basis but only when the user wants visualisations to be split
@@ -200,7 +194,7 @@ std::list<std::pair<T*, double>> CanvasView::process_mon_maxes_text_overlay(
   for (typename std::list<T*>::iterator i = graph_elements.begin(),
        end = graph_elements.end(); i != end; ++i)
   {
-    if (plugin->get_viewer_monitor_type_sync_enabled())
+    if (plugin.get_viewer_monitor_type_sync_enabled())
     {
       // To get the real type, Monitor* must be dereferenced too...
       mon_type = typeid(*((*i)->monitor)).name();
@@ -212,10 +206,10 @@ std::list<std::pair<T*, double>> CanvasView::process_mon_maxes_text_overlay(
     if (it == monitor_maxes.end())
       monitor_maxes[mon_type] = std::make_pair(0, 0);
 
-    if (!(*i)->monitor->fixed_max()
+    if (!(*i)->monitor->has_fixed_max()
         && (*i)->get_max_value() > monitor_maxes[mon_type].first)
       monitor_maxes[mon_type].first = (*i)->get_max_value();
-    else if ((*i)->monitor->fixed_max()
+    else if ((*i)->monitor->has_fixed_max()
              && (*i)->monitor->max() > monitor_maxes[mon_type].second)
     {
       // Debug code
@@ -254,7 +248,7 @@ std::list<std::pair<T*, double>> CanvasView::process_mon_maxes_text_overlay(
    * type-based loop is still the best way */
   if (text_overlay_enabled)
   {
-    text_overlay_format_string = plugin->get_viewer_text_overlay_format_string();
+    text_overlay_format_string = plugin.get_viewer_text_overlay_format_string();
 
     /* Glib::ustring::npos is the strange way C++ flags as a failure to find a
      * string */
@@ -403,19 +397,19 @@ std::list<std::pair<T*, double>> CanvasView::process_mon_maxes_text_overlay(
     /* Setting/fixing changed font and colour - doing it here since the
      * CanvasView updates so frequently that its not worth also setting it
      * directly from the UI etc */
-    Glib::ustring font_details = plugin->get_viewer_text_overlay_font();
+    Glib::ustring font_details = plugin.get_viewer_text_overlay_font();
     if (font_details.empty())
       font_details = "Sans 8";
     if (text_overlay->property_font() != font_details)
       text_overlay->property_font() = font_details;
 
-    unsigned int color = plugin->get_viewer_text_overlay_color();
+    unsigned int color = plugin.get_viewer_text_overlay_color();
     if (text_overlay->property_fill_color_rgba() != color)
       text_overlay->property_fill_color_rgba() = color;
 
     // Positioning text
     int x, y;
-    text_overlay_calc_position(x, y, plugin->get_viewer_text_overlay_position());
+    text_overlay_calc_position(x, y, plugin.get_viewer_text_overlay_position());
     if (text_overlay->property_x() != x)
       text_overlay->property_x() = x;
     if (text_overlay->property_y() != y)
@@ -441,33 +435,33 @@ void CanvasView::text_overlay_calc_position(int& x, int& y,
       break;
 
     case top_center:
-      x = (plugin->get_width() - text_overlay->property_text_width()) / 2;
+      x = (plugin.get_width() - text_overlay->property_text_width()) / 2;
       y = 0;
       break;
 
     case top_right:
-      x = plugin->get_width() - text_overlay->property_text_width();
+      x = plugin.get_width() - text_overlay->property_text_width();
       y = 0;
       break;
 
     case center:
-      x = (plugin->get_width() - text_overlay->property_text_width()) / 2;
-      y = (plugin->get_height() - text_overlay->property_text_height()) / 2;
+      x = (plugin.get_width() - text_overlay->property_text_width()) / 2;
+      y = (plugin.get_height() - text_overlay->property_text_height()) / 2;
       break;
 
     case bottom_left:
       x = 0;
-      y = plugin->get_height() - text_overlay->property_text_height();
+      y = plugin.get_height() - text_overlay->property_text_height();
       break;
 
     case bottom_center:
-      x = (plugin->get_width() - text_overlay->property_text_width()) / 2;
-      y = plugin->get_height() - text_overlay->property_text_height();
+      x = (plugin.get_width() - text_overlay->property_text_width()) / 2;
+      y = plugin.get_height() - text_overlay->property_text_height();
       break;
 
     case bottom_right:
-      x = plugin->get_width() - text_overlay->property_text_width();
-      y = plugin->get_height() - text_overlay->property_text_height();
+      x = plugin.get_width() - text_overlay->property_text_width();
+      y = plugin.get_height() - text_overlay->property_text_height();
       break;
 
     default:

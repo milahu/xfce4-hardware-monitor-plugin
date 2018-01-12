@@ -40,12 +40,11 @@
 class Flame
 {
 public:
-  Flame(Monitor *monitor, unsigned int color);
+  Flame(Monitor *monitor_, unsigned int color_);
 
   void burn(double overall_max);
   double get_max_value();
-  void update(Gnome::Canvas::Canvas &canvas,
-        Plugin *plugin, int width, int height, int no, int total);
+  void update(Gnome::Canvas::Canvas &canvas, int width, int height);
 
   Monitor *monitor;
 
@@ -66,7 +65,7 @@ private:
 class FlameView: public CanvasView
 {
 public:
-  FlameView();
+  FlameView(Plugin &plugin_);
   ~FlameView();
   
 private:

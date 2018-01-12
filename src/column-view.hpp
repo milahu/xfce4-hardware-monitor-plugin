@@ -40,11 +40,11 @@
 class ColumnGraph
 {
 public:
-  ColumnGraph(Monitor *monitor, unsigned int color);
+  ColumnGraph(Monitor *monitor_, unsigned int color_);
 
   void update(unsigned int max_samples);  // Gather info from monitor
   void draw(Gnome::Canvas::Canvas &canvas,  // Redraw columns on canvas
-      Plugin *plugin, int width, int height, double max);
+      int width, int height, double max);
   double get_max_value();  // Used to get overall max across columns
 
   Monitor *monitor;
@@ -62,7 +62,7 @@ private:
 class ColumnView: public CanvasView
 {
 public:
-  ColumnView();
+  ColumnView(Plugin &plugin_);
   ~ColumnView();
   
   static int const pixels_per_sample;

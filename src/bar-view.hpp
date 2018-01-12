@@ -38,12 +38,11 @@
 class Bar
 {
 public:
-  Bar(Monitor *monitor, unsigned int fill_color, bool horizontal = false);
+  Bar(Monitor *monitor_, unsigned int fill_color_, bool horizontal_ = false);
   ~Bar();
 
-  void draw(Gnome::Canvas::Canvas &canvas,
-      Plugin *plugin, int width, int height, int no, int total,
-      double time_offset, double max);
+  void draw(Gnome::Canvas::Canvas &canvas, int width, int height, int no,
+            int total, double time_offset, double max);
   double get_max_value();
   void update();
 
@@ -61,7 +60,7 @@ private:
 class BarView: public CanvasView
 {
 public:
-  BarView(bool horizontal = true);
+  BarView(Plugin &plugin_, bool horizontal_ = true);
   ~BarView();
   virtual bool is_horizontal();
   

@@ -32,8 +32,8 @@
 #include "value-history.hpp"
 
 
-Curve::Curve(Monitor *m, unsigned int c)
-  : monitor(m), value_history(m), remaining_draws(0), color(c)
+Curve::Curve(Monitor *monitor_, unsigned int color_)
+  : monitor(monitor_), value_history(monitor_), remaining_draws(0), color(color_)
 {}
 
 void Curve::update(unsigned int max_samples)
@@ -89,7 +89,7 @@ void Curve::draw(Gnome::Canvas::Canvas &canvas, int width, int height,
    * the monitor has a fixed max (variable maxes should not normally be used
    * with monitors like the CPU usage monitor, although the user can configure
    * this nowadays) */
-  if (monitor->fixed_max())
+  if (monitor->has_fixed_max())
       max = monitor->max();
   
   if (max <= 0)
@@ -141,10 +141,10 @@ double Curve::get_max_value()
 // class CurveView
 //
 
-int const CurveView::pixels_per_sample = 2;
+int const CurveView::pixels_per_sample = 2;  // NOLINT - thinks static intialisation is a dupe declaration
 
-CurveView::CurveView()
-  : CanvasView(true)
+CurveView::CurveView(Plugin &plugin_)
+  : CanvasView(true, plugin_)
 {
 }
 
@@ -174,7 +174,7 @@ void CurveView::do_attach(Monitor *monitor)
   Glib::ustring dir = monitor->get_settings_dir();
 
   // Search for settings file
-  gchar* file = xfce_panel_plugin_lookup_rc_file(plugin->xfce_plugin);
+  gchar* file = xfce_panel_plugin_lookup_rc_file(plugin.xfce_plugin);
 
   if (file)
   {
@@ -187,7 +187,7 @@ void CurveView::do_attach(Monitor *monitor)
     if (xfce_rc_has_entry(settings_ro, "color"))
     {
       color = xfce_rc_read_int_entry(settings_ro, "color",
-        plugin->get_fg_color());
+        plugin.get_fg_color());
       color_missing = false;
     }
 
@@ -200,10 +200,10 @@ void CurveView::do_attach(Monitor *monitor)
   if (color_missing)
   {
     // Setting color
-    color = plugin->get_fg_color();
+    color = plugin.get_fg_color();
 
     // Search for a writeable settings file, create one if it doesnt exist
-    file = xfce_panel_plugin_save_location(plugin->xfce_plugin, true);
+    file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
 
     if (file)
     {
@@ -239,7 +239,7 @@ void CurveView::do_detach(Monitor *monitor)
       return;
     }
 
-  g_assert_not_reached();
+  g_assert_not_reached();  // NOLINT
 }
 
 void CurveView::do_draw_loop()

@@ -35,9 +35,9 @@
 class Text
 {
 public:
-  Text(Monitor *monitor);
+  explicit Text(Monitor *monitor_);
 
-  void add_to_table(Gtk::Table &table, int col, int row);
+  void add_to_table(Gtk::Table &table, int col, int row);  // NOLINT - TODO: complaints about table, but making it const causes further warnings - need more understanding on this
   void update(const Glib::ustring &font);
 
   Monitor *monitor;
@@ -46,8 +46,8 @@ private:
   std::auto_ptr<Gtk::Label> label;
 };
 
-Text::Text(Monitor *mon)
-  : monitor(mon)
+Text::Text(Monitor *monitor_)
+  : monitor(monitor_)
 {
 }
 
@@ -81,8 +81,8 @@ void Text::update(const Glib::ustring &font)
 }
 
 
-TextView::TextView()
-  : View(false)
+TextView::TextView(Plugin &plugin_)
+  : View(false, plugin_)
 {
 }
 
@@ -90,7 +90,7 @@ TextView::TextView()
 void TextView::do_display()
 {
   background_box.add(table);
-  plugin->get_container().add(background_box);
+  plugin.get_container().add(background_box);
 
   table.show();
   background_box.show();
@@ -100,7 +100,7 @@ void TextView::do_update()
 {
   // Update
   for (text_iterator i = texts.begin(), end = texts.end(); i != end; ++i)
-    (*i)->update(plugin->get_viewer_font());
+    (*i)->update(plugin.get_viewer_font());
 }
 
 void TextView::do_attach(Monitor *monitor)
@@ -127,7 +127,7 @@ void TextView::do_detach(Monitor *monitor)
       return;
     }
 
-  g_assert_not_reached();
+  g_assert_not_reached();  // NOLINT
 }
 
 void TextView::do_set_background(unsigned int color)

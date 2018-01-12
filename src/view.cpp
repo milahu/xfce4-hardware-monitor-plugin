@@ -19,8 +19,8 @@
 
 #include "view.hpp"
 
-View::View(bool kh)
-  : keeps_history(kh)
+View::View(bool keeps_history_, Plugin &plugin_)
+  : keeps_history(keeps_history_), plugin(plugin_)
 {
 }
 
@@ -28,9 +28,8 @@ View::View::~View()
 {
 }
 
-void View::display(Plugin &a)
+void View::display()
 {
-  plugin = &a;
   do_display();
 }
 

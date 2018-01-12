@@ -38,7 +38,7 @@
 class Curve
 {
 public:
-  Curve(Monitor *monitor, unsigned int color);
+  Curve(Monitor *monitor_, unsigned int color_);
 
   void update(unsigned int max_samples);  // Gather info from monitor
   void draw(Gnome::Canvas::Canvas &canvas,  // Redraw curve on canvas
@@ -59,7 +59,7 @@ private:
 class CurveView: public CanvasView
 {
 public:
-  CurveView();
+  CurveView(Plugin &plugin_);
   ~CurveView();
   
   static int const pixels_per_sample;

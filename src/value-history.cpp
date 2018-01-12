@@ -25,8 +25,8 @@
 #include "plugin.hpp"
 
 
-ValueHistory::ValueHistory(Monitor *mon)
-  : monitor(mon), max_value(0), waits_remaining(0)
+ValueHistory::ValueHistory(Monitor *monitor_)
+  : monitor(monitor_), max_value(0), max_count(0), waits_remaining(0)
 {
   wait_iterations = monitor->update_interval() / Plugin::update_interval;
 }

@@ -47,7 +47,7 @@ class Plugin;
 class PreferencesWindow: public sigc::trackable
 {
 public:
-  PreferencesWindow(Plugin &plugin, monitor_seq monitors);
+  PreferencesWindow(Plugin &plugin_, monitor_seq monitors);
   ~PreferencesWindow();
 
   void show();
@@ -106,12 +106,12 @@ private:
   Glib::RefPtr<Gtk::ListStore> text_overlay_position_store;
 
   // Originally gconf callbacks
-  void viewer_type_listener(const Glib::ustring viewer_type, bool enable);
+  void viewer_type_listener(const Glib::ustring &viewer_type, bool enable);
   void background_color_listener(unsigned int background_color);
   void use_background_color_listener(bool use_background_color);
   void size_listener(int viewer_size);
   void font_listener(Gtk::CheckButton *checkbutton, Gtk::FontButton *font_button,
-                     const Glib::ustring viewer_font);
+                     const Glib::ustring &viewer_font);
   void monitor_color_listener(unsigned int color);
   void text_overlay_color_listener(unsigned int color);
 
@@ -160,16 +160,16 @@ private:
   // for converting between size_scale units and pixels
   int size_scale_to_pixels(int size);
   int pixels_to_size_scale(int pixels);
-  void sync_conf_with_colorbutton(Glib::ustring settings_dir,
-    Glib::ustring setting_name, Gtk::ColorButton *button);
+  void sync_conf_with_colorbutton(const Glib::ustring &settings_dir,
+    const Glib::ustring &setting_name, Gtk::ColorButton *button);
   void connect_monitor_colorbutton(Gtk::ColorButton *colorbutton);
 
-  void save_font_details(Glib::ustring font_details);
+  void save_font_details(const Glib::ustring &font_details);
   void save_monitor_type_sync_enabled(bool enabled);
   void save_text_overlay_enabled(bool enabled);
-  void save_text_overlay_font_details(Glib::ustring font_details);
-  void save_text_overlay_format_string(const Glib::ustring format_string);
-  void save_text_overlay_separator(const Glib::ustring separator);
+  void save_text_overlay_font_details(const Glib::ustring &font_details);
+  void save_text_overlay_format_string(const Glib::ustring &format_string);
+  void save_text_overlay_separator(const Glib::ustring &separator);
 
   Plugin &plugin;
 };

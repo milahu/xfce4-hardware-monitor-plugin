@@ -28,12 +28,11 @@
 #include "monitor.hpp"
 
 
-Flame::Flame(Monitor *m, unsigned int c)
-  : monitor(m), value(0), next_refuel(0), color(c)
+Flame::Flame(Monitor *monitor_, unsigned int color_)
+  : monitor(monitor_), value(0), next_refuel(0), color(color_), max(0), cooling(0)
 {}
 
-void Flame::update(Gnome::Canvas::Canvas &canvas,
-       Plugin *plugin, int width, int height, int no, int total)
+void Flame::update(Gnome::Canvas::Canvas &canvas, int width, int height)
 {
   // Then make sure layer is correctly setup
   if (flame.get() == 0)
@@ -102,7 +101,7 @@ void Flame::update(Gnome::Canvas::Canvas &canvas,
 
 unsigned int random_between(unsigned int min, unsigned int max)
 {
-  return min + std::rand() % (max - min);
+  return min + std::rand() % (max - min);  // NOLINT - insufficiently random, but this not for cryptography
 }
 
 void Flame::recompute_fuel(double overall_max)
@@ -214,8 +213,8 @@ double Flame::get_max_value()
 // class FlameView
 //
 
-FlameView::FlameView()
-  : CanvasView(false)
+FlameView::FlameView(Plugin &plugin_)
+  : CanvasView(false, plugin_)
 {
 }
 
@@ -229,12 +228,9 @@ void FlameView::do_update()
 {
   CanvasView::do_update();
   
-  int total = flames.size();
-  int no = 0;
-  
   for (flame_iterator i = flames.begin(), end = flames.end(); i != end; ++i) {
     Flame &flame = **i;
-    flame.update(*canvas, plugin, width(), height(), no++, total);
+    flame.update(*canvas, width(), height());
   }
 }
 
@@ -248,7 +244,7 @@ void FlameView::do_attach(Monitor *monitor)
   Glib::ustring dir = monitor->get_settings_dir();
 
   // Search for settings file
-  gchar* file = xfce_panel_plugin_lookup_rc_file(plugin->xfce_plugin);
+  gchar* file = xfce_panel_plugin_lookup_rc_file(plugin.xfce_plugin);
 
   if (file)
   {
@@ -261,7 +257,7 @@ void FlameView::do_attach(Monitor *monitor)
     if (xfce_rc_has_entry(settings_ro, "color"))
     {
       color = xfce_rc_read_int_entry(settings_ro, "color",
-        plugin->get_fg_color());
+        plugin.get_fg_color());
       color_missing = false;
     }
 
@@ -274,10 +270,10 @@ void FlameView::do_attach(Monitor *monitor)
   if (color_missing)
   {
     // Setting color
-    color = plugin->get_fg_color();
+    color = plugin.get_fg_color();
 
     // Search for a writeable settings file, create one if it doesnt exist
-    file = xfce_panel_plugin_save_location(plugin->xfce_plugin, true);
+    file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
 
     if (file)
     {
@@ -313,7 +309,7 @@ void FlameView::do_detach(Monitor *monitor)
       return;
     }
 
-  g_assert_not_reached();
+  g_assert_not_reached();  // NOLINT
 }
 
 void FlameView::do_draw_loop()

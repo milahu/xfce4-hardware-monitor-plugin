@@ -32,7 +32,7 @@ class Text;
 class TextView: public View
 {
 public:
-  TextView();
+  TextView(Plugin &plugin_);
   
 private:
   virtual void do_display();

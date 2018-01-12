@@ -134,7 +134,7 @@ private:
                    *generic_change_in_value_negative_radiobutton,
                    *generic_change_in_value_both_radiobutton;
 
-  Plugin& plugin_priv;
+  Plugin& plugin;
 
   // For disk statistics device name combobox
   class DiskStatsDeviceNameCols: public Gtk::TreeModel::ColumnRecord

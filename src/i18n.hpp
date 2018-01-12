@@ -36,7 +36,7 @@
 #endif
 
 //#define _(x) dgettext (GETTEXT_PACKAGE, x)
-#define _(x) gettext (x)
+#define _(x) gettext (x)  // NOLINT
 #define N_(x) x
 
 #endif

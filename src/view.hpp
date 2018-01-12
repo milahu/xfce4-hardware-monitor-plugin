@@ -36,10 +36,10 @@ class Monitor;
 class View: noncopyable
 {
 public:
-  View(bool keeps_history);
+  View(bool keeps_history_, Plugin &plugin_);
   virtual ~View();
 
-  void display(Plugin &plugin);
+  void display();
   void update();
   void attach(Monitor *monitor);
   void detach(Monitor *monitor);
@@ -50,7 +50,7 @@ public:
   bool const keeps_history;
 
 protected:
-  Plugin *plugin;   // store pointer for reference
+  Plugin &plugin;
 
 private:
   // for derived classes to override

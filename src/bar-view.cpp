@@ -26,10 +26,10 @@
 #include "monitor.hpp"
 
 
-Bar::Bar(Monitor *m, unsigned int c, bool horizontal)
-  : monitor(m), old_value(0), new_value(0), fill_color(c)
+Bar::Bar(Monitor *monitor_, unsigned int fill_color_, bool horizontal_)
+  : monitor(monitor_), old_value(0), new_value(0), fill_color(fill_color_),
+    horizontal(horizontal_)
 {
-  this->horizontal = horizontal;
 }
 
 Bar::~Bar()
@@ -68,9 +68,8 @@ unsigned int outlineified(unsigned int color)
   return (r << 24) | (g << 16) | (b << 8) | (color & 0xff);
 }
 
-void Bar::draw(Gnome::Canvas::Canvas &canvas,
-         Plugin *plugin, int width, int height, int no, int total,
-         double time_offset, double max)
+void Bar::draw(Gnome::Canvas::Canvas &canvas, int width, int height, int no,
+               int total, double time_offset, double max)
 { 
   unsigned int outline_color = outlineified(fill_color);
 
@@ -192,10 +191,9 @@ double Bar::get_max_value()
 // class BarView
 //
 
-BarView::BarView(bool _horizontal)
-  : CanvasView(false), draws_since_update(0)
+BarView::BarView(Plugin &plugin_, bool horizontal_)
+  : CanvasView(false, plugin_), draws_since_update(0), horizontal(horizontal_)
 {
-  horizontal = _horizontal;
 }
 
 BarView::~BarView()
@@ -224,7 +222,7 @@ void BarView::do_attach(Monitor *monitor)
   Glib::ustring dir = monitor->get_settings_dir();
 
   // Search for settings file
-  gchar* file = xfce_panel_plugin_lookup_rc_file(plugin->xfce_plugin);
+  gchar* file = xfce_panel_plugin_lookup_rc_file(plugin.xfce_plugin);
 
   if (file)
   {
@@ -239,7 +237,7 @@ void BarView::do_attach(Monitor *monitor)
     if (xfce_rc_has_entry(settings_ro, "color"))
     {
       fill_color = xfce_rc_read_int_entry(settings_ro, "color",
-        plugin->get_fg_color());
+        plugin.get_fg_color());
       color_missing = false;
     }
 
@@ -252,10 +250,10 @@ void BarView::do_attach(Monitor *monitor)
   if (color_missing)
   {
     // Setting color
-    fill_color = plugin->get_fg_color();
+    fill_color = plugin.get_fg_color();
 
     // Search for a writeable settings file, create one if it doesnt exist
-    file = xfce_panel_plugin_save_location(plugin->xfce_plugin, true);
+    file = xfce_panel_plugin_save_location(plugin.xfce_plugin, true);
 
     if (file)
     {
@@ -285,13 +283,15 @@ void BarView::do_attach(Monitor *monitor)
 void BarView::do_detach(Monitor *monitor)
 {
   for (bar_iterator i = bars.begin(), end = bars.end(); i != end; ++i)
+  {
     if ((*i)->monitor == monitor) {
       delete *i;
       bars.erase(i);
       return;
     }
+  }
 
-  g_assert_not_reached();
+  g_assert_not_reached();  // NOLINT
 }
 
 void BarView::do_draw_loop()
@@ -311,8 +311,10 @@ void BarView::do_draw_loop()
    * second is the max */
   for (std::list<std::pair<Bar*, double>>::iterator i = bars_and_maxes.begin(),
        end = bars_and_maxes.end(); i != end; ++i)
-    i->first->draw(*canvas, plugin, width(), height(), no++, total, time_offset,
+  {
+    i->first->draw(*canvas, width(), height(), no++, total, time_offset,
                    i->second);
+  }
 
   ++draws_since_update;
 }

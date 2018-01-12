@@ -86,7 +86,7 @@ extern "C" void plugin_construct(XfcePanelPlugin* xfce_plugin)
 }
 
 // Does not need C linkage as its called via a function pointer?
-void plugin_free(XfcePanelPlugin* xfce_plugin, Plugin* plugin)
+void plugin_free(XfcePanelPlugin* xfce_plugin, Plugin* plugin)  // NOLINT - unused parameter
 {
   // Called by 'free-data' signal
   delete plugin;
@@ -149,8 +149,8 @@ gboolean size_changed(XfcePanelPlugin* xfce_plugin, gint size, Plugin* plugin)
 * */
 
 
-Plugin::Plugin(XfcePanelPlugin *xfce_plugin)
-  : xfce_plugin(xfce_plugin),
+Plugin::Plugin(XfcePanelPlugin *xfce_plugin_)
+  : xfce_plugin(xfce_plugin_),
 
   // Setting defaults
   icon_path("/usr/share/pixmaps/xfce4-hardware-monitor-plugin.png"),
@@ -166,6 +166,7 @@ Plugin::Plugin(XfcePanelPlugin *xfce_plugin)
   viewer_text_overlay_format_string("%a %m"),
   viewer_text_overlay_separator(" "),
   viewer_text_overlay_font(""),
+  viewer_text_overlay_use_font(false),
   viewer_text_overlay_color(0x000000FF),
   viewer_text_overlay_position(CanvasView::top_left),
   viewer_monitor_type_sync_enabled(true)
@@ -254,8 +255,8 @@ Plugin::Plugin(XfcePanelPlugin *xfce_plugin)
    * in the plugin but the plugin pointer, swapped results in the signal
    * handler getting the plugin reference first - the plugin pointer is
    * passed next, but since the handler only takes one parameter this is
-   * discarded */
-  // Providing About option
+   * discarded
+   * Providing About option */
   g_signal_connect_swapped(xfce_plugin, "about", G_CALLBACK(display_about),
     this);
 
@@ -319,20 +320,20 @@ Plugin::~Plugin()
   }
 }
 
-void Plugin::set_view(View *v)
+void Plugin::set_view(View *view_)
 {
   if (view.get())
     for (monitor_iter i = monitors.begin(), end = monitors.end(); i != end; ++i)
       view->detach(*i);
   
-  view.reset(v);
-  view->display(*this);
+  view.reset(view_);
+  view->display();
 
   for (monitor_iter i = monitors.begin(), end = monitors.end(); i != end; ++i)
     view->attach(*i);
 }
 
-void Plugin::viewer_type_listener(const Glib::ustring viewer_type,
+void Plugin::viewer_type_listener(const Glib::ustring &viewer_type,
                                   bool force_update)
 {
   // Debug code
@@ -343,7 +344,7 @@ void Plugin::viewer_type_listener(const Glib::ustring viewer_type,
   if (viewer_type == "curve")
   {
     if (force_update || !dynamic_cast<CurveView *>(view.get()))
-      set_view(new CurveView);
+      set_view(new CurveView(*this));
   }
   else if (viewer_type == "bar")
   {
@@ -351,26 +352,26 @@ void Plugin::viewer_type_listener(const Glib::ustring viewer_type,
     // Thus, we much also check the oriententation
     BarView *bar_view = dynamic_cast<BarView *>(view.get());
     if (force_update || !(bar_view && bar_view->is_horizontal()) )
-      set_view(new BarView);
+      set_view(new BarView(*this));
   }
   else if (viewer_type == "vbar")
   {
     // Same situation as with "bar"
     BarView *bar_view = dynamic_cast<BarView *>(view.get());
     if (force_update || !(bar_view && !bar_view->is_horizontal()) )
-      set_view(new BarView(false));
+      set_view(new BarView(*this, false));
   }
   else if (viewer_type == "text") {
     if (force_update || !dynamic_cast<TextView *>(view.get()))
-      set_view(new TextView);
+      set_view(new TextView(*this));
   }
   else if (viewer_type == "flame") {
     if (force_update || !dynamic_cast<FlameView *>(view.get()))
-      set_view(new FlameView);
+      set_view(new FlameView(*this));
   }
   else if (viewer_type == "column") {
     if (force_update || !dynamic_cast<ColumnView *>(view.get()))
-      set_view(new ColumnView);
+      set_view(new ColumnView(*this));
   }
 
   // Make sure the view sets the background
@@ -521,7 +522,7 @@ void Plugin::set_viewer_size(const int size)
   // See header file viewer_size_configured notes
 
   // Obtaining current widget dimensions
-  GtkRequisition req_size;
+  GtkRequisition req_size;  // NOLINT - initialisation just below...
   gtk_widget_size_request(GTK_WIDGET(xfce_plugin), &req_size);
 
   /*
@@ -557,7 +558,7 @@ const Glib::ustring Plugin::get_viewer_font()
   return viewer_font;
 }
 
-void Plugin::set_viewer_font(const Glib::ustring font_details)
+void Plugin::set_viewer_font(const Glib::ustring &font_details)
 {
   viewer_font = font_details;
 }
@@ -587,7 +588,8 @@ const Glib::ustring Plugin::get_viewer_text_overlay_format_string()
   return viewer_text_overlay_format_string;
 }
 
-void Plugin::set_viewer_text_overlay_format_string(const Glib::ustring format_string)
+void Plugin::set_viewer_text_overlay_format_string(
+                                             const Glib::ustring &format_string)
 {
   viewer_text_overlay_format_string = format_string;
 }
@@ -597,7 +599,7 @@ const Glib::ustring Plugin::get_viewer_text_overlay_separator() const
   return viewer_text_overlay_separator;
 }
 
-void Plugin::set_viewer_text_overlay_separator(const Glib::ustring separator)
+void Plugin::set_viewer_text_overlay_separator(const Glib::ustring &separator)
 {
   viewer_text_overlay_separator = separator;
 }
@@ -617,7 +619,7 @@ const Glib::ustring Plugin::get_viewer_text_overlay_font()
   return viewer_text_overlay_font;
 }
 
-void Plugin::set_viewer_text_overlay_font(const Glib::ustring font_details)
+void Plugin::set_viewer_text_overlay_font(const Glib::ustring &font_details)
 {
   viewer_text_overlay_font = font_details;
 }
@@ -730,16 +732,16 @@ void Plugin::remove_monitor(Monitor *monitor)
   delete monitor;
 }
 
-void Plugin::replace_monitor(Monitor *prev_mon, Monitor *new_mon)
+void Plugin::replace_monitor(Monitor *prev_monitor, Monitor *new_monitor)
 {
   // Locating monitor of interest
-  monitor_iter i = std::find(monitors.begin(), monitors.end(), prev_mon);
+  monitor_iter i = std::find(monitors.begin(), monitors.end(), prev_monitor);
   assert(i != monitors.end());
 
   // Basic configuration
   //add_sync_for(new_mon);
-  *i = new_mon;
-  new_mon->set_settings_dir(prev_mon->get_settings_dir());
+  *i = new_monitor;
+  new_monitor->set_settings_dir(prev_monitor->get_settings_dir());
 
   // Search for a writeable settings file, create one if it doesnt exist
   gchar* file = xfce_panel_plugin_save_location(xfce_plugin, true);
@@ -751,7 +753,7 @@ void Plugin::replace_monitor(Monitor *prev_mon, Monitor *new_mon)
     g_free(file);
 
     // Saving settings
-    new_mon->save(settings_w);
+    new_monitor->save(settings_w);
     
     // Close settings file
     xfce_rc_close(settings_w);
@@ -765,13 +767,13 @@ void Plugin::replace_monitor(Monitor *prev_mon, Monitor *new_mon)
 
   // Reattach monitor if its attached to the current view
   if (view.get()) {
-    view->detach(prev_mon);
-    view->attach(new_mon);
+    view->detach(prev_monitor);
+    view->attach(new_monitor);
   }
 
   // Deleting previous monitor
-  //remove_sync_for(prev_mon);
-  delete prev_mon;
+  //remove_sync_for(prev_monitor);
+  delete prev_monitor;
 }
 
 /*
