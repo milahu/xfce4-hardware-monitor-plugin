@@ -381,6 +381,15 @@ less than default priority</property>
                                           <placeholder/>
                                         </child>
                                         <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
+                                          <placeholder/>
+                                        </child>
+                                        <child>
                                           <object class="GtkLabel" id="cpu_usage_tag_label">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
@@ -398,8 +407,7 @@ less than default priority</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
-in the optional text overlay in a curve
-view</property>
+in the optional text overlay</property>
                                             <property name="invisible_char">●</property>
                                             <property name="invisible_char_set">True</property>
                                             <property name="primary_icon_activatable">False</property>
@@ -478,15 +486,6 @@ is fixed to a maximum value of 100%</property>
                                             <property name="top_attach">1</property>
                                             <property name="bottom_attach">2</property>
                                           </packing>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
                                         </child>
                                         <child>
                                           <object class="GtkCheckButton" id="cpu_usage_text_overlay_checkbutton">
@@ -603,6 +602,15 @@ include this monitor in the text output</property>
                                   <placeholder/>
                                 </child>
                                 <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
                                   <object class="GtkLabel" id="load_average_tag_label">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
@@ -620,8 +628,7 @@ include this monitor in the text output</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
-in the optional text overlay in a curve
-view</property>
+in the optional text overlay</property>
                                     <property name="invisible_char">●</property>
                                     <property name="invisible_char_set">True</property>
                                     <property name="primary_icon_activatable">False</property>
@@ -719,15 +726,6 @@ value</property>
                                     <property name="top_attach">1</property>
                                     <property name="bottom_attach">2</property>
                                   </packing>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
-                                </child>
-                                <child>
-                                  <placeholder/>
                                 </child>
                                 <child>
                                   <object class="GtkCheckButton" id="load_average_text_overlay_checkbutton">
@@ -911,6 +909,15 @@ include this monitor in the text output</property>
                                       <placeholder/>
                                     </child>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkLabel" id="disk_usage_tag_label">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
@@ -931,8 +938,7 @@ view</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
-in the optional text overlay in a curve
-view</property>
+in the optional text overlay</property>
                                         <property name="invisible_char">●</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="primary_icon_activatable">False</property>
@@ -1014,15 +1020,6 @@ on the size of the volume</property>
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                     <child>
                                       <object class="GtkCheckButton" id="disk_usage_text_overlay_checkbutton">
@@ -1209,6 +1206,15 @@ include this monitor in the text output</property>
                                       <placeholder/>
                                     </child>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkLabel" id="disk_stats_tag_label">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
@@ -1229,8 +1235,7 @@ view</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
-in the optional text overlay in a curve
-view</property>
+in the optional text overlay</property>
                                         <property name="invisible_char">●</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="primary_icon_activatable">False</property>
@@ -1328,15 +1333,6 @@ maximum value</property>
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                     <child>
                                       <object class="GtkCheckButton" id="disk_stats_text_overlay_checkbutton">
@@ -1452,6 +1448,15 @@ include this monitor in the text output</property>
                                       <placeholder/>
                                     </child>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkLabel" id="swap_tag_label">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
@@ -1469,8 +1474,7 @@ include this monitor in the text output</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
-in the optional text overlay in a curve
-view</property>
+in the optional text overlay</property>
                                         <property name="invisible_char">●</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="primary_icon_activatable">False</property>
@@ -1552,15 +1556,6 @@ on the amount of swap available</property>
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                     <child>
                                       <object class="GtkCheckButton" id="swap_text_overlay_checkbutton">
@@ -1676,6 +1671,15 @@ include this monitor in the text output</property>
                                       <placeholder/>
                                     </child>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkLabel" id="memory_tag_label">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
@@ -1693,8 +1697,7 @@ include this monitor in the text output</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
-in the optional text overlay in a curve
-view</property>
+in the optional text overlay</property>
                                         <property name="invisible_char">●</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="primary_icon_activatable">False</property>
@@ -1776,15 +1779,6 @@ the amount of RAM available</property>
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                     <child>
                                       <object class="GtkCheckButton" id="memory_text_overlay_checkbutton">
@@ -1992,6 +1986,15 @@ include this monitor in the text output</property>
                                               <placeholder/>
                                             </child>
                                             <child>
+                                              <placeholder/>
+                                            </child>
+                                            <child>
+                                              <placeholder/>
+                                            </child>
+                                            <child>
+                                              <placeholder/>
+                                            </child>
+                                            <child>
                                               <object class="GtkLabel" id="network_load_tag_label">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
@@ -2009,8 +2012,7 @@ include this monitor in the text output</property>
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
-in the optional text overlay in a curve
-view</property>
+in the optional text overlay</property>
                                                 <property name="invisible_char">●</property>
                                                 <property name="invisible_char_set">True</property>
                                                 <property name="primary_icon_activatable">False</property>
@@ -2107,15 +2109,6 @@ is fixed to a user-specified maximum value</property>
                                                 <property name="top_attach">1</property>
                                                 <property name="bottom_attach">2</property>
                                               </packing>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
-                                            </child>
-                                            <child>
-                                              <placeholder/>
                                             </child>
                                             <child>
                                               <object class="GtkCheckButton" id="network_load_text_overlay_checkbutton">
@@ -2315,6 +2308,15 @@ include this monitor in the text output</property>
                                       <placeholder/>
                                     </child>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkLabel" id="temperature_tag_label">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
@@ -2332,8 +2334,7 @@ include this monitor in the text output</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
-in the optional text overlay in a curve
-view</property>
+in the optional text overlay</property>
                                         <property name="invisible_char">●</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="primary_icon_activatable">False</property>
@@ -2431,15 +2432,6 @@ value</property>
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                     <child>
                                       <object class="GtkCheckButton" id="temperature_text_overlay_checkbutton">
@@ -2565,6 +2557,15 @@ include this monitor in the text output</property>
                                       <placeholder/>
                                     </child>
                                     <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
                                       <object class="GtkLabel" id="fan_speed_tag_label">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
@@ -2582,8 +2583,7 @@ include this monitor in the text output</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
-in the optional text overlay in a curve
-view</property>
+in the optional text overlay</property>
                                         <property name="invisible_char">●</property>
                                         <property name="invisible_char_set">True</property>
                                         <property name="primary_icon_activatable">False</property>
@@ -2681,15 +2681,6 @@ value</property>
                                         <property name="top_attach">1</property>
                                         <property name="bottom_attach">2</property>
                                       </packing>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                    <child>
-                                      <placeholder/>
                                     </child>
                                     <child>
                                       <object class="GtkCheckButton" id="fan_text_overlay_checkbutton">
@@ -3307,8 +3298,7 @@ value</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">Tag to display along with monitor data
-in the optional text overlay in a curve
-view</property>
+in the optional text overlay</property>
                                     <property name="invisible_char">●</property>
                                     <property name="invisible_char_set">True</property>
                                     <property name="primary_icon_activatable">False</property>
