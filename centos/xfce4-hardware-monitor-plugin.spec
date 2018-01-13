@@ -7,7 +7,7 @@
 
 Summary: XFCE Plugin for hardware monitoring
 Name: xfce4-hardware-monitor-plugin
-Version: 1.5.0
+Version: 1.6.0
 Release: 1%{?dist}
 License: GPLv3+
 Group: User Interface/Desktops
@@ -55,6 +55,49 @@ pleasantly with the rest of your XFCE desktop.
 %{_datadir}/xfce4/panel/plugins/xfce4-hardware-monitor-plugin.desktop
 
 %changelog
+* Fri Jan 12 2018  OmegaPhil <OmegaPhil@startmail.com>
+
+        Release 1.6.0
+
+        This is an important release as it makes including different types of
+        monitors on the same visualisation a supported, properly-working option,
+        when the user takes the time to configure individual monitors to taste.
+
+        - Text overlay tag settings for Monitors moved to the relevant Advanced
+        sections for less clutter.
+        - User-configurable monitor refresh rates - make the monitors update
+        every second or once every hour as you wish (so slowing down/speeding up
+        the visualisations as approriate, see Advanced.
+        https://bugzilla.xfce.org/show_bug.cgi?id=13796
+        https://bugzilla.xfce.org/show_bug.cgi?id=13803
+        - CPU Usage Monitor now supports optional inclusion of low priority/
+        nice'd processes and I/O wait
+        https://bugzilla.xfce.org/show_bug.cgi?id=13910
+        - Fixed/unfixed maxes now configurable where sensible for all monitors:
+        e.g. for recent versions the CPU Usage Monitor was fixed to have 100% at
+        the top of the time-based visualisation (e.g. Curves) - now you can keep
+        this or have the scale change dynamically based on the max value
+        encountered in recent history, like the Network Monitor does. See
+        Advanced.
+        - All time-based visualisations now treat their max scale in the same
+        way as the Curve view - based on the actual recent maxima rather than
+        some slowly-decaying value derived from it.
+        - All monitors in a visualisation can have their maxes synced together
+        so share the same scale, or scales are synced per monitor type, with each
+        type able to work to its own dedicated scale on the same visualisation.
+        - Disk Stats Monitor has had 'Number of sectors read/written' replaced
+        with 'Number of bytes read/written per duration' to get at the much more
+        interesting disk read/write speed.
+        - The text overlay that used to be restricted to the Curves visualisation
+        is now implemented for everything bar the Text visualisation.
+        - Text overlay supports users that just want to put a label ontop of a
+        visualisation, rather than report on monitor data values, when multiple
+        monitor types are in one visualisation.
+        https://bugzilla.xfce.org/show_bug.cgi?id=14065
+        - User can now hide individual monitors from the text overlay output.
+        https://bugzilla.xfce.org/show_bug.cgi?id=14113
+
+
 * Sun Jul 17 2016  OmegaPhil <OmegaPhil@startmail.com>
 
         Release 1.5.0

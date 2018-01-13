@@ -1,7 +1,7 @@
 /* Implementation of the Plugin class.
  *
  * Copyright (c) 2003, 04, 05 Ole Laursen.
- * Copyright (c) 2013-2016 OmegaPhil (OmegaPhil@startmail.com)
+ * Copyright (c) 2013-2018 OmegaPhil (OmegaPhil@startmail.com)
  *
  * This program is free software; you can redistribute it and/or 
  * modify it under the terms of the GNU General Public License as 
@@ -851,7 +851,7 @@ void Plugin::on_about_activated()
     about->set_version(VERSION);
     // %1 is the copyright symbol
     about->set_copyright(String::ucompose(_("Copyright %1 2003 Ole "
-      "Laursen\nCopyright %1 2013-2016 OmegaPhil"), "\xc2\xa9"));
+      "Laursen\nCopyright %1 2013-2018 OmegaPhil"), "\xc2\xa9"));
     about->set_authors(authors);
     if (!documenters.empty())
       about->set_documenters(documenters);

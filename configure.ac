@@ -11,13 +11,13 @@ dnl
 
 dnl XFCE4 modifications copyright:
 dnl
-dnl 2013-2016 OmegaPhil (OmegaPhil@startmail.com)
+dnl 2013-2018 OmegaPhil (OmegaPhil@startmail.com)
 dnl
 
 
 dnl Initialising autoconf - this provides PACKAGE_NAME and PACKAGE_VERSION
 dnl output variables
-AC_INIT([xfce4-hardware-monitor-plugin], [1.5.0])
+AC_INIT([xfce4-hardware-monitor-plugin], [1.6.0])
 
 dnl Initialise automake with minimum version 1.11.6 (as of 17.11.13 Debian
 dnl Stable (Wheezy) has this version - http://mail.xfce.org/pipermail/xfce4-dev/2013-November/030523.html)
