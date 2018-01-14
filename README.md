@@ -1,13 +1,18 @@
 XFCE4 Hardware Monitor Downloads
 ================================
 
-This branch contains Debian archives (<v1.4.6, made by [checkinstall](http://asic-linux.com.mx/~izto/checkinstall/)) targetted at the Devuan Testing environment I use locally (but should work with Debian
-Testing).
+This branch contains Debian archives:
+
+<v1.6: Historical interest only, built for Devuan Testing (compatible with
+Debian Testing) at the time of the relevant release  (<v1.4.6, made by
+[checkinstall](http://asic-linux.com.mx/~izto/checkinstall/)).
+v1.6: As of 14.01.18, built for Debian Stable (Stretch) and Debian Testing
+(Buster) in Debian VMs.
 
 Please report any problems on the [issue tracker](https://bugzilla.xfce.org/buglist.cgi?component=General&list_id=19900&product=Xfce4-hardware-monitor-plugin).
 
-To download a file, click on the filename, then click View Raw. **DO NOT**
-right click on a link, as this will save the web page, not the file.
+To download a file, use the 'plain' link on the far right - anything else will
+treat it as a binary file to view in the cgit system.
 
 From v1.4.6 these archives are signed by my GPG key - to verify:
 
