@@ -419,8 +419,18 @@ void PreferencesWindow::font_listener(Gtk::CheckButton *checkbutton,
                                       const Glib::ustring &viewer_font)
 {
   if (viewer_font.empty())
+  {
+    // Debug code
+    //std::cout << "PreferencesWindow::font_listener: Font is empty!" << std::endl;
+
     checkbutton->set_active(false);
-  else {
+  }
+  else
+  {
+    // Debug code
+    /*std::cout << "PreferencesWindow::font_listener: Font is not empty!"
+             << std::endl;*/
+
     if (font_button->get_font_name() != viewer_font)
       font_button->set_font_name(viewer_font);
 
@@ -853,8 +863,9 @@ void PreferencesWindow::on_font_checkbutton_toggled()
 
 void PreferencesWindow::on_fontbutton_set()
 {
-  // Saving
-  save_font_details(fontbutton->get_font_name());
+  // Saving, but only if 'use this font' is set
+  if (font_checkbutton->get_active())
+    save_font_details(fontbutton->get_font_name());
 }
 
 void PreferencesWindow::on_text_overlay_checkbutton_toggled()
@@ -905,8 +916,9 @@ void PreferencesWindow::on_text_overlay_font_checkbutton_toggled()
 
 void PreferencesWindow::on_text_overlay_fontbutton_set()
 {
-  // Saving
-  save_text_overlay_font_details(text_overlay_fontbutton->get_font_name());
+  // Saving, but only if 'use this font' is set
+  if (text_overlay_font_checkbutton->get_active())
+    save_text_overlay_font_details(text_overlay_fontbutton->get_font_name());
 }
 
 void PreferencesWindow::on_text_overlay_colorbutton_set()
