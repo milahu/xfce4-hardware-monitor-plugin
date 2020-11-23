@@ -1103,6 +1103,8 @@ double DiskStatsMonitor::do_measure()
    * device may be hotpluggable */
   std::map<Glib::ustring, std::vector<uint64_t> > disk_stats =
       parse_disk_stats();
+
+  // TODO rename `it`
   std::map<Glib::ustring, std::vector<uint64_t> >::iterator it =
       disk_stats.find(device_name);
   if (it == disk_stats.end())
@@ -1112,7 +1114,13 @@ double DiskStatsMonitor::do_measure()
                                           "%2 from!\n"), device_name,
                                         stat_to_string(stat_to_monitor, false));*/
 
-    return 0;
+    return 0; // TODO nan or zero?
+  }
+
+  // -1: dont count regex group 0 = whole match
+  if (stat_to_monitor > (it->second.size() - 1)) {
+    // value not found in /proc/diskstats line
+    return NAN; // TODO nan or zero?
   }
 
   // Debug code
@@ -1249,11 +1257,13 @@ DiskStatsMonitor::parse_disk_stats()
   }
 
   /* Preparing regex to use in splitting out stats
-   * Example line:
-   *    8      16 sdb 16710337 4656786 7458292624 49395796 15866670 4083490 5442473656 53095516 0 24513196 102484768 */
+   * see `enum Stat` in monitor-impls.hpp */
   Glib::RefPtr<Glib::Regex> split_stats_regex = Glib::Regex::create(
-        "^\\s+(\\d+)\\s+(\\d+)\\s([\\w-]+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s"  // NOLINT - C++11
-        "(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)\\s(\\d+)$",
+        "^ *(\\d+) +(\\d+) ([\\w-]+) (\\d+) (\\d+) (\\d+) (\\d+)"  // NOLINT - C++11
+        "(?: (\\d+) (\\d+) (\\d+) (\\d+) (\\d+) (\\d+) (\\d+)"
+        "(?: (\\d+) (\\d+) (\\d+) (\\d+)"
+        "(?: (\\d+) (\\d+))?)?)?" // no $: ignore extra fields at end of line
+        ,
         Glib::REGEX_OPTIMIZE);
 
   // Splitting out stats into devices
@@ -1298,6 +1308,9 @@ DiskStatsMonitor::parse_disk_stats()
     {
       uint64_t stat = 0;
 
+
+
+
       /* Stringstreams are not trivially reusable! Hence creating a new one
        * each time... */
       std::stringstream convert;
@@ -1313,7 +1326,8 @@ DiskStatsMonitor::parse_disk_stats()
       device_parsed_stats.push_back(stat);
 
       // Debug code
-      //std::cout << "Stat number " << i << " value: " << stat << std::endl;
+      //if (device_name.compare("sda") == 0)
+      //std::cout << "Stat number " << i << " raw " << match_info.fetch(i) << " int " << stat << std::endl;
     }
     parsed_stats[device_name] = device_parsed_stats;
   }
@@ -1357,80 +1371,127 @@ Glib::ustring DiskStatsMonitor::stat_to_string(const DiskStatsMonitor::Stat &sta
   {
     case num_reads_completed:
       if (short_ver)
-        stat_str = _("Num rd compl");
+        stat_str = _("r-c");
       else
-        stat_str = _("Number of reads completed");
+        stat_str = _("reads completed");
       break;
 
     case num_reads_merged:
       if (short_ver)
-        stat_str = _("Num rd merg");
+        stat_str = _("r-m");
       else
-        stat_str = _("Number of reads merged");
+        stat_str = _("reads merged");
       break;
 
     case num_bytes_read:
       if (short_ver)
-        stat_str = _("Num B rd");
+        stat_str = _("r-b");
       else
-        stat_str = _("Number of bytes read per duration");
+        stat_str = _("read bytes per second");
       break;
 
     case num_ms_reading:
       if (short_ver)
-        stat_str = _("Num ms rd");
+        stat_str = _("r-t");
       else
-        stat_str = _("Number of milliseconds spent reading");
+        stat_str = _("read time");
       break;
 
     case num_writes_completed:
       if (short_ver)
-        stat_str = _("Num wr compl");
+        stat_str = _("w-c");
       else
-        stat_str = _("Number of writes completed");
+        stat_str = _("writes completed");
       break;
 
     case num_writes_merged:
       if (short_ver)
-        stat_str = _("Num wr merg");
+        stat_str = _("w-m");
       else
-        stat_str = _("Number of writes merged");
+        stat_str = _("writes merged");
       break;
 
     case num_bytes_written:
       if (short_ver)
-        stat_str = _("Num B wr");
+        stat_str = _("w-b");
       else
-        stat_str = _("Number of bytes written per duration");
+        stat_str = _("write bytes per second");
       break;
 
     case num_ms_writing:
       if (short_ver)
-        stat_str = _("Num ms wrt");
+        stat_str = _("w-t");
       else
-        stat_str = _("Number of milliseconds spent writing");
+        stat_str = _("write time");
       break;
 
     case num_ios_in_progress:
       if (short_ver)
-        stat_str = _("Num I/Os");
+        stat_str = _("io-n");
       else
-        stat_str = _("Number of I/Os in progress");
+        stat_str = _("IO number");
       break;
 
     case num_ms_doing_ios:
       if (short_ver)
-        stat_str = _("Num ms I/Os");
+        stat_str = _("io-t");
       else
-        stat_str = _("Number of milliseconds spent doing I/Os");
+        stat_str = _("IO time");
       break;
 
     case num_ms_doing_ios_weighted:
       if (short_ver)
-        stat_str = _("Num ms I/Os wt");
+        stat_str = _("io-tw");
       else
-        stat_str = _("Weighted number of milliseconds spent doing I/Os");
+        stat_str = _("IO weighted time");
       break;
+
+    case num_discards_completed:
+      if (short_ver)
+        stat_str = _("dc-c");
+      else
+        stat_str = _("discards completed");
+      break;
+
+    case num_discards_merged:
+      if (short_ver)
+        stat_str = _("dc-m");
+      else
+        stat_str = _("discards merged");
+      break;
+
+    case num_discards_sectors:
+      if (short_ver)
+        stat_str = _("dc-s");
+      else
+        stat_str = _("discarded sectors");
+      break;
+
+    case num_discards_time:
+      if (short_ver)
+        stat_str = _("dc-t");
+      else
+        stat_str = _("discards time");
+      break;
+
+    case num_flushes_completed:
+      if (short_ver)
+        stat_str = _("fl-c");
+      else
+        stat_str = _("flushes completed");
+      break;
+
+    case num_flushes_time:
+      if (short_ver)
+        stat_str = _("fl-t");
+      else
+        stat_str = _("flushes time");
+      break;
+
+    // TODO fix units: B/s, 1/s, s, B
+
+    // TODO double-click in menu --> change item (Monitored devices)
+
   }
 
   return stat_str;

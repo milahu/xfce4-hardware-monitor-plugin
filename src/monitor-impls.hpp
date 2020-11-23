@@ -212,21 +212,37 @@ class DiskStatsMonitor: public Monitor
 {
 public:
 
-  /* Based on kernel Documentation/iostats.txt - available since kernel v2.5.69
+  /* Based on kernel Documentation/iostats.txt
+   * and kernel Documentation/ABI/testing/procfs-diskstats
    * If you change this, remember to update DiskStatsMonitor::stat_to_string */
   enum Stat {
-    num_reads_completed,        // # of reads completed
-    num_reads_merged,           // # of reads merged
-    num_bytes_read,             // # of bytes read, originally num_sectors_read
-    num_ms_reading,             // # of milliseconds spent reading
-    num_writes_completed,       // # of writes completed
-    num_writes_merged,          // # of writes merged
-    num_bytes_written,          // # of bytes written, originally
-                                // num_sectors_written
-    num_ms_writing,             // # of milliseconds spent writing
-    num_ios_in_progress,        // # of I/Os currently in progress
-    num_ms_doing_ios,           // # of milliseconds spent doing I/Os
-    num_ms_doing_ios_weighted,  // weighted # of milliseconds spent doing I/Os
+
+    // kernel 2.6
+    num_reads_completed,        //  3 # of reads completed
+    num_reads_merged,           //  4 # of reads merged
+    num_bytes_read,             //  5 # of bytes read, originally num_sectors_read
+    num_ms_reading,             //  6 # of milliseconds spent reading
+    num_writes_completed,       //  7 # of writes completed
+
+    // kernel 2.6 (optional)
+    num_writes_merged,          //  8 # of writes merged
+    num_bytes_written,          //  9 # of bytes written, originally
+                                // 10 num_sectors_written
+    num_ms_writing,             // 11 # of milliseconds spent writing
+    num_ios_in_progress,        // 12 # of I/Os currently in progress
+    num_ms_doing_ios,           // 13 # of milliseconds spent doing I/Os
+    num_ms_doing_ios_weighted,  // 14 weighted # of milliseconds spent doing I/Os
+
+    // kernel 4.18
+    num_discards_completed,     // 15 discards completed successfully
+    num_discards_merged,        // 16 discards merged
+    num_discards_sectors,       // 17 sectors discarded
+    num_discards_time,          // 18 time spent discarding
+
+    // kernel 5.5
+    num_flushes_completed,      // 19 flush requests completed successfully
+    num_flushes_time,           // 20 time spent flushing
+
     NUM_STATS
   };
 
